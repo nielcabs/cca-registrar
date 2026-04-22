@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Reports</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'reports' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Reports & Statistics',
+          subtitle: 'Generated reports on system transactions and usage.'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>Transaction Report</h2>
+          <p>Use this summary for administrative reporting.</p>
+        </section>
+
+        <section class="stat-grid">
+          <article class="stat-card"><h3><%= stats.totalRequests %></h3><p>Total Requests</p></article>
+          <article class="stat-card"><h3><%= stats.released %></h3><p>Released</p></article>
+          <article class="stat-card"><h3><%= stats.scheduled %></h3><p>Scheduled</p></article>
+          <article class="stat-card"><h3><%= stats.rejected %></h3><p>Rejected</p></article>
+        </section>
+
+        <section class="grid">
+          <section class="card">
+            <div class="card-head"><h2>Requests by Document Type</h2></div>
+            <% if (!stats.byDocType.length) { %>
+              <p class="muted">No data yet.</p>
+            <% } else { %>
+              <table class="data-table">
+                <thead><tr><th>Type</th><th>Count</th></tr></thead>
+                <tbody>
+                  <% stats.byDocType.forEach((d) => { %>
+                  <tr><td><%= d.documentType %></td><td><%= d.count %></td></tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><h2>Requests by Month</h2></div>
+            <% if (!stats.byMonth.length) { %>
+              <p class="muted">No data yet.</p>
+            <% } else { %>
+              <table class="data-table">
+                <thead><tr><th>Month</th><th>Count</th></tr></thead>
+                <tbody>
+                  <% stats.byMonth.forEach((m) => { %>
+                  <tr><td><%= m.month %></td><td><%= m.count %></td></tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </section>
+
+          <section class="card full">
+            <div class="card-head"><h2>Recent Audit Log (<%= audit.length %>)</h2></div>
+            <% if (!audit.length) { %>
+              <p class="muted">No audit entries yet.</p>
+            <% } else { %>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Details</th></tr></thead>
+                  <tbody>
+                    <% audit.forEach((a) => { %>
+                    <tr>
+                      <td class="tiny"><%= a.at_formatted %></td>
+                      <td><%= a.actor_email %></td>
+                      <td><%= a.action %></td>
+                      <td class="tiny muted"><%= a.details %></td>
+                    </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

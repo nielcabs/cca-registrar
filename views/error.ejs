@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title><%= title %></title>
+  </head>
+  <body class="app-body">
+    <% if (user) { %>
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: '' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', { title, subtitle: '' }) %>
+        <section class="card narrow">
+          <div class="alert error"><%= message %></div>
+          <a href="/" class="btn-link">Return to home</a>
+        </section>
+      </main>
+    </div>
+    <% } else { %>
+    <main class="card auth-card" style="margin: 4rem auto;">
+      <h1><%= title %></h1>
+      <div class="alert error"><%= message %></div>
+      <a href="/login" class="btn-link">Back to login</a>
+    </main>
+    <% } %>
+  </body>
+</html>

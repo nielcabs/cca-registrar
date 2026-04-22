@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Admin Dashboard</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'dashboard' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Administrator Dashboard',
+          subtitle: 'Oversee system usage, accounts, and transactions.'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>System Overview</h2>
+          <p>Monitor transaction volume, verified students, and request flow.</p>
+        </section>
+
+        <section class="stat-grid">
+          <article class="stat-card"><h3><%= stats.totalRequests %></h3><p>Total Requests</p></article>
+          <article class="stat-card"><h3><%= stats.totalStudents %></h3><p>Student Accounts</p></article>
+          <article class="stat-card"><h3><%= stats.verifiedStudents %></h3><p>Verified Students</p></article>
+          <article class="stat-card"><h3><%= stats.totalUsers %></h3><p>Total Users</p></article>
+        </section>
+
+        <section class="grid">
+          <section class="card">
+            <div class="card-head"><h2>Request Status Breakdown</h2></div>
+            <dl class="detail-list">
+              <div><dt>Submitted</dt><dd><%= stats.submitted %></dd></div>
+              <div><dt>For Verification</dt><dd><%= stats.forVerification %></dd></div>
+              <div><dt>Scheduled</dt><dd><%= stats.scheduled %></dd></div>
+              <div><dt>Released</dt><dd><%= stats.released %></dd></div>
+              <div><dt>Rejected</dt><dd><%= stats.rejected %></dd></div>
+            </dl>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><h2>Top Document Types</h2></div>
+            <% if (!stats.byDocType.length) { %>
+              <p class="muted">No data yet.</p>
+            <% } else { %>
+              <table class="data-table">
+                <thead><tr><th>Type</th><th>Count</th></tr></thead>
+                <tbody>
+                  <% stats.byDocType.forEach((d) => { %>
+                  <tr><td><%= d.documentType %></td><td><%= d.count %></td></tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </section>
+
+          <section class="card full">
+            <div class="card-head"><h2>Recent Requests</h2></div>
+            <% if (!recent.length) { %>
+              <p class="muted">No requests yet.</p>
+            <% } else { %>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>Student</th><th>Doc</th><th>Status</th><th>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recent.forEach((r) => { %>
+                    <tr>
+                      <td><%= r.id %></td>
+                      <td><%= r.studentName %> (<%= r.studentId %>)</td>
+                      <td><%= r.documentType %></td>
+                      <td><span class="badge <%= r.statusClass %>"><%= r.status %></span></td>
+                      <td class="tiny"><%= new Date(r.createdAt).toLocaleString() %></td>
+                    </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

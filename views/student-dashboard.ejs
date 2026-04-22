@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Student Dashboard</title>
+  </head>
+  <body class="app-body">
+    <% const pendingCount = requests.filter((item) => item.status !== "Released" && item.status !== "Rejected").length; %>
+    <% const scheduledCount = requests.filter((item) => item.status === "Scheduled").length; %>
+    <% const releasedCount = requests.filter((item) => item.status === "Released").length; %>
+
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'dashboard' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Student Dashboard',
+          subtitle: 'Track your requisitions, schedule, and clearance updates.',
+          actionsHtml: '<a class="btn-solid" href="/student/new-request">+ New Request</a>'
+        }) %>
+
+        <% if (!user.isVerified) { %>
+        <section class="alert error" style="margin-bottom: 0.9rem;">
+          <strong>Account pending verification.</strong> You cannot submit new requests until the administrator verifies your account.
+        </section>
+        <% } %>
+
+        <section class="hero-banner">
+          <h2>Integrated Requisition and Scheduling</h2>
+          <p>Submit document requests, view clearance across departments, and book release appointments online.</p>
+        </section>
+
+        <section class="stat-grid">
+          <article class="stat-card">
+            <h3><%= requests.length %></h3>
+            <p>Total Requests</p>
+          </article>
+          <article class="stat-card">
+            <h3><%= pendingCount %></h3>
+            <p>Active Requests</p>
+          </article>
+          <article class="stat-card">
+            <h3><%= scheduledCount %></h3>
+            <p>Scheduled</p>
+          </article>
+          <article class="stat-card">
+            <h3><%= releasedCount %></h3>
+            <p>Released</p>
+          </article>
+        </section>
+
+        <section class="card data-card" style="margin-bottom: 0.9rem;">
+          <div class="card-head">
+            <h2>Clearance Summary</h2>
+            <a class="btn-link" href="/student/clearance">View Details</a>
+          </div>
+          <p>Your overall clearance status: <span class="badge <%= clearanceBadge %>"><%= clearanceSummary %></span></p>
+          <p class="muted tiny">Requests can only be scheduled for release once all departments have cleared you.</p>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head">
+            <h2>My Requests</h2>
+          </div>
+          <% if (!requests.length) { %>
+          <p class="muted">No requests yet. Create one to start your transaction.</p>
+          <% } else { %>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Document</th>
+                  <th>Status</th>
+                  <th>Clearance</th>
+                  <th>Schedule</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% requests.forEach((item) => { %>
+                <tr>
+                  <td><%= item.id %></td>
+                  <td><%= item.documentType %></td>
+                  <td><span class="badge <%= item.statusClass %>"><%= item.status %></span></td>
+                  <td><%= item.clearanceStatus %></td>
+                  <td><%= item.schedule ? `${item.schedule.date} ${item.schedule.time}` : "Not set" %></td>
+                  <td><a class="table-link" href="/student/track/<%= item.id %>">Track</a></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
