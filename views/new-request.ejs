@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>New Document Request</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'new-request' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Create New Request',
+          subtitle: 'Upload payment proof for OCR-assisted registrar verification.',
+          actionsHtml: '<a class="btn-link" href="/student/dashboard">Back to Dashboard</a>'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>Request Submission</h2>
+          <p>Fill out the details and attach your payment proof image.</p>
+        </section>
+
+        <section class="card narrow">
+          <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+          <form method="post" action="/student/new-request" enctype="multipart/form-data" class="form">
+            <label>
+              Document Type
+              <select name="documentType" required>
+                <option value="">Select type</option>
+                <option value="Transcript of Records">Transcript of Records (TOR)</option>
+                <option value="Certificate of Enrollment">Certificate of Enrollment</option>
+                <option value="Certificate of Grades">Certificate of Grades</option>
+                <option value="Diploma Copy">Diploma Copy</option>
+                <option value="Certificate of Good Moral">Certificate of Good Moral</option>
+                <option value="Certificate of Graduation">Certificate of Graduation</option>
+                <option value="Honorable Dismissal">Honorable Dismissal</option>
+              </select>
+            </label>
+
+            <label>
+              Purpose
+              <textarea name="purpose" rows="3" placeholder="Employment, scholarship, transfer, etc." required></textarea>
+            </label>
+
+            <label>
+              Upload Payment Proof (JPG/PNG only, max 5 MB)
+              <input type="file" name="documentFile" accept=".jpg,.jpeg,.png" required />
+            </label>
+
+            <button type="submit">Submit Request</button>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

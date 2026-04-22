@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>CCA Registrar System - Login</title>
+  </head>
+  <body class="auth-bg">
+    <main class="card auth-card">
+      <h1>Integrated Requisition and Scheduling System</h1>
+      <p class="muted">City College of Angeles Registrar's Office</p>
+
+      <% if (error) { %>
+      <div class="alert error"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+      <div class="alert success"><%= success %></div>
+      <% } %>
+
+      <form method="post" action="/login" class="form">
+        <label>
+          Email
+          <input type="email" name="email" placeholder="you@cca.edu.ph" required autofocus />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required />
+        </label>
+        <button type="submit">Login</button>
+      </form>
+
+      <p class="tiny muted" style="margin-top: 0.8rem;">
+        New student? <a href="/register">Create an account</a>
+      </p>
+    </main>
+  </body>
+</html>

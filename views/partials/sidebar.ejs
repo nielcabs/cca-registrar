@@ -1,0 +1,44 @@
+<aside class="sidebar">
+  <div class="brand">CCA Registrar</div>
+  <p class="sidebar-role">
+    <% if (user.role === "student") { %>Student Portal
+    <% } else if (user.role === "registrar") { %>Registrar Panel
+    <% } else if (user.role === "admin") { %>Administrator
+    <% } else if (user.role === "department") { %>Department Officer
+    <% } %>
+  </p>
+
+  <nav class="menu">
+    <% if (user.role === "student") { %>
+      <a href="/student/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/student/new-request" class="<%= active === 'new-request' ? 'active' : '' %>">New Request</a>
+      <a href="/student/clearance" class="<%= active === 'clearance' ? 'active' : '' %>">My Clearance</a>
+      <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>">Change Password</a>
+    <% } else if (user.role === "registrar") { %>
+      <a href="/registrar/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>">Change Password</a>
+    <% } else if (user.role === "admin") { %>
+      <a href="/admin/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/admin/users" class="<%= active === 'users' ? 'active' : '' %>">Manage Users</a>
+      <a href="/admin/verify-students" class="<%= active === 'verify' ? 'active' : '' %>">Verify Students</a>
+      <a href="/admin/reports" class="<%= active === 'reports' ? 'active' : '' %>">Reports</a>
+      <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>">Change Password</a>
+    <% } else if (user.role === "department") { %>
+      <a href="/department/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>">Change Password</a>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-foot">
+    <p><strong><%= user.displayName %></strong></p>
+    <p class="muted tiny"><%= user.email || '' %></p>
+    <% if (user.role === "student") { %>
+      <p class="muted tiny">ID: <%= user.studentId %></p>
+      <% if (!user.isVerified) { %>
+        <p class="badge badge-verify tiny">Unverified</p>
+      <% } %>
+    <% } else if (user.role === "department") { %>
+      <p class="muted tiny">Dept: <%= user.departmentCode %></p>
+    <% } %>
+  </div>
+</aside>

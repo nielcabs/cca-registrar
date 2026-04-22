@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Manage Users</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'users' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Manage User Profiles',
+          subtitle: 'Create, verify, and remove system accounts.'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="card" style="margin-bottom: 1rem;">
+          <h2>Create Account</h2>
+          <form method="post" action="/admin/users/create" class="form two-col">
+            <label>
+              Role
+              <select name="role" id="roleSelect" required>
+                <option value="">Select role</option>
+                <option value="student">Student</option>
+                <option value="registrar">Registrar</option>
+                <option value="department">Department Officer</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </label>
+            <label>
+              Display Name
+              <input type="text" name="displayName" required />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" required />
+            </label>
+            <label>
+              Password (min 6)
+              <input type="password" name="password" minlength="6" required />
+            </label>
+            <label id="studentIdField" style="display:none;">
+              Student ID
+              <input type="text" name="studentId" />
+            </label>
+            <label id="deptField" style="display:none;">
+              Department
+              <select name="departmentCode">
+                <option value="">Select department</option>
+                <% departments.forEach((d) => { %>
+                <option value="<%= d.code %>"><%= d.name %></option>
+                <% }) %>
+              </select>
+            </label>
+            <button type="submit" class="full-row">Create Account</button>
+          </form>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head"><h2>All User Accounts (<%= users.length %>)</h2></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Email</th><th>Name</th><th>Role</th><th>Dept/SID</th><th>Verified</th><th>Created</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach((u) => { %>
+                <tr>
+                  <td><%= u.email %></td>
+                  <td><%= u.displayName %></td>
+                  <td><%= u.role %></td>
+                  <td><%= u.studentId || u.departmentCode || '—' %></td>
+                  <td>
+                    <% if (u.role === 'student') { %>
+                      <% if (u.isVerified) { %>
+                        <span class="badge badge-released">Verified</span>
+                      <% } else { %>
+                        <span class="badge badge-verify">Unverified</span>
+                      <% } %>
+                    <% } else { %>
+                      <span class="muted tiny">n/a</span>
+                    <% } %>
+                  </td>
+                  <td class="tiny"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                  <td>
+                    <% if (u.role === 'student') { %>
+                      <% if (!u.isVerified) { %>
+                      <form method="post" action="/admin/users/<%= u.id %>/verify" style="display:inline;">
+                        <button type="submit" class="btn-solid tiny">Verify</button>
+                      </form>
+                      <% } else { %>
+                      <form method="post" action="/admin/users/<%= u.id %>/unverify" style="display:inline;">
+                        <button type="submit" class="ghost tiny">Unverify</button>
+                      </form>
+                      <% } %>
+                    <% } %>
+                    <% if (u.email !== user.email) { %>
+                    <form method="post" action="/admin/users/<%= u.id %>/delete" style="display:inline;" onsubmit="return confirm('Delete account <%= u.email %>?');">
+                      <button type="submit" class="ghost tiny">Delete</button>
+                    </form>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        var roleSelect = document.getElementById("roleSelect");
+        var sidField = document.getElementById("studentIdField");
+        var deptField = document.getElementById("deptField");
+        var sidInput = sidField.querySelector("input");
+        var deptSelect = deptField.querySelector("select");
+        function sync() {
+          var v = roleSelect.value;
+          sidField.style.display = v === "student" ? "block" : "none";
+          deptField.style.display = v === "department" ? "block" : "none";
+          sidInput.required = v === "student";
+          deptSelect.required = v === "department";
+        }
+        roleSelect.addEventListener("change", sync);
+        sync();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+<header class="main-topbar">
+  <div>
+    <h1><%= title %></h1>
+    <% if (typeof subtitle !== "undefined" && subtitle) { %>
+      <p><%= subtitle %></p>
+    <% } %>
+  </div>
+  <div class="actions">
+    <% if (typeof actionsHtml !== "undefined" && actionsHtml) { %>
+      <%- actionsHtml %>
+    <% } %>
+    <form method="post" action="/logout">
+      <button type="submit" class="btn-outline">Logout</button>
+    </form>
+  </div>
+</header>

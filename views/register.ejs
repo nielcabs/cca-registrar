@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Student Registration</title>
+  </head>
+  <body class="auth-bg">
+    <main class="card auth-card">
+      <h1>Create Student Account</h1>
+      <p class="muted">Register to submit document requests.</p>
+
+      <% if (error) { %>
+      <div class="alert error"><%= error %></div>
+      <% } %>
+
+      <form method="post" action="/register" class="form">
+        <label>
+          Full Name
+          <input type="text" name="displayName" value="<%= form.displayName || '' %>" placeholder="Juan Dela Cruz" required />
+        </label>
+        <label>
+          Student ID
+          <input type="text" name="studentId" value="<%= form.studentId || '' %>" placeholder="2023001234" required />
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" value="<%= form.email || '' %>" placeholder="you@cca.edu.ph" required />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" minlength="6" required />
+        </label>
+        <label>
+          Confirm Password
+          <input type="password" name="confirmPassword" minlength="6" required />
+        </label>
+        <button type="submit">Register</button>
+      </form>
+
+      <p class="tiny muted" style="margin-top: 0.8rem;">
+        Already have an account? <a href="/login">Sign in</a>
+      </p>
+      <p class="tiny muted">
+        Note: Your account will require administrator verification before you can submit requests.
+      </p>
+    </main>
+  </body>
+</html>

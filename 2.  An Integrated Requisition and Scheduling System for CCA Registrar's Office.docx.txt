@@ -1,0 +1,570 @@
+﻿An Integrated Requisition and Scheduling System for CCA Registrar's Office                      
+An Integrated Requisition and Scheduling System for City College of Angeles  Registrar's Office
+
+
+
+
+
+
+A Capstone Project Presented to the Faculty of
+Institute of Computing Studies and Library Information Science
+City College of Angeles
+Angeles City
+
+
+
+
+  
+
+
+
+
+
+In Partial Fulfillment of the Requirement for the Degree
+Bachelor of Science in Information Systems
+
+
+
+
+
+
+
+
+
+
+By:
+Joshua Louise C. Casuga
+Arnold Jr. E. Abuan
+Julian M. Alamares
+Angel C. Malbog
+Jhun Marc R. Mazon
+Adrian S. Verdaflor
+
+
+
+
+
+
+
+
+
+
+March 2026
+INTRODUCTION
+Background of the Study
+The Registrar's Office is said to be one of the most important offices in schools for handling important records, schedule of the students. This is an office where the records are stored, requests for other academic needs are submitted, and the schedule of admission of students, and other transactions in the school are made. The registrar’s office is responsible for handling the submitted documents during enrollment, transcripts, certificates and managing the students data and requests (Mallares et al., 2024). Management of this office is imperative as service to students, faculty and administration is required and needs timely response. 
+
+
+In most institutions most of their tasks are done manually, leading to mismanagement of credentials, delay of transactions, and data loss or damage. The office urgently needed not only manpower, but also a digital system to enhance efficiency of the office transactions (“Digital Archives: School and Academic Records for Preservation and Accessibility,” 2025). Requisition and scheduling of registrar services is done manually, or by procedures that are not unified. Document requisition such as transcript requests, certificates and other academic documents are all done on paper forms or electronic communication platforms which are not well integrated. Scheduling for registrar services, on the other hand, may involve walk-ins, appointment diaries or emails. Handling these tasks manually is both time-consuming and risky, especially since it involves processing sensitive student information. Moreover, students and clients often complain about delays and missing documents, unaware of the complexities involved in record management (“Digital Archives: School and Academic Records for Preservation and Accessibility,” 2025). This methodology is characterized by long queues, misplaced requisition requests, discrepancies in documentation and several challenges in checking status of requests made.
+
+
+The absence of an integrated system can also modulate the efficiency of the registrar office organization. This rework not only reduces efficiency, but also consumes time and resources that could be dedicated to strategic initiatives (Agal et al., 2025). Scarcity conditions cannot smooth the process for the employees to screen the demands, dilute the preferences and hasten the time schedule due to absence of requisition and standard time agenda. The situation can lead to misunderstanding and prolongation of the receipt of the documents, absence of scheduling procedure and transparency for the students to be informed on the status of their request.
+
+
+In the City College of Angeles Registrar's Office, students are required to clear checks from the different offices with a view of fulfilling all academic and institutional requirements. However it is not always easy to apply the clearance process, especially when the records are stored in a different directory or the manual process. 
+
+
+Based on the City College of Angeles student handbook 6th edition published in 2022, the student may need to first pay the transcript fee  or any necessary fee to the budget and finance office before they can proceed to clearance signing. Each department has different rules and policies that they follow, they are responsible to identify students obligations, requirements, and qualifications before signing clearance. For instance, the library may deny clearance to any student if he/she borrowed the books that haven't been returned yet. Similarly, a student's clearance may also be denied by the finance office if he/she has outstanding payment of tuition and other fees. 
+
+
+Other departments that are also involved in the verification process. According to the personnel interviewed from the Community Extension Office, which handles NSTP or National Service Training Program, they require students to accomplish tree planting and community extension projects that are assigned by their respective professor, and may also be denied from request if not met. The Multimedia and Information Systems and Service Office (MISSO) may also deny clearance to a student who damaged school equipment in the Computer Laboratory and borrowed equipment such as computers, laptops, speakers, projector, and etc. While a student may also be required to comply with sanctions at Student Affairs and Service Office (SASO) if he/she commits a minor or a major offense before a clearance may be granted. In some situations, the Guidance Office may also be asked to fulfill counseling or other services before clearance is given. The said requirements above are necessary for requesting important documents to the registrar such as transcript of records (TOR), diploma or certificate of completion, and promotion to the next year level. 
+
+
+As the verifications happen from different offices, the verification request and appointments can be time consuming for students and the staff. Students need to visit different offices to confirm their status and registrar offices have to wait for the manual verification before appointment and requisition requests can be made. As the verification is not in a single system that gives live updates of their clearance status, this can result in more days and struggling for the staff and students to know whether they fulfill the requirements needed in each office or not. These issues further highlight the need for a more efficient requisition request and appointment scheduling and clearance verification approach by the City College of Angeles Registrar’s office
+
+
+Another problem with the current clearance verification process is the lack of validity and authenticity of the clearance forms signed by students submitted for checks. The fact that the clearance verification procedure is often executed offline with the help of paper-based clearance forms may lead to occasional doubt by registrar staff regarding the authenticity and authenticity of the signatures they process. Considering the existence of an opportunity for forgery and misrepresentation of such signatures in order to accomplish the clearance requirements, we need to focus on the stage of clearance verification. This becomes a problem with the registrar’s office regarding whether the students have cleared all the requirements. In this regard, the registrar’s office must verify the clearances to the concerned office, which will take more time and require more work and further delays on the requests and applications that will be affected by the registrar’s office. As such, there is a need for a more secure and more manageable process to automate and convert the status of the clearance approvals to avoid the possibility of fraud and processing of the requests with a more reliable validation and verification tool. 
+
+
+Therefore this study aims to develop an Integrated Requisition and Scheduling System for City College of Angeles Registrar's Office, aligns with United Nations Sustainable Development Goals 4 (Quality Education). The system's goal with digital automation is to increase the accuracy, integrity, and accessibility of the scheduling management of the City College of Angeles Registrar’s Office.
+
+
+Statement of the Problem
+The current requisition and scheduling processes for City College of Angeles Registrar’s Office are manual and may produce inefficient outcomes. Students requiring academic records or trying to schedule services have experienced such challenges as difficulties navigating the process, long wait times, and little ability to track the status of the request in real-time.
+A non-integrated platform makes it more complicated to handle requests for documents and making appointments, both for the user and for the administration. In the case of several platforms, it is frequent that requests are not seen, not well documented, and not easy to follow.
+1. This study aims to identify the current processes used by the City College of Angeles Registrar’s Office in handling document requests, clearance verification, and registrar services scheduling.
+2. This study seeks to discover the problems and challenges that are being encountered in the current manual process in terms of processing time, tracking of document requests, scheduling management, and accessibility of registrar services.
+3. Can an Integrated Requisition and Scheduling System improve the process of submitting document requests, monitoring clearance status, and scheduling registrar transactions.
+4. The study determines what are the important features and functionalities that are needed to be included in the system based on the requirements of the City College of Angeles registrar Office.
+5. It is necessary to consider and evaluate the measures of the system’s efficiency based on its effectiveness, no-usable, operable performance, reliability, and accuracy. Usability and performance measures definition will allow us to analyze how the solution is effective for the problem.
+
+
+Objectives of the Study
+        The general objective of this study is to develop An Integrated Requisition and Scheduling System for City College of Angeles Registrar's Office
+Specific Objectives
+1. Analyze the current procedures for requisition and scheduling in City College of Angeles Registrar’s Office in terms of processing time, accuracy of records, requests tracking and accessibility of services. Breaking down the general objective into smaller, logically connected parts. 
+2. To identify the issues and difficulties in the present manual methods to improve the efficiency of the registrar services in relation to processing time, request tracking, scheduling, and accessibility through a new integrated system
+3. To develop a web-based system that removes processing delays, reduces the possibility of errors in the handling of requests, and improves the accessibility of the documents as opposed to the current method of manual, non-integrated work with the City College of Angeles Registrar's Office.
+4. To gather and specify the essential system requirements and features needed for the Integrated Requisition and Scheduling System as requested by the City College of Angeles Registrar’s Office.
+5. Evaluate the effectiveness of the implemented system in enabling document requests and scheduling in terms of system usability, features, reliability, performance, and privacy of personal information.
+
+
+Scope of the Study
+This study focuses on the design and development of an Integrated Requisition and Scheduling System for the CCA Registrar’s Office. The system aims to digitalize the process of requesting academic documents, clearance verification, scheduling registrar related services, and generate a basic report which are currently handled and managed through manual process helping registrar officers efficiently manage students' transactions.
+
+
+The proposed system allows students and authorized users to submit a request for academic documents, such as transcripts, certificates and other registrar related records. The system will provide automated scheduling features that assign specific available times and dates for the releasing of requested documents. The system will include clearance verification features, where registrar officers are able to view and monitor the clearance status of the students across various departments. Since registrar transactions require students to be cleared from different departments, the system will help monitor and verify the students clearance status before processing their requests. Additionally, the system also includes features such as request tracking to help registrar officers to effectively manage student transactions, providing a convenient and satisfactory experience for both students and staff. 
+
+
+In addition, the systems should generate reports for the requisition of the Registrar’s Office for the admin to view the transaction, statistics on demand, and usage for administration purposes. The scope of the study is confined to the admin service of the CCA Registrar’s Office, and the system will be utilized by the registrar staff and students to requisition documents, upload files to the system, check their clearances, and book a schedule. It includes testing and assessment of the system or its effectiveness to evaluate if the proposed system can enhance the services of the registrar.
+
+
+This study includes the analysis, system design, development, and evaluation from users of the proposed system to determine the effectiveness in improving the process, organization, and services provided by the City College of Angeles Registrar's Office.
+
+
+
+
+
+
+Delimitations of the Study
+This study is limited to only the development and implementation of an integrated requisition and scheduling system specifically for the City College of Angeles registrar office. The system will focus on digitizing the document request, scheduling appointments, viewing, and verification of the students clearance status from different departments.
+
+
+The system will only support existing registrar service transactions, such as requests for scheduling and academic documents. While the system allows registrar personnel to view students' clearance, each department will still be responsible for the process of managing, approving and updating their own clearance records.
+
+
+Additionally, the system is only limited in use within the City College of Angeles and will be accessed by the identified authorized users. The study also does not include the integration with other systems like enrollment systems, financial systems, grading systems, and external databases. Other aspects such as network expansion, future systems updates, new institutional policy implementation, and future long-term maintenance, are beyond the scope of this study.
+
+
+
+
+
+
+
+
+Conceptual Framework / Theoretical Framework / Paradigm of the Study  
+
+
+Figure 1. IPO Diagram
+Input–Process–Output (IPO) model as described by Ken Feldman (2025), a widely used framework in systems analysis that provides a clear and logical structure for connecting inputs, processes, and outputs. Applying this model to the development of an Integrated Requisition and Scheduling System for City College of Angeles Registrar's Office ensures a systematic and organized approach to system creation. This structured application of the IPO model ensures clarity in development stages, facilitates evaluation at each phase, and aligns the system’s components with academic objectives and user needs.
+
+
+Significance of the Study
+An Integrated Requisition and Scheduling System for City College of Angeles Registrar's Office expected to provide significant benefits to different stakeholders, including: 
+
+
+To the Students: The system as it is expected to provide ease of access for the student in filing of request and scheduling the registrar transaction. The students can track the status of their request to confirm that they have finished clearing with the relevant offices.
+
+
+To the Registrar Staff: The system integration will facilitate registrar officers to have more efficiency in the processing clearance verification, document requests and schedules. It will reduce the manual paperwork which can eliminate processing errors and improve recording on registrar transactions.
+
+
+To the School Departments: Even though it will not be granted authority to control departments, it will enhance the connection between departments and the registrar by giving a picture of the clearance status of the students. This would make it possible to eliminate any issues of probable misinterpretation as well as the delay in documentation processing.
+
+
+To the Administration and Institution: The implementation of the developed system will help in overall enhancement of the registrars’ area academic efficiency, forming an efficient and ordered process, and increasing students and staff contentment
+
+
+To the Researcher: This research provides the researchers adequate knowledge and experience on the design and evaluation of an Integrated Requisition and Scheduling System for the City College of Angeles Registrar’s Office. Through the conduct of this research endeavor, the researchers will be well-versed in system analysis, database design, and programming of web-based applications. The research study will enable the researchers to apply their theoretical and conceptual knowledge on the solution of an actual institutional problem. Further, the skills of the researchers on problem-solving, critical thinking, system development, teamwork and other skills set will be enhanced which are valuable among professionals.
+
+
+To the Future Researchers: The study may be used as a leap off and reference for future researchers that have the same principles of document request systems, scheduling systems, and registrar management systems in a certain school.
+
+
+Definition of Terms
+1. Integrated - combining different parts or elements to form a unified, more effective whole where they work together efficiently.
+2. Proficiency - the advanced ability, skill, or talent to carry out job functions, typically requiring the achievement of required qualifications and skills.
+3. Requisition - a formal, written demand or request for items, services, or personnel, often used in business, military, or legal contexts to initiate procurement or authorization.
+4. Transcripts - an authenticated document (record) of a student in a program of study with a complete enrollment record including courses (subjects) taken, marks obtained and awards made.
+5. Web-Based System - an application software that is run entirely from a web browser over the internet or intranet instead of being installed locally.
+
+
+
+
+
+
+Chapter 2
+REVIEW OF RELATED LITERATURES AND STUDIES
+The chapter presents the relevant literature and studies that the researcher considered in strengthening the importance of the present study. It also presents the synthesis of the discussion to fully understand the research and for better understanding the study.
+Foreign Literature
+Academic Records Management Systems (ARMS) and Students' Academic Records Maintenance in Nigerian Universities
+Okon, Umoren, and Philips (2023) looked into academic records management systems and how they help keep student records in order at Nigerian universities. The study showed that the universities whose records management systems were organized had a better accuracy rate regarding records, records retrieval time, and compliance with institutional policies. The researchers made their main point that institutions have to leave behind paper-based systems and switch to electronic records management in higher education. This research addressing the topic of records management really will help the present study because it backs up the idea of taking a digital approach to records management and gives a broader perspective on the difficulties and advantages of digitizing academic records internationally.
+
+
+Okon, Umoren, and Philips (2023) suggest that a good electronic record delivery management system will improve accuracy, turn-around time, and compliance in institutional contexts. The paper focuses on deficiencies and inefficiencies aforementioned present in management were present in paper systems. A proper electronic management system will aid the institutions in becoming more efficient. The academic paper is applicable in the development of a system that would efficiently manage and schedule requests since there is some element of planning and quick turn-around of requests with electronic systems. The research work in the paper is applicable in the creation of an in-system that would be efficient but efficient in the improvement of procedures to improve services.
+
+
+Online academic record management system and students' academic achievement: The example of the University of Bamenda, Cameroon
+Fokong and Kizito (2025) focus on online academic record management systems and their influence on student academic achievement at the University of Bamenda in Cameroon. On the whole, the results suggested that the use of an online system made access to academic records easier as well as enhanced the monitoring of student performance. The article also mentioned the contribution of technology to the closing of administrative gaps in universities of developing countries. This research is clearly pertinent to the research topic being investigated since it establishes that the advantages of digital records management extend to making office tasks more efficient and less strenuous.
+
+
+Fokong and Kizito (2025) refer to the field of university records management in terms of such a point concerning the online systems of record management and convenience of access and procedures. The idea of the authors is to affirm the role of online capabilities of databases in bridging the administrative divide, as well as enhancing the quality of the work performed with the university records. Appropriate accessibility fastens the working process, while real-time updates include the tools for efficient data processing. Such benefits are utilized in scheduling and requisition procedures, where the information should be meaningful and structured. Following these ideas, the authors refer to the advantages of the digital transformation as to the optimization of the workload on the personnel or a supervisor.
+
+
+An Implementation of Digital Platform to Enhance the Appointment Scheduling System
+Hui and Teo (2024) studied the rollout of a digital platform meant to improve appointment scheduling systems. The research finds that the use of online system has enhanced the delivery of service due to reduced conflicts, reduced waiting time and more control to the customer. Authors of this journal discuss factors affecting the usability and notifications as the key aspects of this service. Findings from this research can be used in the scheduling of the proposed system in reference to the requirements for the customers.
+
+
+Hui and Teo (2024) have shown that the use of the digital appointment calendar improves the delivery of service by drastically reducing scheduling conflicts and the associated waiting time. The research findings indicate that ease of use in addition to messaging is of concern in maintaining customer satisfaction and maintaining system efficiency. This is especially the case with request forms and scheduling systems in particular in that it brings focus on the interaction between the need for the system, system design and ease of use. This therefore lends credence to the idea of schedule automation being used to improve service delivery, interaction and customer satisfaction.
+
+
+Stakeholders’ Experiences, Perceptions and Satisfaction With An Electronic Appointment System: A Qualitative Content Analysis
+Ostadmohammadi, Nabovati, Rangraze Jeddi, and Shokrizadeh Arani (2025) carried out a qualitative study to understand how different people experienced and felt about an electronic appointment system in a healthcare setting. Their findings indicated that, despite the majority of users’ positive attitude towards the system, the most essentials to users were ease of use, dependability and communicative system. They reported that technical challenges and senior-resistance would be the hindrance of the system’s successful implementation. These implications aid the current work to recognize human dynamics of scheduling system implementation.
+
+
+Ostadmohammadi et al. (2025) say that consumers are eager to have e-ticketing systems if there are proper processes to ensure that appointments are scheduled smoothly, and if the systems are dependable and sufficiently understandable. The problems are, for example, technology breakdowns and reluctant providers. This is pertinent to the people involved in developing and implementing the working request/scheduling systems as they underline the importance of consumer-oriented process and system clarity. Therefore, to summarize, the article emphasizes the significance of usability and technicality for the overall effectiveness of the system.implementation.
+
+
+A Review of Optimization Studies for System Appointment Scheduling
+Niu, Lei, Guo, Fang, Li, Gao, Yang, and Gao (2024) reviewed a wide range of studies on appointment scheduling systems, looking at different methods used across various service sectors. They contemplated the priority scheduling, dynamic rescheduling, and demand forecasting, and investigated the manner in which they improved system effectiveness and decreased the waiting. They offer a methodological foundation for building appointment scheduling systems that can manage diverse demand and workload. The major benefit of this for the research task is that it provides a sample for implementing a scheduling system that is efficient and with a high level of adaptability for the system going to be designed.
+
+
+Niu et al. (2024) give a detailed review of the scheduling system, including priority scheduling, dynamic rescheduling-demand forecasting etc. Their results showed that these treatments maximize the performance of scheduling systems and significantly lowers the waiting time for costs in different fields of business. These systems become more flexible and cater for the needs of different users through dynamic adjustment to variation in demand and supply. This paper is of high significance to systems which receive scheduling requests as it gives thought on resources and scheduling system optimization. This paper has provided a firm foundation for coming up with an effective demand driven flexible scheduling system.
+Foreign Studies
+Design and Development of Web-Based Appointment System
+Ku Zamri and Wan Ishak (2022) developed a web-based appointment system that any organization could use to manage client appointments. The system was designed with scheduling rules and priority settings, intending that these should make it easier for the service providers to manage the flow of clients and check the staff efficiency. The system, which was tested by 20 users, managed to score high in terms of ease of use and satisfaction of users' needs. This study considers that work as a reference for building the appointment system of the proposed registrar system, through a web-based method to speed up the process, which is less manual.
+
+
+        Ku Zamri and Wan Ishak (2022) created a web-based scheduling system that arranges client appointments more efficiently by following certain procedures and application of appointment scheduling rules. From the results of their research, the author concludes that such practices allow providers to respond to the growing client demands and assess the work of each employee. Providing such benefits and ease of use that was confirmed in the user's trial, such a user-oriented approach showed the benefit of system development. These attributes are very adaptable and can be replicated in business settings or by individuals, as it has been proven to be effective by cutting processing times and eliminating the need for entries by hand. This research paper indicates that utilizing a website-based appointment managing system creates a greater degree of efficiency, structure, and satisfaction for users regarding administrative exercises.
+
+
+Records Management Practices and Organizational Effectiveness of Universities Registries in South -West, Nigeria
+        Dada and Ogunwemimo (2024) looked at records management practices and how they affected how well university registries in South-West Nigeria functioned. The study established that good records management in institutions of higher learning results in efficiency and effectiveness in the operations, provision of quality service delivery and accountability. Training, policy compliance, and efficiency and effectiveness in technology usage were the characteristics of good records management identified in this study. This study finding could be applied in the current study in that the technology alone could not make the registrar office efficient. However, its application with other methods may result in the efficiency of the registrar office.
+
+
+        Dada and Ogunwemimo (2024) confirms that record management relies on training, policies, and maximizing technology. The paper shows that technology shows little effectiveness when there are poor implementation and insufficient training to users. These results are relevant to request and inbox scheduling systems since it shows a need for integration of technology and procedures and personnel. The findings of the paper indicate that a combination of the two or a balanced approach works better.
+
+
+Electronic records management systems and the competency of educational institutions: Evidence from Yemen
+Mukred, Yusof, Al-Moallemi, Mokhtar, and Hawash (2022) studied how the use of electronic records management systems affected the performance of educational institutions in Yemen. Their study revealed that establishments that had embraced electronic records management systems were more effective in, productivity, employee effectiveness, and the quality of services they delivered. This study indicated that electronic records management systems is not only a great technological advancement but it also augments the worth of a business. This report proves that electronic records management systems can be useful in an institution of higher learning thus warranting the usage of this system.
+
+
+Mukred et al. (2022) prove the electronic records management systems will enhance the productivity, performance and service delivery of the learning institutions. Their findings indicate that the electronic record management system will enhance the operations and level of records management. It means that the study indicates that the electronic record management system will not only help the operations to catch up with the changed world, but also bring value in terms of increasing potential productivity. Request and scheduling because it brings a solution on how operations are able to request and schedule effectively. The study is the idea of the electronic records management system to enhance service delivery in the learning institutions.
+
+
+Appointment Scheduling Problem in Complexity Systems of the Healthcare Services: A Comprehensive Review
+Ala and Chen (2022) reviewed research on appointment scheduling in complex healthcare systems. The article investigates the theoretical and practical approaches of the appointment scheduling enhancement with probability, simulation, and machine learning methods. It has been noted by the authors that the appointment scheduling considers the variance of service time, user preference, and available resources to reduce waiting time in a queue and not have a long list of tasks to do. The research is conducted in the area of health, yet the information is transferable to other areas, and it presents an evidence-based theory that was used in the appointment module of registrars' system proposed in the study.
+
+
+Ala and Chen (2022) highlights the necessity of taking into account the variability in service time, preferences of users, and the availability of resources in order to avoid the appearance of long queues and a large number of requests. In such a manner, the system will be filled with a homogenous task set with an even distribution of the tasks. Although they discuss it in terms of its application in healthcare, it is equally applicable to other spheres where organizing the processing of requests is more than vital. Overall, a flexible job scheduling and organization system is being advertised in this paper, since it will ensure the maximization of the production and satisfaction of the customers.
+
+
+The Approaches Utilized in Queuing Modeling: A Systematic Literature Review
+Anuruddhika, Prasanth, and Rathnayaka (2022) presented a review of queuing models used across different service industries. The article analyzed the old and new queue theories and their utilization in decongesting, smoothing services, as well as customer satisfaction. The article has identified approaches that have been successful with diverse protocols and flexibility with demand being dynamic. Thus, the research contributes to the knowledge of the system, especially in terms of the queuing module design through the dynamic queue at the registration center.
+
+
+        Anuruddhika, Prasanth, and Rathnayaka (2022) had explained how both the static and dynamic queueing systems had operated to reduce the congestion, load imbalance, and improve the service quality. They emphasize the necessity of response capacity and the requirements for being quick in changes of demand in service environments. These ideas are well accepted during the job of designing a scheduling and request-handling system architecture, as they limit the system's bottlenecks and utilize all the resources properly. Primarily, it gives readers the hands-on knowledge that is necessary to put into practice a dynamic queueing approach in a service-oriented setting that is bound to boost productivity and improve service quality as well.
+
+
+
+
+
+
+
+
+Local Literatures
+Designing and Implementing e-School Systems: An Information Systems Approach to School Management of a Community College in Northern Mindanao, Philippines
+Grepon, Baran, Gumonan, Martinez, and Lacsa (2022) discussed the design and development of an e-school system for a community college in Northern Mindanao, Philippines. The researchers built a platform that combined key school management functions such as enrollment, grading, and records management into one system. Their results showed that a well-organized digital system can greatly reduce the workload of administrative staff and improve the accuracy of student records. This study is useful to the current research because it shows how a digital platform can be successfully used in a Philippine school setting to make administrative tasks faster and more efficient.
+Grepon et al. (2022) note how integration of school management functions in one platform is a good idea to improve efficiency. They conclude that reducing work stages through such processes as student registration, grading, and record-keeping can lead to less workload and more precise data. The efficiency of the developed system indicates the advantages of having a single platform to avoid duplication at the administrative stage. The study is relevant to request and query platforms as such centralization allows better activities and the fast-processing of queries at the system level. The study shows that centralization can help improve speed and data accuracy, and provide better service.
+
+
+
+
+Online Request System for the Issuance of School Academic Records of Maila Rosario College
+Bacud and Siddayao (2024) developed an online request system for the issuance of school academic records at Maila Rosario College. The system allowed students to request documentations without physically visiting the school, and the administrators to manage their requests through one platform. The study concluded that the system reduces processing time and face-to-face transactions making it more convenient to students and administrators. This study is highly related with the present study because both concentrate on the issue of putting the document request process of a registrar of a school in the Philippines online.
+
+
+Bacud and Siddayao (2024) show how an online request system facilitates the submission of requests for academic documents without having to do it personally. It was found out that converting the request process into a digital format increases the efficiency and lessens the need for direct interaction. In addition, it allows for easy management of requests for administrators in one system. This is also applicable to the requisition and scheduling web solution as a way to promote convenience and efficient service in the office.
+
+
+Development of Student Records Management System of Magalalag National High School
+Duruin and Siddayao (2024) developed a student records management system for Magalalag National High School. The system had the objective of transferring all the organizational records from the traditional paper system to the computerized one so that all the problems associated with manual paper-based record-keeping would be addressed. The results of the research showed that the computerized system had better access to records, there were no errors in record-keeping, and it considerably saved time on administrative work. This research is connected to the current study since it helped to show that having no resources does not prevent the development and implementation of a system for record management.
+
+Duruin and Siddayao (2024) findings suggested that digital systems can avoid being updated due to regular errors when recording information and can also minimize the administrative time spent on them. It also proves that even underfunded institutions can have a structured record management system. Although this study may be unlike specific systems for scheduling and request management, it proves that automation is beneficial for workflow and organizational purposes, but in general, it recommends computerized record-keeping systems.
+
+
+Smart Queuing and Appointment Management System for Client Services in Bulacan State University Bustos Campus
+Concepcion, Concepcion, Guinto, Araza, Imperio, Regaas, and Perez (2026) developed a Smart Queuing and Appointment Management System for the client services of Bulacan State University Bustos Campus. A unified system has brought together queuing, appointment scheduling, and real-time monitoring into one solution. Based on both the Technology Acceptance Model (TAM) and ISO/IEC 25010, the research proves that a decrease in waiting times, combined with an increase in overall student service quality, is a reality with the system. This is the most relevant study to the given tasks of this thesis, as it proves that it is possible to merge queuing and appointment scheduling into a single procedure, significantly increasing the quality of the registrar services.
+
+
+Concepcion et al. (2026) demonstrates that queuing, appointment services, and live monitoring capabilities all integrated within a single interface can both provide better service and improve user experience. According to the results of their study, the combination decreases the waiting time and increases the service quality. Besides, in the examination, they consider system usability and effectiveness, which is otherwise supported by theories. This concerns how the services are managed, that is, requests and schedules provided and accepted by the same system as the integration can afford better service and make the processes smoother. The research confirms that the combination of process and system improves service in places of work.
+
+
+Development of an Integrated Denture Job-Order and Appointment Scheduling System
+Lituanas, Gayramara, Ramirez, Dela Pena, Tabianan, and Padilla (2025) developed an integrated denture job-order and appointment scheduling system for use in a dental laboratory. The integrated order tracking and the unified system for scheduling in the same system provided employees with the access to be able to conduct tracking of orders and work in the patient appointment scheduling at the same time. The result showed that the integrated approach could provide a better flow of work and lesser conflicts in scheduling tasks. Although this may be an inappropriate application of the concepts to the case of the registrar’s office of a school, the concepts gained from the research on the integrated order and appointment scheduling have provided the foundation for the enhanced features of the proposed system in the current study.
+
+
+Lituanas et al. (2025) findings indicate that integration improves task visibility and seamless works. These ideas are relevant to request and schedule processing groups as facilitates it keeps better track of works in real-time. The conclusion of the study supports the value of having multi-functional integrations for enhancing efficiency and smooth workflows.
+
+
+Local Studies
+An Implementation and Evaluation of Web-Based Appointment System for the Mindanao State University – Main Campus
+Ampuan and Delena (2022) built and tested a web-based appointment system for the registrar's office of Mindanao State University, Main Campus. The students managed to schedule an appointment with the adviser through online appointment, therefore, reducing the students visiting the office for walk-in appointment, reducing chances of congestion in the office. The usability tests where conducted and with the desirable rating scores it implies that the students are friendly to the system. This research paper will be a research paper that will consider a general model applicable to technology for appointment systems since it illustrates an occurrence that can be applicable in the technology of appointment system in the registrar in the Philippine schools.
+
+
+Ampuan and Delena (2022) study shows that allowing people to make appointments via a web application is convenient and useful to organize work with the clients.The favorable usability tests show that users may agree with the use of the available systems. The impact on the two systems of appointments and requests is considerable because the authors of the research article note the importance of convenient web design and appointment brokering services. In general, the research articles present convincingly a case in favor of online appointment systems. in order to make the provision of services more efficient and organize the work with the clients.
+
+
+Online Appointment System: Basis of the Service Delivery of PRC Regional Office IV-A
+Marasigan (2025) studied an online appointment system used to improve service delivery at the Professional Regulation Commission (PRC) Regional Office IV-A. Based on the findings of the research study presented in this article, online appointment scheduling may result in a reduction of walk-ins, shorter waiting times, and increased satisfaction of clients. Aside from this, the study also concluded that the design of the system as well as the orientation on the use of the system were important factors to consider in order to make the system effective. The connection of the article to the study at hand is that the appointment system is used in a public office in the Philippines, which could serve as a model for the registrar function of the online system.
+
+
+Marasigan (2025) demonstrates that by implementing online reservation systems, the services can be enhanced, the number of walk-ins can be lessened, and the waiting time for clients can be reduced. The research concluded that good scheduling leads to efficient transaction processing, thus improving the satisfaction of people. In addition, a Delivery Report shows that proper architecture of the system and proper training constitutes determining factors for its success and acceptance. The information is applicable to those systems which have requisition and scheduling as it discusses two features of a good system—accessibility and clear instructions. Mostly, the implications rest on planned online scheduling for enhancement of an efficiency of public service delivery experience.
+
+
+Student Registration and Records Management services of the three private universities in the Philippines: Basis for Academic Records Digitization
+Purcia and Velarde (2022) looked at student registration and records management services in three private universities in the Philippines, focusing on the push to digitize academic records. Based on the study, manual labour led to long lead time on processing of documents, a risk of documents getting lost, and a burden to registrars. Thus, the authors of the study recommended that digitization of records be embraced so as to improve services and sustainability of academic records. The result from the above study has provided a basis for the current study since it has discussed the limitations of manual operation of records management that the proposed system will address.
+
+
+Purcia and Velarde (2022) shows how students manual registration and documentation practices cause delays, workloads, and risks of losing documents. This affects the administrative staff working on these processes and the service delivery. This is cited by the authors as having the need to record on the system for faster processing, better documentation, and sustainability of academic records. This can be used for requisition orders and calendaring since it indicates the possibilities to automate as a way of getting rid of the resulting workload and laboring. This study is advocating for digitalization as a solution to inefficiencies, errors, and the unavoidable influence of fate in dealing with institutional records.
+
+
+CLIQUE: A Web-Based Queue Management System with Real-Time Queue Tracking and Notification of Units for Angeles University Foundation Office of the University Registrar 
+Mallari, Guintu, Magalong, and Yap (2022) developed CLIQUE, a web-based queue management system with real-time tracking and notifications for the Office of the University Registrar at Angeles University Foundation. The system enabled the students to queue online and be able to check their queue status, and thus the pressure is alleviated from the registry office. The study found that the system was able to enhance the efficiency of services and decreased the time spent by students while waiting in line. This study is related to the topic of this paper because it presented a local case study for the implementation of a queue management system in the registry services and to improve student services.
+
+
+Mallari et al. (2022) shows that the online and real-time queue management system improves the efficiency of the registrar services. It enhances the load for the administrators and reduces the congestion given that in the system by users queuing online and check their status. The research shows that it reduces the wait time and enhances the service. The features described match the requesting system in that it improves the work systems. Overall, this was a theoretical presentation of the way to integrate the work systems into the electronic for efficiency and quality of work in the registrar’s applications.
+
+
+Development and Implementation of Document Management System for Ilocos Sur Polytechnic State College, Tagudin Campus
+Angala, Casugay, Estillore, Lebantino, Marcha, and Villanueva (2023) built and launched a document management system for Ilocos Sur Polytechnic State College, Tagudin Campus. The system has been designed to improve the process of management, storage, and access to the institutional documents, which is taken place manually, a process that has a number of errors. The system has been designed systematically and is considered within the scope of the school, and users’ evaluation of the system confirms the acceptance of the proposed system. The existing study’s relevance to the current study is determined by the fact that the existing study has proposed that the concept of the proposed system, in our case, a document management system, is applicable to the Philippine polytechnic school, a proper environment for the proposed systems.
+        
+        Angala et al. (2023) demonstrates the advantages of a document management system in terms of filing, records management, and requesting and scheduling records in an institution. The use of the system makes document processing easier due to the lessening of man-made errors. The fact that it received good reviews by users means that the use of electronic means is feasible in an academic setting. The findings can be utilized in requesting and scheduling, because the availability of records for easy access is helpful in the processes. The study opens up that there should be an embrace of electronic means for better services to help in the administrative process among other services in the institution.
+
+
+Chapter 3
+METHODOLOGY
+This chapter presents the research methods, procedures, development model, respondents, data gathering techniques, instruments, and evaluation processes used in creating the An Integrated Requisition and Scheduling System for CCA Registrar's Office. The methodology ensures that each stage of the study from planning to system evaluation is systematically executed to achieve the objectives outlined in the previous chapter.
+
+
+Research Design
+        The study utilized a Descriptive Research Design, a type of non-experimental research design that offers a factual, methodical, and precise depiction of current processes and the status quo of the system without altering any variables. As McCombes (2023) stated It is useful when not much is known yet about the topic or problem. Before you can research why something happens, you need to understand how, when and where it happens.
+        The given design is suitable for the context to implement the An Integrated Requisition and Scheduling System for CCA Registrar's Office. This can be achieved through mapping, assessment, and presentation of  the current process of requesting and scheduling in the Registrar Office in City College of Angeles. 
+
+
+System Development Methodology  
+Figure 2. Agile Methodology
+1. Plan - During this phase, high-level requirements were obtained through interviews and workflow observation of registrar current process, and scheduling. The purpose, system modules, schedule, and user roles were established. 
+2. Design - System architecture, database schema, and UI models were created. Importantly, a user interface that encourages accurate data entry, quick record retrieval, and auditable access rights was developed. UI mock-ups were presented to stakeholders for initial feedback. Stakeholder feedback was used to make improvements to data fields, logging, and audit trails.
+3. Develop - The implementation of the system was done through iterative sprints with the development of critical components by modules, such as the requisition module of the clearance, scheduling, and report generator. Using agile principles, adjustments were made based on the feedback received. 
+4. Test - Testing was carried out during all stages of development. Unit testing and integration were conducted after each Sprint. Stakeholders from the Registrar Staffs provided input on functionality, security, and usability. Their inputs were incorporated continuously to improve record encoding, release documents, and auditing processes.
+5. Deploy - After completing key tests, staging deployment was done to fully validate the system using the ISO 25010 software quality model. Stakeholder reviews were performed on the reliability, functionality, usability, and efficiency of the system. Performance and security tests were later carried out before deployment to production.
+6. Review - Sprint reviews and retrospectives were conducted to assess development effectiveness and evaluate areas for improvement. Feedback from stakeholders was used to adapt future development iterations, improve features, and enhance the reliability and accuracy of the integrated requisition and scheduling document processing system.
+7. Launch - After successfully completing the evaluation processes and getting the endorsement of the stakeholders, the system was rolled out for use. The development team ensured regular monitoring, maintenance of the system, and provision of necessary updates to keep the system running smoothly and guarantee precision in the requisition and scheduling for the Registrar Office.
+
+
+Participants
+The development of the integrated requisition and scheduling system required involvement of key participants. Users in the system contribute roles and responsibilities to ensure the system's accuracy, relevance, usability, and functionality.
+
+
+The purposive sampling was utilized in collecting the participants that are currently engaged in the functions of the registrar’s office and evaluating the information systems. The participants were the registrarian office, the students that are regularly availing of the services from the registrarian, one system administrator, and IT specialists. The bases for selecting the participants are their knowledge and experience in process requisites and schedules and evaluating the information system. This sampling method ensures the accuracy and immediacy of the given information in the actual implementation of the project.
+
+
+
+
+
+
+
+
+
+
+
+
+1. Registrar Office/Staff are the personnel who maintain student information, fulfill requests for transcripts, certifying statements, and enrollment verification, as well as schedule certain requests. They are the source of data, and from them, requests and scheduling services are completed through the system. They update, create, and validate data for the system. They are stakeholders because they provide information that pertains to the manual processes, and they help identify areas for improvement for the system processes.
+2. Students are the main users serving to the services of the Registrar’s Office. By means of the system, they can get requests, make appointment bookings, and track the process. They play a significant part in the evaluation of the efficiency, adequacy, and convenience of the system, as their opinions have an evaluative value. As end-users, they are also a significant factor of success in terms of time
+3. System Administrator is responsible for overseeing and ensuring the smooth functioning of the system. This encompasses user account management, system monitoring, data protection, and troubleshooting. The administrator plays a crucial role in maintaining the system's efficiency, security, and reliability.
+4. IT Experts would be the evaluators of technical merit of the system. They evaluate the system based on the quality attributes such as functionality, usability, efficiency, reliability, and security among others. Their evaluation of the system is that the system has good technical quality to fully serve the purpose of the staff and students. They make sure that the quality of the system meets the required standards.
+Procedure
+        The development of an Integrated Requisition and Scheduling System for CCA Registrar's Office involves a variety of methods of data gathering to better align the proposed system with the requirements of the stakeholders. The researchers utilized interviews, web research, and evaluation. The research methods described played a crucial role in verifying system functionalities, confirming existing processes, and supporting the ability of the system to improve the efficiency, transparency, and accuracy of records on integrated requisition and scheduling in City College of Angeles.
+
+
+Interview: Structured interviews were performed with registrar staffs, and staff handling the reports. These interviews provided in-depth information on the manual process, issues faced by the users, data collection errors, reports writing inconsistencies, and user requirements during the acquisition process. The interviewees provided real-life experiences on their frustrations with paper-based processes, challenges in accessing relevant documents, and problems with missing or inaccurate information in scheduling. The interviews were useful in designing the features of the application, including report writing, scheduling, timestamping, and clearance photographs.
+
+
+Data Analysis
+        The researchers used Likert Scale questions to collect thorough feedback on the system's quality and usefulness. Instead of only providing yes or no responses, this method allowed participants to indicate varying degrees of agreement or pleasure. This method generated more insightful information on user perceptions. Every question was thoughtfully designed to highlight a certain quality attribute from the ISO 25010 software quality model.
+Likert Scale: Researchers use Likert Scale to quantitatively  examine the responses, making them an important tool to understand the participants' opinions, and perspective on the topic. McCleod (2023) stated that the Likert scale is a five (or seven) point scale that is used to allow an individual to express how much they agree or disagree with a particular statement.
+
+
+Table 1. The Five-Point Likert Scale Rating
+Numerical Rating
+	Descriptive Rating
+	5
+	Excellent
+	4
+	Very Good
+	3
+	Good
+	2
+	Fair
+	1
+	Poor
+	General Weighted Average
+        The researcher uses the General Weighted Average (GWA) to examine and interpret the data collected. In this method, the values are given weights, which are then multiplied by the frequencies, and the average is derived, indicating the overall sentiment of the users.  
+        Where:
+        GWM = General Weighted Mean
+        ∑wx = Sum of all weighted values
+Frequency Distribution
+Frequency Distribution is the pattern of frequencies of a variable. It’s the number of times each possible value of a variable occurs in a dataset (Turney 2023). The researcher uses the following formula for frequency distribution.
+        
+F = XN
+        Where:
+        F = Frequency Distribution
+        X = Number of time that the value occurs
+        N = Total number of respondent
+        
+Percentage Distribution
+        Also known as the relative frequency, is a proportion of each category’s frequency as percentage of the total number of respondents. Percentage distribution simplified complex data, making it easier to comprehend, compare, and interpret in various contexts. The researcher uses this formula.
+ 
+Formula: Percentage = f/N x 100%
+Where:         f = frequency
+                N = population
+
+
+Likert Scale Interpretation
+        Likert scale is the most commonly used tool in terms of measuring attitudes, perceptions, and satisfaction. The respondent rated each statement based on their level of agreement, they can choose from the range such as “Strongly agree” and “Strongly disagree”. Here is the example of the 5 point scale used in this study.
+Table 2. Scale for Interpreting the Evaluation Result
+Numerical Rating
+	Descriptive Rating
+	4.20-5.00
+	Excellent
+	3.40-4.19
+	Very Good
+	2.60-3.39
+	Good
+	1.80-2.59
+	Fair
+	1.00-1.79
+	Poor
+	
+
+        Table 2 shows the scale of how to interpret respondent evaluation on the study. To examine the general results of the study, the researchers applied the weighted mean as the main instrument for processing the data obtained from the questionnaires. By using this approach, the researchers were able to provide an integrated evaluation of the respondents’ opinions and to represent the true sentiment towards the system.
+
+
+
+
+Design and Implementation
+        The researcher explains an Integrated Requisition and Scheduling System for CCA Registrar's Office systems components in this chapter, which the user could use to identify their roles and responsibilities for the improvement of the system.
+User Authentication Module
+        This module is designed to control access to the system ensuring that only authorized users such as student and registered personnel can access the assigned access privilege within the system and perform respective functions. To access their dashboard features, each user must enter their password and registered email address. The system will allow users to authenticate their credentials, granting access permissions specific to their roles.
+Password Change Module
+        This module is accessible to all authorized users including students and registrar personnel. Changing passwords allows users to safely change and update their account password. Before changing passwords, users are required to input their old passwords with their new password to verify so that the new passwords are validated. This module is necessary when the password is compromised, forgotten, or in need for regular update for security purposes.
+Admin Module
+Admin Module is assigned to the administrators of the system, who possess the greatest level of accessibility and regulation within the entire platform. Aside from this, the administrators are able to access accounts that are available in the system. The access to the interface is based on the authentication of the credentials for the admin in order to be able to determine the entry point for the role-specific access panel.
+* Student Verification Module: Verify the student identity if enrolled to the school ensuring that only legitimate students can use the system.
+* View User Profiles Module: Allows users to view and manage their accounts. This module also enables administrators to monitor user details and information for effective management.
+* Document Request Module: Allows students to submit a request for academic documents and other registrar related services for the registrar to review, process, and update the status of the document requested.
+* Clearance Verification Module: Verify the students clearance status from different departments involved helping the students to fulfill all institutional requirements before the start of processing the request and scheduling services.
+* Appointment Scheduling Module: Allows students to have a specific time schedule for the release of the registrar service reducing the overcrowding and conflicts.
+Student Module (User)
+Verified students have a dashboard that allows access and utilizes the system's services and features. This module enables students to request a document, track their status and manage their account information. 
+* Submit Document Requests Module: Allows the students to request documents and records that they need related to the registrar.
+* View Request Status Module: Enables the students to monitor the progress of the submitted requests and receive updates on their processing status.
+* Clearance Status Module: Allows the students to view their clearance status from different departments to ensure that they complete the requirements before processing the request.
+* Appointment Schedule Module: Allows the students to view the released date of scheduled appointments for registrar services.
+
+
+System Design and Specifications
+        
+Logical Specifications
+        This chapter contains key diagrams which help in designing and explaining the Integrated Requisition and Scheduling System for the CCA Registrar’s Office. Those are such diagrams as Flowchart, Use Case Diagram, Entity Relationship  Diagram (ERD), and Data Flow Diagram which helps in understanding the system model.
+Flowchart
+        The flowchart shows the process flow on An Integrated Requisition and Scheduling System for CCA Registrar's Office  for organizing processes to be more systematic and understandable.
+Use Case Diagram
+        The use case diagram shows the interaction of the users with the system. The users are the students, registrar office staff, and administrators. The students will request as well as make appointments; the staff will approve and accept the requests, the administrator will maintain the system as well as the users. This diagram shows the role as well as how each user does their functions.
+Entity Relationship Diagram (ERD)
+Data Flow Diagram (DFD)
+        The Data Flow diagram shows how data flows from input through processing and storage to output. The diagram represents the process from the submission of requests to receipt of the status or document by emulating the activity of other Registrars where the data is kept on the database. Any process, scheduling, approvals, and files for easy understanding of the data flow as shown on the Data Flow diagram.
+Hardware Specifications
+
+
+Components
+	Specification Requirements
+	Recommended Specification
+	Central Processing Unit (CPU)
+	Intel Core i3 (8th gen) / Amd Ryzen 3 (2K series)
+	Intel Core i5/i7 (10th gen) / AMD Ryzen 5/7 (4k series)
+	Random Access Memory (RAM)
+	At least 8 GB DDR4
+	16 GB DDR4 
+	Storage Device
+	256 GB SSD 
+	512 GB - 1TB NVMe SSD
+	Graphics Display
+	Integrated Graphics (Intel UHD Graphics / AMD Vega Graphics) 
+	Dedicated GPU with 4GB+ VRAM
+	Monitor Display
+	1920 x 1080 resolution
+	2560 x 1440 above
+	Network Connection
+	WiFi 5, Wired/Wireless Ethernet Connection (100 Mbps or higher)
+	WiFi 6, Gigabit Ethernet
+	
+
+Software Specifications
+Operating System: Windows 10/11
+Development Tools:
+* Visual Studio Code: An Integrated Development Environment (IDE) supports almost every major programming language. Several ship in the box, like JavaScript, TypeScript, CSS, and HTML.
+* Node.js (v18 or newer): JavaScript runtime used to execute the server-side application.
+* npm: Node package manager used to install and manage project dependencies.
+* Git / GitHub: Version control and collaborative repository hosting for the development team.
+
+Frontend Frameworks:
+* HTML5, CSS3, and vanilla JavaScript are used as the core frontend technologies for cross-browser compatibility and a lightweight presentation layer.
+* EJS (Embedded JavaScript Templates): A server-side templating engine used to render role-based dashboards (student, registrar, administrator, and department officer) with dynamic data from the backend.
+* Custom CSS (single-file stylesheet): Provides a modern and responsive user interface with a CCA-inspired blue color palette, role-based sidebars, status badges, and form components.
+
+Backend Frameworks and Libraries:
+* Express.js (v5): The primary backend web framework, handling routing, middleware, and HTTP request/response management.
+* express-session: Session management library used to maintain authenticated user state across requests.
+* bcryptjs: Password hashing library used to securely store user credentials.
+* Multer: File-upload middleware used for accepting student-submitted payment proof images (JPG/PNG, max 5 MB).
+* Tesseract.js: JavaScript-based Optical Character Recognition (OCR) engine used as the innovation feature to extract payment details (student name, Student ID, OR number, amount, and payment date) from uploaded receipts.
+* Day.js: Lightweight date and time utility used for schedule formatting and slot generation.
+* UUID: Library used to generate unique identifiers for users and records.
+
+Database:
+* SQLite 3: A lightweight, file-based relational database management system used to store users, document requests, department clearances, and system audit logs. SQLite was chosen for its portability, low configuration overhead, and suitability for a single-institution deployment such as the CCA Registrar's Office.
+
+Web Browser (Client-Side):
+* Google Chrome, Microsoft Edge, or Mozilla Firefox (latest version): Any modern web browser that supports HTML5, CSS3, and JavaScript is sufficient to access the web-based system.
+
+System Architecture:
+The system follows a client–server architecture deployed as a web-based application. The client (web browser) communicates with the Node.js/Express server through HTTP, which in turn reads from and writes to the SQLite database. Uploaded files are stored on the server's file system and served through a secured static route. The OCR module runs on the server side using Tesseract.js, processing uploaded payment proofs on demand when initiated by registrar staff.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+REFERENCES
+
+
+Mallares, D., Alegata, W. C., & Bual, J. (2024). Admission and Registrar Office (ARO) Mobile Document Scanner with Archiving System. Technium Romanian Journal of Applied Sciences and Technology, 22, 33–54. https://doi.org/10.47577/technium.v22i.10957
+
+
+Digital Archives: School and Academic records for Preservation and Accessibility. (2025). International Journal of Science and Applied Information Technology, 14(2), 1–5. https://doi.org/10.30534/ijsait/2025/011422025
+
+
+Agal, S., Bhavsar, N., Shekokar, K., & Shrivastava, S. S. (2025). A unified framework for smart and secure digital transformation: Leveraging block chain, AI, and ICT across Healthcare, Education, E-Commerce, and Industrial Systems. International Journal of Science and Research Archive, 15(1), 927–943. https://doi.org/10.30574/ijsra.2025.15.1.1084
+
+
+Feldman, K., & Feldman, K. (2025, January 23). A comprehensive guide to Input-Process-Output models. isixsigma.com. https://www.isixsigma.com/dictionary/input-process-output-i-p-o/

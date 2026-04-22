@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>My Clearance</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'clearance' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'My Clearance Status',
+          subtitle: 'View your clearance status across participating departments.'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>Overall Status: <%= summary %></h2>
+          <p>All departments must mark you as "Cleared" before the registrar can release your documents.</p>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head">
+            <h2>Department Clearances</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Remarks</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% clearances.forEach((c) => { %>
+                <tr>
+                  <td><%= c.departmentName %></td>
+                  <td><span class="badge <%= c.badge %>"><%= c.status %></span></td>
+                  <td><%= c.remarks || '—' %></td>
+                  <td class="tiny muted"><%= c.updatedAt ? new Date(c.updatedAt).toLocaleString() : '—' %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

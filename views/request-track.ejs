@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Track Request <%= request.id %></title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'dashboard' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Track Request ' + request.id,
+          subtitle: 'Monitor status, schedule, and OCR verification results.',
+          actionsHtml: '<a class="btn-link" href="/student/dashboard">Back to Dashboard</a>'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>Status: <%= request.status %></h2>
+          <p>
+            Clearance: <%= request.clearanceStatus %>
+            <% if (request.schedule) { %>
+              | Release Schedule: <%= request.schedule.date %> <%= request.schedule.time %>
+            <% } %>
+          </p>
+        </section>
+
+        <section class="grid">
+          <section class="card">
+            <h2>Request Details</h2>
+            <dl class="detail-list">
+              <div><dt>Document</dt><dd><%= request.documentType %></dd></div>
+              <div><dt>Purpose</dt><dd><%= request.purpose %></dd></div>
+              <div><dt>Status</dt><dd><%= request.status %></dd></div>
+              <div><dt>Clearance</dt><dd><%= request.clearanceStatus %></dd></div>
+              <div><dt>Schedule</dt><dd><%= request.schedule ? `${request.schedule.date} ${request.schedule.time}` : "Not yet assigned" %></dd></div>
+              <div><dt>Remarks</dt><dd><%= request.registrarRemarks || "No remarks yet" %></dd></div>
+            </dl>
+          </section>
+
+          <section class="card">
+            <h2>Uploaded Proof</h2>
+            <p><a class="table-link" href="<%= request.uploadedFilePath %>" target="_blank">View uploaded file</a></p>
+            <img src="<%= request.uploadedFilePath %>" alt="Uploaded proof document" class="preview" />
+          </section>
+
+          <section class="card full">
+            <h2>OCR Verification Result</h2>
+            <% if (request.ocr.state === "not_run") { %>
+              <p class="muted">OCR has not been processed yet by the registrar.</p>
+            <% } else if (request.ocr.state === "failed") { %>
+              <p class="alert error">OCR processing failed. Registrar may re-run or encode manually.</p>
+            <% } else { %>
+              <p class="muted">OCR State: <strong><%= request.ocr.state %></strong> | Confidence: <strong><%= request.ocr.confidence ?? "N/A" %>%</strong></p>
+              <dl class="detail-list">
+                <div><dt>Student Name</dt><dd><%= request.ocr.extracted.studentName || "-" %></dd></div>
+                <div><dt>Student ID</dt><dd><%= request.ocr.extracted.studentId || "-" %></dd></div>
+                <div><dt>OR Number</dt><dd><%= request.ocr.extracted.orNumber || "-" %></dd></div>
+                <div><dt>Amount</dt><dd><%= request.ocr.extracted.amount || "-" %></dd></div>
+                <div><dt>Payment Date</dt><dd><%= request.ocr.extracted.paymentDate || "-" %></dd></div>
+              </dl>
+            <% } %>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
