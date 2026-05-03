@@ -264,14 +264,29 @@ async function getUserByStudentId(studentId) {
 }
 
 async function listUsers(filter = {}) {
-  if (filter.role) {
-    const rows = await db.all(
-      "SELECT * FROM users WHERE role = ? ORDER BY created_at DESC",
-      filter.role
-    );
-    return rows.map(mapUserRow);
+  const role = filter.role || null;
+  const search =
+    typeof filter.search === "string" && filter.search.trim()
+      ? filter.search.trim().toLowerCase()
+      : "";
+  const conditions = [];
+  const params = [];
+  if (role) {
+    conditions.push("role = ?");
+    params.push(role);
   }
-  const rows = await db.all("SELECT * FROM users ORDER BY created_at DESC");
+  if (search) {
+    const like = `%${search}%`;
+    conditions.push(
+      "(LOWER(email) LIKE ? OR LOWER(display_name) LIKE ? OR LOWER(IFNULL(student_id,'')) LIKE ? OR LOWER(IFNULL(department_code,'')) LIKE ? OR LOWER(role) LIKE ?)"
+    );
+    params.push(like, like, like, like, like);
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const rows = await db.all(
+    `SELECT * FROM users ${where} ORDER BY created_at DESC`,
+    ...params
+  );
   return rows.map(mapUserRow);
 }
 

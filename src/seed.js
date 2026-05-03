@@ -52,7 +52,7 @@ async function seedUsers() {
       email: "admin@cca.edu.ph",
       passwordHash: password,
       role: "admin",
-      displayName: "CCA Registrar Administrator",
+      displayName: "CCA Registrar",
       isVerified: true,
       createdAt: nowIso
     },

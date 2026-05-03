@@ -251,7 +251,27 @@ body {
 .auth-card {
   width: min(560px, 92vw);
   border: none;
-  box-shadow: 0 16px 40px rgba(5, 41, 76, 0.26);
+  box-shadow: 0 16px 40px rgba(20, 83, 45, 0.28);
+}
+
+/* Auth pages: explicit green (avoids stale browser cache of old blue build) */
+body.auth-bg {
+  background: linear-gradient(135deg, #14532d 0%, #15803d 38%, #22c55e 100%);
+}
+
+body.auth-bg .auth-card input,
+body.auth-bg .auth-card select,
+body.auth-bg .auth-card textarea {
+  border: 1px solid #86efac;
+}
+
+body.auth-bg .auth-card button[type="submit"] {
+  background: #166534;
+  border: 1px solid #14532d;
+}
+
+body.auth-bg .auth-card button[type="submit"]:hover {
+  background: #14532d;
 }
 
 .btn-link {

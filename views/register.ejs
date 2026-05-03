@@ -3,6 +3,18 @@
   <head>
     <%- include('partials/head') %>
     <title>Student Registration</title>
+    <style>
+      body.auth-bg {
+        background: linear-gradient(135deg, #14532d 0%, #15803d 38%, #22c55e 100%) !important;
+      }
+      body.auth-bg .auth-card button[type="submit"] {
+        background: #166534 !important;
+        border: 1px solid #14532d !important;
+      }
+      body.auth-bg .auth-card button[type="submit"]:hover {
+        background: #14532d !important;
+      }
+    </style>
   </head>
   <body class="auth-bg">
     <main class="card auth-card">

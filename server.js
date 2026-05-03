@@ -94,7 +94,7 @@ ensureStorageDirs()
     app.listen(PORT, () => {
       console.log(`CCA Registrar System running at http://localhost:${PORT}`);
       console.log("Seeded credentials (password for all = cca123):");
-      console.log("  admin@cca.edu.ph (Administrator + Registrar functions)");
+      console.log("  admin@cca.edu.ph (Registrar office — full access)");
       console.log("  juan@cca.edu.ph | maria@cca.edu.ph | pedro@cca.edu.ph (students)");
       console.log("  library@cca.edu.ph | finance@cca.edu.ph | misso@cca.edu.ph");
       console.log("  saso@cca.edu.ph | guidance@cca.edu.ph | extension@cca.edu.ph");

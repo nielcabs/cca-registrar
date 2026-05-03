@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <%- include('partials/head') %>
-    <title>Document requests — Admin</title>
+    <title>Document requests — Registrar</title>
   </head>
   <body class="app-body">
     <% const forVerificationCount = requests.filter((item) => item.status === "For Verification").length; %>
@@ -32,8 +32,8 @@
         </section>
 
         <section class="hero-banner">
-          <h2>Registrar operations (admin)</h2>
-          <p>All document processing, OCR, and scheduling are handled here — one role for the Registrar Office.</p>
+          <h2>Registrar operations</h2>
+          <p>Document processing, OCR, and scheduling for the Registrar Office.</p>
         </section>
 
         <section class="stat-grid">

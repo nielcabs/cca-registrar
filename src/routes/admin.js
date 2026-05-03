@@ -39,6 +39,14 @@ const {
 
 const router = express.Router();
 
+function usersPageSearch(req) {
+  if (req.method === "POST" && Object.prototype.hasOwnProperty.call(req.body || {}, "redirectSearch")) {
+    return String(req.body.redirectSearch || "").trim();
+  }
+  if (typeof req.query.q === "string") return req.query.q.trim();
+  return "";
+}
+
 router.use(requireAuth, requireRole("admin"));
 
 router.get("/dashboard", async (req, res) => {
@@ -333,27 +341,33 @@ router.get("/clearances", async (req, res) => {
 });
 
 router.get("/users", async (req, res) => {
-  const users = await listUsers();
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const users = await listUsers({ search: q });
   res.render("admin-users", {
     user: req.session.user,
     users,
     departments: DEPARTMENTS,
+    searchQuery: q,
     error: null,
-    success: null
+    success: null,
+    active: "users"
   });
 });
 
 router.post("/users/create", async (req, res) => {
   const { email, password, role, displayName, studentId, departmentCode } = req.body;
-  const users = await listUsers();
+  const listQ = usersPageSearch(req);
+  const users = await listUsers({ search: listQ });
 
   if (!email || !password || !role || !displayName) {
     res.render("admin-users", {
       user: req.session.user,
       users,
       departments: DEPARTMENTS,
+      searchQuery: listQ,
       error: "Email, password, role, and name are required.",
-      success: null
+      success: null,
+      active: "users"
     });
     return;
   }
@@ -362,8 +376,10 @@ router.post("/users/create", async (req, res) => {
       user: req.session.user,
       users,
       departments: DEPARTMENTS,
+      searchQuery: listQ,
       error: "Password must be at least 6 characters.",
-      success: null
+      success: null,
+      active: "users"
     });
     return;
   }
@@ -374,8 +390,10 @@ router.post("/users/create", async (req, res) => {
       user: req.session.user,
       users,
       departments: DEPARTMENTS,
+      searchQuery: listQ,
       error: "Email already in use.",
-      success: null
+      success: null,
+      active: "users"
     });
     return;
   }
@@ -386,8 +404,10 @@ router.post("/users/create", async (req, res) => {
         user: req.session.user,
         users,
         departments: DEPARTMENTS,
+        searchQuery: listQ,
         error: "Student ID is required for student accounts.",
-        success: null
+        success: null,
+        active: "users"
       });
       return;
     }
@@ -397,8 +417,10 @@ router.post("/users/create", async (req, res) => {
         user: req.session.user,
         users,
         departments: DEPARTMENTS,
+        searchQuery: listQ,
         error: "Student ID already registered.",
-        success: null
+        success: null,
+        active: "users"
       });
       return;
     }
@@ -408,8 +430,10 @@ router.post("/users/create", async (req, res) => {
       user: req.session.user,
       users,
       departments: DEPARTMENTS,
+      searchQuery: listQ,
       error: "Department is required for department officers.",
-      success: null
+      success: null,
+      active: "users"
     });
     return;
   }
@@ -430,17 +454,20 @@ router.post("/users/create", async (req, res) => {
   if (role === "student") await ensureClearanceRows(newUser.studentId);
   await writeAudit(req.session.user.email, "create_user", `email=${newUser.email} role=${role}`);
 
-  const freshUsers = await listUsers();
+  const freshUsers = await listUsers({ search: listQ });
   res.render("admin-users", {
     user: req.session.user,
     users: freshUsers,
     departments: DEPARTMENTS,
+    searchQuery: listQ,
     error: null,
-    success: `Account created for ${newUser.email}.`
+    success: `Account created for ${newUser.email}.`,
+    active: "users"
   });
 });
 
 router.post("/users/:id/delete", async (req, res) => {
+  const listQ = usersPageSearch(req);
   const target = await getUserById(req.params.id);
   if (target && target.email === req.session.user.email) {
     res.status(400).send("You cannot delete your own account while logged in.");
@@ -450,7 +477,7 @@ router.post("/users/:id/delete", async (req, res) => {
     await deleteUser(target.id);
     await writeAudit(req.session.user.email, "delete_user", `email=${target.email}`);
   }
-  res.redirect("/admin/users");
+  res.redirect("/admin/users" + (listQ ? `?q=${encodeURIComponent(listQ)}` : ""));
 });
 
 router.get("/reports", async (req, res) => {
