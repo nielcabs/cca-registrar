@@ -9,13 +9,14 @@
       <%- include('partials/sidebar', { user, active: 'reports' }) %>
       <main class="main-panel">
         <%- include('partials/topbar', {
-          title: 'Reports & Statistics',
-          subtitle: 'Generated reports on system transactions and usage.'
+          title: 'Reports & statistics',
+          subtitle: 'On-screen summary and downloadable PDF for presentations or records.',
+          actionsHtml: '<a class="btn-solid" href="/admin/reports/export.pdf">Download PDF report</a>'
         }) %>
 
         <section class="hero-banner">
-          <h2>Transaction Report</h2>
-          <p>Use this summary for administrative reporting.</p>
+          <h2>Transaction report</h2>
+          <p>Export includes summary counts, document-type breakdown, and the latest audit trail entries.</p>
         </section>
 
         <section class="stat-grid">

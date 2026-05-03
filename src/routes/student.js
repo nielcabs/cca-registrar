@@ -12,7 +12,7 @@ const {
   computeStudentClearanceSummary,
   writeAudit
 } = require("../db");
-const { requireAuth, requireRole, requireVerifiedStudent } = require("../middleware");
+const { requireAuth, requireRole } = require("../middleware");
 const { computeStatusBadge, computeClearanceBadge } = require("../helpers");
 
 const router = express.Router();
@@ -71,13 +71,12 @@ router.get("/clearance", async (req, res) => {
   });
 });
 
-router.get("/new-request", requireVerifiedStudent, (req, res) => {
+router.get("/new-request", (req, res) => {
   res.render("new-request", { user: req.session.user, error: null });
 });
 
 router.post(
   "/new-request",
-  requireVerifiedStudent,
   upload.single("documentFile"),
   async (req, res) => {
     const { documentType, purpose } = req.body;

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Process request <%= request.id %></title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'requests' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Process request ' + request.id,
+          subtitle: 'Student: ' + request.studentName + ' (ID: ' + request.studentId + ')',
+          actionsHtml: '<a class="btn-link" href="/admin/requests">Back to request queue</a>'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>Current status: <%= request.status %></h2>
+          <p>
+            Live clearance (all offices): <span class="badge <%= clearanceSummaryBadge %>"><%= clearanceSummary %></span>
+            &nbsp;|&nbsp; OCR state: <strong><%= request.ocr?.state || "not_run" %></strong>
+          </p>
+        </section>
+
+        <% if (returningNote) { %>
+        <section class="card" style="margin-bottom: 0.85rem; border-left: 4px solid var(--primary);">
+          <p class="tiny" style="margin:0;"><strong>Repeat / returning student:</strong> <%= returningNote %></p>
+          <p class="tiny muted" style="margin:0.35rem 0 0;">Department clearances stay on file. A new document request reuses the same clearance record until an office changes it.</p>
+        </section>
+        <% } %>
+
+        <% if (message) { %>
+        <section class="card full"><div class="alert success"><%= message %></div></section>
+        <% } %>
+        <% if (error) { %>
+        <section class="card full"><div class="alert error"><%= error %></div></section>
+        <% } %>
+
+        <section class="grid">
+          <section class="card">
+            <h2>Payment proof (uploaded image)</h2>
+            <p><a class="table-link" href="<%= request.uploadedFilePath %>" target="_blank" rel="noopener">Open full image</a></p>
+            <img src="<%= request.uploadedFilePath %>" alt="Uploaded payment proof" class="preview" />
+            <form method="post" action="/admin/request/<%= request.id %>/run-ocr">
+              <button type="submit">Run OCR on this image</button>
+            </form>
+            <p class="tiny muted">OCR suggests values only — you must confirm or edit before saving.</p>
+          </section>
+
+          <section class="card">
+            <h2>Request details</h2>
+            <dl class="detail-list">
+              <div><dt>Document type</dt><dd><%= request.documentType %></dd></div>
+              <div><dt>Purpose</dt><dd><%= request.purpose %></dd></div>
+              <div><dt>Submitted</dt><dd><%= dayjs(request.createdAt).format("MMM D, YYYY h:mm A") %></dd></div>
+              <div><dt>Workflow status</dt><dd><%= request.status %></dd></div>
+            </dl>
+          </section>
+
+          <section class="card full">
+            <h2>Department clearance grid (read-only here)</h2>
+            <p class="tiny muted">Each office signs in separately to update its row. You can search all students under <strong>Student clearances</strong> in the sidebar.</p>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Department / office</th>
+                    <th>Clearance status</th>
+                    <th>Remarks from office</th>
+                    <th>Last updated</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% clearances.forEach((c) => { %>
+                  <tr>
+                    <td><%= c.departmentName %></td>
+                    <td><span class="badge <%= c.badge %>"><%= c.status %></span></td>
+                    <td><%= c.remarks || '—' %></td>
+                    <td class="tiny muted"><%= c.updatedAt ? new Date(c.updatedAt).toLocaleString() : '—' %></td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <p class="tiny muted"><strong>Rule:</strong> Status may only be set to <em>Scheduled</em> or <em>Released</em> when every department shows <strong>Cleared</strong>.</p>
+          </section>
+
+          <section class="card full">
+            <h2>Update request, OCR fields, and release schedule</h2>
+            <form method="post" action="/admin/request/<%= request.id %>/update" class="form two-col">
+              <label>
+                Request workflow status
+                <select name="status" required>
+                  <% ["Submitted","For Verification","Scheduled","Released","Rejected"].forEach((value) => { %>
+                  <option value="<%= value %>" <%= request.status === value ? "selected" : "" %>><%= value %></option>
+                  <% }) %>
+                </select>
+              </label>
+
+              <label>
+                Release appointment slot
+                <select name="scheduleSlot" id="scheduleSlot" aria-label="Pick date and time slot">
+                  <option value="">— No slot selected —</option>
+                  <% slots.forEach((slot) => { %>
+                  <option value="<%= slot.date %>|<%= slot.time %>"
+                    <%= (request.schedule?.date === slot.date && request.schedule?.time === slot.time) ? 'selected' : '' %>
+                    <%= !slot.available && !(request.schedule?.date === slot.date && request.schedule?.time === slot.time) ? 'disabled' : '' %>>
+                    <%= slot.date %> &nbsp;<%= slot.time %>
+                    (<%= slot.booked %>/<%= slot.capacity %><%= slot.available ? '' : ' FULL' %>)
+                  </option>
+                  <% }) %>
+                </select>
+              </label>
+
+              <input type="hidden" name="scheduleDate" id="scheduleDate" value="<%= request.schedule?.date || '' %>" />
+              <input type="hidden" name="scheduleTime" id="scheduleTime" value="<%= request.schedule?.time || '' %>" />
+
+              <label>
+                OCR — payer / student name
+                <input type="text" name="extractedStudentName" value="<%= request.ocr?.extracted?.studentName || '' %>" autocomplete="off" />
+              </label>
+              <label>
+                OCR — student number
+                <input type="text" name="extractedStudentId" value="<%= request.ocr?.extracted?.studentId || '' %>" autocomplete="off" />
+              </label>
+              <label>
+                OCR — OR / reference number
+                <input type="text" name="extractedOrNumber" value="<%= request.ocr?.extracted?.orNumber || '' %>" autocomplete="off" />
+              </label>
+              <label>
+                OCR — amount (PHP)
+                <input type="text" name="extractedAmount" value="<%= request.ocr?.extracted?.amount || '' %>" autocomplete="off" />
+              </label>
+              <label>
+                OCR — payment date (as read from receipt)
+                <input type="text" name="extractedPaymentDate" value="<%= request.ocr?.extracted?.paymentDate || '' %>" autocomplete="off" />
+              </label>
+
+              <label class="full-row">
+                Internal remarks (visible to student on tracking page)
+                <textarea name="registrarRemarks" rows="3" placeholder="e.g. Bring school ID; reason if rejected; etc."><%= request.registrarRemarks || '' %></textarea>
+              </label>
+
+              <button type="submit">Save all changes</button>
+            </form>
+
+            <h3>Raw OCR text (stored excerpt)</h3>
+            <pre class="raw-ocr"><%= request.ocr?.rawText || "No OCR run yet." %></pre>
+            <p class="tiny muted">
+              OCR engine state: <strong><%= request.ocr?.state || "not_run" %></strong>
+              <% if (request.ocr?.confidence !== null && request.ocr?.confidence !== undefined) { %>
+              &nbsp;|&nbsp; Confidence: <strong><%= request.ocr.confidence %>%</strong>
+              <% } %>
+            </p>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        var slotSelect = document.getElementById("scheduleSlot");
+        var dateInput = document.getElementById("scheduleDate");
+        var timeInput = document.getElementById("scheduleTime");
+        function sync() {
+          var val = slotSelect.value;
+          if (!val) {
+            dateInput.value = "";
+            timeInput.value = "";
+            return;
+          }
+          var parts = val.split("|");
+          dateInput.value = parts[0];
+          timeInput.value = parts[1];
+        }
+        slotSelect.addEventListener("change", sync);
+        sync();
+      })();
+    </script>
+  </body>
+</html>

@@ -18,15 +18,9 @@
           actionsHtml: '<a class="btn-solid" href="/student/new-request">+ New Request</a>'
         }) %>
 
-        <% if (!user.isVerified) { %>
-        <section class="alert error" style="margin-bottom: 0.9rem;">
-          <strong>Account pending verification.</strong> You cannot submit new requests until the administrator verifies your account.
-        </section>
-        <% } %>
-
         <section class="hero-banner">
-          <h2>Integrated Requisition and Scheduling</h2>
-          <p>Submit document requests, view clearance across departments, and book release appointments online.</p>
+          <h2>CCA document requests &amp; scheduling</h2>
+          <p>Submit requests with payment proof, track status, view clearance from each office, and see your release appointment when scheduled.</p>
         </section>
 
         <section class="stat-grid">
@@ -54,7 +48,7 @@
             <a class="btn-link" href="/student/clearance">View Details</a>
           </div>
           <p>Your overall clearance status: <span class="badge <%= clearanceBadge %>"><%= clearanceSummary %></span></p>
-          <p class="muted tiny">Requests can only be scheduled for release once all departments have cleared you.</p>
+          <p class="muted tiny">The registrar can schedule release only after every department shows <strong>Cleared</strong>. If you request another document later, your existing clearance stays on file.</p>
         </section>
 
         <section class="card data-card">

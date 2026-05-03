@@ -16,10 +16,14 @@ const { requireAuth } = require("../middleware");
 const router = express.Router();
 
 function buildSessionUser(user) {
+  let role = user.role;
+  if (role === "registrar") {
+    role = "admin";
+  }
   return {
     id: user.id,
     email: user.email,
-    role: user.role,
+    role,
     displayName: user.displayName,
     studentId: user.studentId,
     departmentCode: user.departmentCode,
@@ -28,7 +32,10 @@ function buildSessionUser(user) {
 }
 
 router.get("/login", (req, res) => {
-  res.render("login", { error: null, success: req.query.registered ? "Account created. Please wait for admin verification before submitting requests." : null });
+  res.render("login", {
+    error: null,
+    success: req.query.registered ? "Account created. Sign in with your email and password to submit document requests." : null
+  });
 });
 
 router.post("/login", async (req, res) => {
@@ -54,8 +61,7 @@ router.post("/login", async (req, res) => {
   await writeAudit(user.email, "login", `role=${user.role}`);
 
   if (user.role === "student") res.redirect("/student/dashboard");
-  else if (user.role === "registrar") res.redirect("/registrar/dashboard");
-  else if (user.role === "admin") res.redirect("/admin/dashboard");
+  else if (user.role === "admin" || user.role === "registrar") res.redirect("/admin/dashboard");
   else if (user.role === "department") res.redirect("/department/dashboard");
   else res.redirect("/");
 });
@@ -100,7 +106,7 @@ router.post("/register", async (req, res) => {
     role: "student",
     displayName: displayName.trim(),
     studentId: studentId.trim(),
-    isVerified: false,
+    isVerified: true,
     createdAt: new Date().toISOString()
   };
 

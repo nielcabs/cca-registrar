@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <%- include('partials/head') %>
-    <title><%= department.name %> - Clearance Management</title>
+    <title><%= department.name %> — Clearances</title>
   </head>
   <body class="app-body">
     <div class="dashboard-shell">
@@ -10,32 +10,45 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: department.name,
-          subtitle: 'Update your department\'s clearance status for each student.'
+          subtitle: 'Update clearance for your office only. Students and the registrar admin see changes immediately.'
         }) %>
 
         <% if (message) { %><div class="alert success"><%= message %></div><% } %>
 
+        <section class="card" style="margin-bottom: 1rem;">
+          <form method="get" action="/department/dashboard" class="form two-col" style="align-items: end;">
+            <label class="full-row">
+              Search students (name, student ID, or email)
+              <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' && searchQuery ? searchQuery : '' %>" placeholder="Search all students…" />
+            </label>
+            <button type="submit">Search</button>
+            <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+            <a class="btn-link" href="/department/dashboard">Clear</a>
+            <% } %>
+          </form>
+        </section>
+
         <section class="hero-banner">
-          <h2>Department Clearance Module</h2>
-          <p>Your updates are visible to the student and registrar in real-time.</p>
+          <h2>Department clearance</h2>
+          <p>Use <strong>Cleared</strong> when requirements are satisfied, <strong>Not cleared</strong> when the student must return, or <strong>Pending</strong> while reviewing.</p>
         </section>
 
         <section class="card data-card">
-          <div class="card-head"><h2>Students (<%= students.length %>)</h2></div>
+          <div class="card-head"><h2>Student list (<%= students.length %> shown)</h2></div>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
                 <tr>
                   <th>Student ID</th>
-                  <th>Name / Email</th>
-                  <th>Current Status</th>
-                  <th>Last Updated</th>
-                  <th>Update</th>
+                  <th>Name &amp; email</th>
+                  <th>Your office status</th>
+                  <th>Last updated</th>
+                  <th>Update form</th>
                 </tr>
               </thead>
               <tbody>
                 <% if (!students.length) { %>
-                <tr><td colspan="5" class="muted center">No students registered yet.</td></tr>
+                <tr><td colspan="5" class="muted center">No students match this search.</td></tr>
                 <% } %>
                 <% students.forEach((s) => { %>
                 <tr>
@@ -43,7 +56,6 @@
                   <td>
                     <strong><%= s.displayName %></strong>
                     <div class="tiny muted"><%= s.email %></div>
-                    <% if (!s.isVerified) { %><span class="tiny badge badge-verify">Unverified</span><% } %>
                   </td>
                   <td>
                     <span class="badge <%= s.badge %>"><%= s.status %></span>
@@ -52,12 +64,15 @@
                   <td class="tiny"><%= s.updatedAt ? new Date(s.updatedAt).toLocaleString() : '—' %></td>
                   <td>
                     <form method="post" action="/department/update/<%= s.studentId %>" class="form" style="gap:0.3rem;">
-                      <select name="status" required>
-                        <% ["Pending","Cleared","Not Cleared"].forEach((v) => { %>
-                        <option value="<%= v %>" <%= s.status === v ? 'selected' : '' %>><%= v %></option>
-                        <% }) %>
-                      </select>
-                      <input type="text" name="remarks" value="<%= s.remarks || '' %>" placeholder="Remarks (optional)" />
+                      <input type="hidden" name="returnQ" value="<%= typeof searchQuery !== 'undefined' && searchQuery ? searchQuery : '' %>" />
+                      <label class="tiny" style="margin:0;">Status
+                        <select name="status" required>
+                          <% ["Pending","Cleared","Not Cleared"].forEach((v) => { %>
+                          <option value="<%= v %>" <%= s.status === v ? 'selected' : '' %>><%= v %></option>
+                          <% }) %>
+                        </select>
+                      </label>
+                      <input type="text" name="remarks" value="<%= s.remarks || '' %>" placeholder="Optional remarks" />
                       <button type="submit" class="tiny">Save</button>
                     </form>
                   </td>

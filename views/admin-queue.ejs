@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <%- include('partials/head') %>
-    <title>Registrar Dashboard</title>
+    <title>Document requests — Admin</title>
   </head>
   <body class="app-body">
     <% const forVerificationCount = requests.filter((item) => item.status === "For Verification").length; %>
@@ -11,41 +11,42 @@
     <% const ocrProcessedCount = requests.filter((item) => item.ocr?.state === "processed" || item.ocr?.state === "corrected").length; %>
 
     <div class="dashboard-shell">
-      <%- include('partials/sidebar', { user, active: 'dashboard' }) %>
+      <%- include('partials/sidebar', { user, active: 'requests' }) %>
       <main class="main-panel">
         <%- include('partials/topbar', {
-          title: 'Registrar Dashboard',
-          subtitle: 'Manage requisitions, OCR validation, and release scheduling.'
+          title: 'Document request queue',
+          subtitle: 'Search by student name, ID, document type, or request number. Process OCR, verify payment, and assign release slots.'
         }) %>
 
+        <section class="card" style="margin-bottom: 1rem;">
+          <form method="get" action="/admin/requests" class="form two-col" style="align-items: end;">
+            <label class="full-row">
+              Search requests (applies to all columns in the table below)
+              <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="e.g. Juan, 20230001, TOR, DEMO1001" />
+            </label>
+            <button type="submit">Search</button>
+            <% if (searchQuery) { %>
+            <a class="btn-link" href="/admin/requests">Clear search</a>
+            <% } %>
+          </form>
+        </section>
+
         <section class="hero-banner">
-          <h2>Service Operations Overview</h2>
-          <p>Centralized monitoring of request progress, clearance status, and OCR-assisted verification.</p>
+          <h2>Registrar operations (admin)</h2>
+          <p>All document processing, OCR, and scheduling are handled here — one role for the Registrar Office.</p>
         </section>
 
         <section class="stat-grid">
-          <article class="stat-card">
-            <h3><%= requests.length %></h3>
-            <p>Total Requests</p>
-          </article>
-          <article class="stat-card">
-            <h3><%= forVerificationCount %></h3>
-            <p>For Verification</p>
-          </article>
-          <article class="stat-card">
-            <h3><%= scheduledCount %></h3>
-            <p>Scheduled</p>
-          </article>
-          <article class="stat-card">
-            <h3><%= ocrProcessedCount %></h3>
-            <p>OCR Processed</p>
-          </article>
+          <article class="stat-card"><h3><%= requests.length %></h3><p>Requests shown</p></article>
+          <article class="stat-card"><h3><%= forVerificationCount %></h3><p>For verification</p></article>
+          <article class="stat-card"><h3><%= scheduledCount %></h3><p>Scheduled</p></article>
+          <article class="stat-card"><h3><%= ocrProcessedCount %></h3><p>OCR processed</p></article>
         </section>
 
         <section class="card data-card">
           <div class="card-head">
-            <h2>Request Queue</h2>
-            <p class="muted">Released: <%= releasedCount %></p>
+            <h2>Request list</h2>
+            <p class="muted">Released (all time): <%= releasedCount %></p>
           </div>
           <div class="table-wrap">
             <table class="data-table">
@@ -53,33 +54,31 @@
                 <tr>
                   <th>Request ID</th>
                   <th>Student</th>
-                  <th>Doc Type</th>
+                  <th>Document type</th>
                   <th>Status</th>
-                  <th>Clearance</th>
+                  <th>Clearance (at submit)</th>
                   <th>OCR</th>
-                  <th>Schedule</th>
                   <th>Created</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 <% if (!requests.length) { %>
-                <tr><td colspan="9" class="muted center">No requests submitted yet.</td></tr>
+                <tr><td colspan="8" class="muted center">No requests match your search.</td></tr>
                 <% } %>
                 <% requests.forEach((item) => { %>
                 <tr>
                   <td><%= item.id %></td>
                   <td>
                     <%= item.studentName %> (<%= item.studentId %>)
-                    <div class="tiny"><a class="table-link" href="/registrar/clearance/<%= item.studentId %>">View clearance</a></div>
+                    <div class="tiny"><a class="table-link" href="/admin/clearance/<%= item.studentId %>">View clearance record</a></div>
                   </td>
                   <td><%= item.documentType %></td>
                   <td><span class="badge <%= item.statusClass %>"><%= item.status %></span></td>
                   <td><%= item.clearanceStatus %></td>
                   <td><%= item.ocr?.state || "not_run" %></td>
-                  <td><%= item.schedule ? `${item.schedule.date} ${item.schedule.time}` : '—' %></td>
                   <td class="tiny"><%= new Date(item.createdAt).toLocaleString() %></td>
-                  <td><a class="table-link" href="/registrar/request/<%= item.id %>">Open</a></td>
+                  <td><a class="table-link" href="/admin/request/<%= item.id %>">Open &amp; process</a></td>
                 </tr>
                 <% }) %>
               </tbody>

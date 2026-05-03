@@ -83,6 +83,9 @@ async function initializeDatabase() {
       at TEXT NOT NULL
     );
   `);
+
+  await db.run("UPDATE users SET role = 'admin' WHERE role = 'registrar'");
+  await db.run("UPDATE users SET is_verified = 1 WHERE role = 'student'");
 }
 
 function mapRequestRow(row) {
@@ -142,6 +145,21 @@ async function listRequests(filter = {}) {
     const rows = await db.all(
       "SELECT * FROM requests WHERE student_id = ? ORDER BY created_at DESC",
       filter.studentId
+    );
+    return rows.map(mapRequestRow);
+  }
+  const search = typeof filter.search === "string" ? filter.search.trim() : "";
+  if (search) {
+    const s = `%${search.replace(/%/g, "%%")}%`;
+    const rows = await db.all(
+      `SELECT * FROM requests WHERE
+        student_name LIKE ? OR student_id LIKE ? OR document_type LIKE ? OR purpose LIKE ? OR id LIKE ?
+        ORDER BY created_at DESC`,
+      s,
+      s,
+      s,
+      s,
+      s
     );
     return rows.map(mapRequestRow);
   }
@@ -372,6 +390,52 @@ async function computeStudentClearanceSummary(studentId) {
   return "Pending";
 }
 
+async function listStudentsClearanceOverview(search = "") {
+  const n = search.trim();
+  let sql = `
+    SELECT u.student_id AS student_id, u.display_name AS display_name, u.email AS email,
+      SUM(CASE WHEN COALESCE(c.status, '') = 'Cleared' THEN 1 ELSE 0 END) AS n_cleared,
+      SUM(CASE WHEN c.status = 'Not Cleared' THEN 1 ELSE 0 END) AS n_denied,
+      COUNT(c.department_code) AS n_tracked
+    FROM users u
+    LEFT JOIN clearances c ON c.student_id = u.student_id
+    WHERE u.role = 'student'
+  `;
+  const params = [];
+  if (n) {
+    const like = `%${n.replace(/%/g, "%%")}%`;
+    sql += " AND (u.display_name LIKE ? OR u.student_id LIKE ? OR u.email LIKE ?)";
+    params.push(like, like, like);
+  }
+  sql += " GROUP BY u.student_id, u.display_name, u.email ORDER BY u.display_name";
+  const rows = await db.all(sql, ...params);
+  const totalDepts = DEPARTMENTS.length;
+  return rows.map((r) => {
+    let clearanceSummary;
+    if (Number(r.n_denied) > 0) clearanceSummary = "Not Cleared";
+    else if (Number(r.n_cleared) === totalDepts && Number(r.n_tracked) >= totalDepts) {
+      clearanceSummary = "Cleared";
+    } else if (Number(r.n_cleared) > 0) clearanceSummary = "Partially Cleared";
+    else clearanceSummary = "Pending";
+    return {
+      studentId: r.student_id,
+      displayName: r.display_name,
+      email: r.email,
+      clearanceSummary,
+      nCleared: Number(r.n_cleared),
+      nTracked: Number(r.n_tracked)
+    };
+  });
+}
+
+async function countReleasedRequestsForStudent(studentId) {
+  const row = await db.get(
+    "SELECT COUNT(*) AS n FROM requests WHERE student_id = ? AND status = 'Released'",
+    studentId
+  );
+  return Number(row?.n || 0);
+}
+
 async function writeAudit(actorEmail, action, details = "") {
   await db.run(
     "INSERT INTO audit_log (actor_email, action, details, at) VALUES (?, ?, ?, ?)",
@@ -438,6 +502,8 @@ module.exports = {
   ensureStorageDirs,
   initializeDatabase,
   listRequests,
+  listStudentsClearanceOverview,
+  countReleasedRequestsForStudent,
   getRequestById,
   insertRequest,
   updateRequest,

@@ -33,7 +33,7 @@
               <div><dt>Status</dt><dd><%= request.status %></dd></div>
               <div><dt>Clearance</dt><dd><%= request.clearanceStatus %></dd></div>
               <div><dt>Schedule</dt><dd><%= request.schedule ? `${request.schedule.date} ${request.schedule.time}` : "Not yet assigned" %></dd></div>
-              <div><dt>Remarks</dt><dd><%= request.registrarRemarks || "No remarks yet" %></dd></div>
+              <div><dt>Office remarks</dt><dd><%= request.registrarRemarks || "No remarks yet" %></dd></div>
             </dl>
           </section>
 
@@ -46,7 +46,7 @@
           <section class="card full">
             <h2>OCR Verification Result</h2>
             <% if (request.ocr.state === "not_run") { %>
-              <p class="muted">OCR has not been processed yet by the registrar.</p>
+              <p class="muted">OCR has not been run yet by the registrar office.</p>
             <% } else if (request.ocr.state === "failed") { %>
               <p class="alert error">OCR processing failed. Registrar may re-run or encode manually.</p>
             <% } else { %>

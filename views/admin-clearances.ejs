@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Student clearances — Admin</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'clearances' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Student clearance overview',
+          subtitle: 'Search by student name, ID, or email. Applies to all registered students. Links open the detailed grid for one student.'
+        }) %>
+
+        <section class="card" style="margin-bottom: 1rem;">
+          <form method="get" action="/admin/clearances" class="form two-col" style="align-items: end;">
+            <label class="full-row">
+              Search students (name, student ID, or email)
+              <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="e.g. Maria, 20230002, @cca.edu.ph" />
+            </label>
+            <button type="submit">Search</button>
+            <% if (searchQuery) { %>
+            <a class="btn-link" href="/admin/clearances">Show all students</a>
+            <% } %>
+          </form>
+        </section>
+
+        <section class="hero-banner">
+          <h2>Registrar clearance monitoring</h2>
+          <p>Six offices: Library, Finance, MISSO, SASO, Guidance, Community Extension (NSTP). Each office uses its own login to update statuses.</p>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head">
+            <h2>Students (<%= rows.length %>)</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Offices cleared</th>
+                  <th>Overall</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!rows.length) { %>
+                <tr><td colspan="6" class="muted center">No students match this search.</td></tr>
+                <% } %>
+                <% rows.forEach((r) => { %>
+                <tr>
+                  <td><%= r.studentId %></td>
+                  <td><%= r.displayName %></td>
+                  <td class="tiny"><%= r.email %></td>
+                  <td><%= r.nCleared %> / <%= departments.length %></td>
+                  <td><span class="badge <%= r.summaryBadge %>"><%= r.clearanceSummary %></span></td>
+                  <td><a class="table-link" href="/admin/clearance/<%= r.studentId %>">Open detail</a></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

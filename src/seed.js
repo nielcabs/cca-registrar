@@ -57,15 +57,6 @@ async function seedUsers() {
       createdAt: nowIso
     },
     {
-      id: "registrar-001",
-      email: "registrar@cca.edu.ph",
-      passwordHash: password,
-      role: "registrar",
-      displayName: "Ms. Registrar Staff",
-      isVerified: true,
-      createdAt: nowIso
-    },
-    {
       id: "student-001",
       email: "juan@cca.edu.ph",
       passwordHash: password,
@@ -92,7 +83,7 @@ async function seedUsers() {
       role: "student",
       displayName: "Pedro Reyes",
       studentId: "20230003",
-      isVerified: false,
+      isVerified: true,
       createdAt: nowIso
     }
   ];
@@ -248,7 +239,7 @@ async function seedSampleClearances() {
     });
   }
 
-  // Student 20230003 (Pedro): pending verification, clearances pending
+  // Student 20230003 (Pedro): default clearance rows only
   await ensureClearanceRows("20230003");
 }
 

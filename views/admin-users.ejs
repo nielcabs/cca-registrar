@@ -2,51 +2,51 @@
 <html lang="en">
   <head>
     <%- include('partials/head') %>
-    <title>Manage Users</title>
+    <title>User accounts</title>
   </head>
   <body class="app-body">
     <div class="dashboard-shell">
       <%- include('partials/sidebar', { user, active: 'users' }) %>
       <main class="main-panel">
         <%- include('partials/topbar', {
-          title: 'Manage User Profiles',
-          subtitle: 'Create, verify, and remove system accounts.'
+          title: 'User account management',
+          subtitle: 'Create student or department officer logins, or remove accounts. The registrar / admin role is not created here — use the seeded admin account.'
         }) %>
 
         <% if (error) { %><div class="alert error"><%= error %></div><% } %>
         <% if (success) { %><div class="alert success"><%= success %></div><% } %>
 
         <section class="card" style="margin-bottom: 1rem;">
-          <h2>Create Account</h2>
+          <h2>Create new account</h2>
+          <p class="tiny muted" style="margin-top:0;">Students can also self-register from the login page. New students can submit requests immediately after registration.</p>
           <form method="post" action="/admin/users/create" class="form two-col">
             <label>
-              Role
+              Account role
               <select name="role" id="roleSelect" required>
                 <option value="">Select role</option>
                 <option value="student">Student</option>
-                <option value="registrar">Registrar</option>
-                <option value="department">Department Officer</option>
-                <option value="admin">Administrator</option>
+                <option value="department">Department officer (Library, Finance, etc.)</option>
+                <option value="admin">Additional administrator</option>
               </select>
             </label>
             <label>
-              Display Name
-              <input type="text" name="displayName" required />
+              Full display name
+              <input type="text" name="displayName" required placeholder="As it should appear in the system" />
             </label>
             <label>
-              Email
-              <input type="email" name="email" required />
+              Email (used as login)
+              <input type="email" name="email" required placeholder="name@cca.edu.ph" />
             </label>
             <label>
-              Password (min 6)
+              Initial password (min. 6 characters)
               <input type="password" name="password" minlength="6" required />
             </label>
             <label id="studentIdField" style="display:none;">
-              Student ID
-              <input type="text" name="studentId" />
+              Student ID number
+              <input type="text" name="studentId" placeholder="e.g. 2023001234" />
             </label>
             <label id="deptField" style="display:none;">
-              Department
+              Department (for officer login)
               <select name="departmentCode">
                 <option value="">Select department</option>
                 <% departments.forEach((d) => { %>
@@ -54,17 +54,22 @@
                 <% }) %>
               </select>
             </label>
-            <button type="submit" class="full-row">Create Account</button>
+            <button type="submit" class="full-row">Create account</button>
           </form>
         </section>
 
         <section class="card data-card">
-          <div class="card-head"><h2>All User Accounts (<%= users.length %>)</h2></div>
+          <div class="card-head"><h2>All accounts (<%= users.length %>)</h2></div>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Email</th><th>Name</th><th>Role</th><th>Dept/SID</th><th>Verified</th><th>Created</th><th>Actions</th>
+                  <th>Email (login)</th>
+                  <th>Display name</th>
+                  <th>Role</th>
+                  <th>Student ID / office</th>
+                  <th>Created</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,34 +79,14 @@
                   <td><%= u.displayName %></td>
                   <td><%= u.role %></td>
                   <td><%= u.studentId || u.departmentCode || '—' %></td>
-                  <td>
-                    <% if (u.role === 'student') { %>
-                      <% if (u.isVerified) { %>
-                        <span class="badge badge-released">Verified</span>
-                      <% } else { %>
-                        <span class="badge badge-verify">Unverified</span>
-                      <% } %>
-                    <% } else { %>
-                      <span class="muted tiny">n/a</span>
-                    <% } %>
-                  </td>
                   <td class="tiny"><%= new Date(u.createdAt).toLocaleDateString() %></td>
                   <td>
-                    <% if (u.role === 'student') { %>
-                      <% if (!u.isVerified) { %>
-                      <form method="post" action="/admin/users/<%= u.id %>/verify" style="display:inline;">
-                        <button type="submit" class="btn-solid tiny">Verify</button>
-                      </form>
-                      <% } else { %>
-                      <form method="post" action="/admin/users/<%= u.id %>/unverify" style="display:inline;">
-                        <button type="submit" class="ghost tiny">Unverify</button>
-                      </form>
-                      <% } %>
-                    <% } %>
                     <% if (u.email !== user.email) { %>
-                    <form method="post" action="/admin/users/<%= u.id %>/delete" style="display:inline;" onsubmit="return confirm('Delete account <%= u.email %>?');">
+                    <form method="post" action="/admin/users/<%= u.id %>/delete" style="display:inline;" onsubmit="return confirm('Permanently delete <%= u.email %>?');">
                       <button type="submit" class="ghost tiny">Delete</button>
                     </form>
+                    <% } else { %>
+                    <span class="muted tiny">Current session</span>
                     <% } %>
                   </td>
                 </tr>
