@@ -84,7 +84,8 @@ async function initializeDatabase() {
     );
   `);
 
-  await db.run("UPDATE users SET role = 'admin' WHERE role = 'registrar'");
+  // Registrar and admin are equivalent; canonical role in DB is `registrar`.
+  await db.run("UPDATE users SET role = 'registrar' WHERE role = 'admin'");
   await db.run("UPDATE users SET is_verified = 1 WHERE role = 'student'");
 }
 

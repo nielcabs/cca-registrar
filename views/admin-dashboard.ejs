@@ -6,12 +6,26 @@
   </head>
   <body class="app-body">
     <div class="dashboard-shell">
-      <%- include('partials/sidebar', { user, active: 'dashboard' }) %>
+      <%- include('partials/sidebar', { user, active: active || 'dashboard' }) %>
       <main class="main-panel">
         <%- include('partials/topbar', {
-          title: 'Registrar office overview',
-          subtitle: 'Registrar workspace — document requests, clearances, reports, and user accounts.'
+          title: 'Registrar dashboard',
+          subtitle: 'Document requisitions, OCR validation, release scheduling, and student lookup.'
         }) %>
+
+        <section class="card" style="margin-bottom: 1rem;">
+          <form method="get" action="/admin/dashboard" class="form two-col" style="align-items: end;">
+            <label class="full-row">
+              Search students &amp; requests (filters the table below; same data as the full queue)
+              <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="Student name, ID, document type, or request ID (e.g. Juan, 20230001, DEMO1001)" />
+            </label>
+            <button type="submit">Search</button>
+            <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+            <a class="btn-link" href="/admin/dashboard">Clear search</a>
+            <a class="btn-link" href="/admin/requests?q=<%= encodeURIComponent(searchQuery) %>">Open full queue</a>
+            <% } %>
+          </form>
+        </section>
 
         <section class="hero-banner">
           <h2>Quick actions</h2>
@@ -25,10 +39,10 @@
         </section>
 
         <section class="stat-grid">
-          <article class="stat-card"><h3><%= stats.totalRequests %></h3><p>Total document requests</p></article>
-          <article class="stat-card"><h3><%= stats.totalStudents %></h3><p>Registered students</p></article>
-          <article class="stat-card"><h3><%= stats.released %></h3><p>Released (completed)</p></article>
-          <article class="stat-card"><h3><%= stats.totalUsers %></h3><p>All system accounts</p></article>
+          <article class="stat-card"><h3><%= recent.length %></h3><p>Requests shown below<% if (typeof searchQuery !== 'undefined' && searchQuery) { %> (search)<% } %></p></article>
+          <article class="stat-card"><h3><%= stats.forVerification %></h3><p>For verification (office-wide)</p></article>
+          <article class="stat-card"><h3><%= stats.scheduled %></h3><p>Scheduled (office-wide)</p></article>
+          <article class="stat-card"><h3><%= typeof ocrProcessedCount !== 'undefined' ? ocrProcessedCount : 0 %></h3><p>OCR processed<% if (typeof searchQuery !== 'undefined' && searchQuery) { %> (matches search)<% } else { %> (all requests)<% } %></p></article>
         </section>
 
         <section class="grid">
@@ -61,11 +75,11 @@
 
           <section class="card full">
             <div class="card-head">
-              <h2>Latest document requests</h2>
-              <a class="btn-link" href="/admin/requests">View full queue</a>
+              <h2><%= (typeof searchQuery !== 'undefined' && searchQuery) ? 'Matching requests' : 'Latest document requests' %></h2>
+              <a class="btn-link" href="/admin/requests<%= typeof searchQuery !== 'undefined' && searchQuery ? ('?q=' + encodeURIComponent(searchQuery)) : '' %>">View full queue</a>
             </div>
             <% if (!recent.length) { %>
-              <p class="muted">No requests yet.</p>
+              <p class="muted"><%= (typeof searchQuery !== 'undefined' && searchQuery) ? 'No requests match this search. Try another name, ID, or request number.' : 'No requests yet.' %></p>
             <% } else { %>
               <div class="table-wrap">
                 <table class="data-table">

@@ -51,15 +51,23 @@ router.use(requireAuth, requireRole("admin"));
 
 router.get("/dashboard", async (req, res) => {
   const stats = await getDashboardStats();
-  const recent = (await listRequests()).slice(0, 8).map((r) => ({
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const pool = await listRequests({ search: q });
+  const recent = pool.slice(0, 20).map((r) => ({
     ...r,
     statusClass: computeStatusBadge(r.status)
   }));
+  const ocrProcessedCount = pool.filter(
+    (r) => r.ocr?.state === "processed" || r.ocr?.state === "corrected"
+  ).length;
 
   res.render("admin-dashboard", {
     user: req.session.user,
     stats,
-    recent
+    recent,
+    searchQuery: q,
+    ocrProcessedCount,
+    active: "dashboard"
   });
 });
 
@@ -355,7 +363,8 @@ router.get("/users", async (req, res) => {
 });
 
 router.post("/users/create", async (req, res) => {
-  const { email, password, role, displayName, studentId, departmentCode } = req.body;
+  let { email, password, role, displayName, studentId, departmentCode } = req.body;
+  if (role === "admin" || role === "registrar") role = "registrar";
   const listQ = usersPageSearch(req);
   const users = await listUsers({ search: listQ });
 
@@ -378,6 +387,20 @@ router.post("/users/create", async (req, res) => {
       departments: DEPARTMENTS,
       searchQuery: listQ,
       error: "Password must be at least 6 characters.",
+      success: null,
+      active: "users"
+    });
+    return;
+  }
+
+  const allowedRoles = ["student", "department", "registrar"];
+  if (!allowedRoles.includes(role)) {
+    res.render("admin-users", {
+      user: req.session.user,
+      users,
+      departments: DEPARTMENTS,
+      searchQuery: listQ,
+      error: "Invalid account role.",
       success: null,
       active: "users"
     });

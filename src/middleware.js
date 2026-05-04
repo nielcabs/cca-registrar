@@ -6,10 +6,17 @@ function requireAuth(req, res, next) {
   next();
 }
 
+/** Registrar office staff: `admin` and `registrar` are the same access level. */
+function isRegistrarStaff(role) {
+  return role === "admin" || role === "registrar";
+}
+
 function requireRole(...roles) {
   return (req, res, next) => {
     const role = req.session.user?.role;
-    const allowed = roles.includes(role) || (roles.includes("admin") && role === "registrar");
+    const wantsStaff = roles.some((r) => r === "admin" || r === "registrar");
+    const allowed =
+      roles.includes(role) || (wantsStaff && isRegistrarStaff(role));
     if (!req.session.user || !allowed) {
       res.status(403).render("error", {
         user: req.session.user || null,
@@ -22,4 +29,4 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { requireAuth, requireRole };
+module.exports = { requireAuth, requireRole, isRegistrarStaff };

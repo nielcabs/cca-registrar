@@ -2,7 +2,7 @@
   <div class="brand">CCA Registrar Office</div>
   <p class="sidebar-role">
     <% if (user.role === "student") { %>Student portal
-    <% } else if (user.role === "admin") { %>Registrar office
+    <% } else if (user.role === "admin" || user.role === "registrar") { %>Registrar office
     <% } else if (user.role === "department") { %>Department officer
     <% } %>
   </p>
@@ -13,7 +13,7 @@
       <a href="/student/new-request" class="<%= active === 'new-request' ? 'active' : '' %>">New document request</a>
       <a href="/student/clearance" class="<%= active === 'clearance' ? 'active' : '' %>">My clearance status</a>
       <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>">Change password</a>
-    <% } else if (user.role === "admin") { %>
+    <% } else if (user.role === "admin" || user.role === "registrar") { %>
       <a href="/admin/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">Overview dashboard</a>
       <a href="/admin/requests" class="<%= active === 'requests' ? 'active' : '' %>">Document requests</a>
       <a href="/admin/clearances" class="<%= active === 'clearances' ? 'active' : '' %>">Student clearances</a>

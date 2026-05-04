@@ -14,6 +14,7 @@ const authRoutes = require("./src/routes/auth");
 const studentRoutes = require("./src/routes/student");
 const adminRoutes = require("./src/routes/admin");
 const departmentRoutes = require("./src/routes/department");
+const { isRegistrarStaff } = require("./src/middleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,7 +53,7 @@ app.get("/", (req, res) => {
   }
   const role = req.session.user.role;
   if (role === "student") res.redirect("/student/dashboard");
-  else if (role === "admin" || role === "registrar") res.redirect("/admin/dashboard");
+  else if (isRegistrarStaff(role)) res.redirect("/admin/dashboard");
   else if (role === "department") res.redirect("/department/dashboard");
   else res.redirect("/login");
 });

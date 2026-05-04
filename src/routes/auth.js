@@ -11,19 +11,15 @@ const {
   ensureClearanceRows,
   writeAudit
 } = require("../db");
-const { requireAuth } = require("../middleware");
+const { requireAuth, isRegistrarStaff } = require("../middleware");
 
 const router = express.Router();
 
 function buildSessionUser(user) {
-  let role = user.role;
-  if (role === "registrar") {
-    role = "admin";
-  }
   return {
     id: user.id,
     email: user.email,
-    role,
+    role: user.role,
     displayName: user.displayName,
     studentId: user.studentId,
     departmentCode: user.departmentCode,
@@ -61,7 +57,7 @@ router.post("/login", async (req, res) => {
   await writeAudit(user.email, "login", `role=${user.role}`);
 
   if (user.role === "student") res.redirect("/student/dashboard");
-  else if (user.role === "admin" || user.role === "registrar") res.redirect("/admin/dashboard");
+  else if (isRegistrarStaff(user.role)) res.redirect("/admin/dashboard");
   else if (user.role === "department") res.redirect("/department/dashboard");
   else res.redirect("/");
 });

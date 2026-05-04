@@ -29,7 +29,7 @@
                 <option value="">Select role</option>
                 <option value="student">Student</option>
                 <option value="department">Department officer (Library, Finance, etc.)</option>
-                <option value="admin">Additional registrar staff</option>
+                <option value="registrar">Additional registrar staff</option>
               </select>
             </label>
             <label>
@@ -98,7 +98,7 @@
                 <tr>
                   <td><%= u.email %></td>
                   <td><%= u.displayName %></td>
-                  <td><%= u.role === 'admin' ? 'Registrar' : u.role === 'student' ? 'Student' : u.role === 'department' ? 'Department' : u.role %></td>
+                  <td><%= (u.role === 'admin' || u.role === 'registrar') ? 'Registrar' : u.role === 'student' ? 'Student' : u.role === 'department' ? 'Department' : u.role %></td>
                   <td><%= u.studentId || u.departmentCode || '—' %></td>
                   <td class="tiny"><%= new Date(u.createdAt).toLocaleDateString() %></td>
                   <td>

@@ -1,3 +1,41 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="/public/styles.css?v=cca-green-2" />
+<link rel="stylesheet" href="/public/styles.css?v=cca-green-4" />
+<style>
+  /* Theme fallback if an old non-green stylesheet is cached */
+  :root {
+    --cca-primary: #15803d;
+    --cca-primary-dark: #14532d;
+  }
+  body.app-body {
+    background: linear-gradient(180deg, #e8f5ec 0%, #f4fbf7 100%) !important;
+  }
+  .hero-banner {
+    background: linear-gradient(120deg, #14532d 0%, #15803d 45%, #22c55e 100%) !important;
+    color: #fff !important;
+  }
+  .menu a.active {
+    background: #15803d !important;
+    border-color: #166534 !important;
+    color: #fff !important;
+  }
+  .stat-card h3 {
+    color: #15803d !important;
+  }
+  .brand {
+    color: #166534 !important;
+  }
+  .brand::before {
+    background: #15803d !important;
+  }
+  button:not(.ghost):not(.tiny),
+  .btn-solid {
+    background: #15803d !important;
+    border-color: #166534 !important;
+    color: #fff !important;
+  }
+  button:not(.ghost):hover,
+  .btn-solid:hover {
+    background: #166534 !important;
+  }
+</style>
