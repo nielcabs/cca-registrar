@@ -10,15 +10,76 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'User account management',
-          subtitle: 'Create student or department officer logins, or remove accounts. Main registrar login is seeded (admin@cca.edu.ph) — not created here.'
+          subtitle: 'Search and manage logins. The main registrar account is pre-seeded — expand below only when adding new users.'
         }) %>
 
         <% if (error) { %><div class="alert error"><%= error %></div><% } %>
         <% if (success) { %><div class="alert success"><%= success %></div><% } %>
 
-        <section class="card" style="margin-bottom: 1rem;">
-          <h2>Create new account</h2>
-          <p class="tiny muted" style="margin-top:0;">Students can also self-register from the login page. New students can submit requests immediately after registration.</p>
+        <section class="card data-card">
+          <div class="card-head-row">
+            <h2>Accounts</h2>
+            <form method="get" action="/admin/users" class="inline-search">
+              <label>
+                Search name, email, ID, office
+                <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="Juan, 20230001, @cca.edu.ph…" autocomplete="off" />
+              </label>
+              <button type="submit">Search</button>
+              <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+              <a class="btn-link" href="/admin/users" style="align-self: center;">Reset</a>
+              <% } %>
+            </form>
+          </div>
+          <p class="accounts-meta">
+            Showing <strong><%= users.length %></strong><% if (typeof searchQuery !== 'undefined' && searchQuery) { %> match(es) for “<%= searchQuery %>”<% } else { %> account(s)<% } %>.
+          </p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Email (login)</th>
+                  <th>Display name</th>
+                  <th>Role</th>
+                  <th>Student ID / office</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!users.length) { %>
+                <tr>
+                  <td colspan="6" class="muted"><%= (typeof searchQuery !== 'undefined' && searchQuery) ? 'No accounts match this search.' : 'No user accounts yet.' %></td>
+                </tr>
+                <% } %>
+                <% users.forEach((u) => { %>
+                <tr>
+                  <td><%= u.email %></td>
+                  <td><%= u.displayName %></td>
+                  <td><%= (u.role === 'admin' || u.role === 'registrar') ? 'Registrar' : u.role === 'student' ? 'Student' : u.role === 'department' ? 'Department' : u.role %></td>
+                  <td><%= u.studentId || u.departmentCode || '—' %></td>
+                  <td class="tiny"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                  <td>
+                    <% if (u.email !== user.email) { %>
+                    <form method="post" action="/admin/users/<%= u.id %>/delete" style="display:inline;" onsubmit="return confirm('Permanently delete <%= u.email %>?');">
+                      <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+                      <input type="hidden" name="redirectSearch" value="<%= searchQuery %>" />
+                      <% } %>
+                      <button type="submit" class="ghost tiny">Delete</button>
+                    </form>
+                    <% } else { %>
+                    <span class="muted tiny">This session</span>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <details class="create-panel">
+          <summary>Create new account — student, department officer, or registrar staff</summary>
+          <p class="tiny muted" style="margin-top:0;">Students may also register from the login page.</p>
           <form method="post" action="/admin/users/create" class="form two-col">
             <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
             <input type="hidden" name="redirectSearch" value="<%= searchQuery %>" />
@@ -59,66 +120,7 @@
             </label>
             <button type="submit" class="full-row">Create account</button>
           </form>
-        </section>
-
-        <section class="card data-card">
-          <div class="card-head"><h2>Accounts</h2></div>
-          <form method="get" action="/admin/users" class="form two-col" style="align-items: end; margin-bottom: 1rem;">
-            <label class="full-row">
-              Search by name, email, student ID, or office code
-              <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="e.g. Juan, 20230001, @cca.edu.ph, LIB" />
-            </label>
-            <button type="submit">Search</button>
-            <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
-            <a class="btn-link" href="/admin/users">Show all accounts</a>
-            <% } %>
-          </form>
-          <p class="tiny muted" style="margin-top:0;">
-            Showing <strong><%= users.length %></strong><% if (typeof searchQuery !== 'undefined' && searchQuery) { %> match(es) for “<%= searchQuery %>”<% } else { %> account(s)<% } %>.
-          </p>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Email (login)</th>
-                  <th>Display name</th>
-                  <th>Role</th>
-                  <th>Student ID / office</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% if (!users.length) { %>
-                <tr>
-                  <td colspan="6" class="muted"><%= (typeof searchQuery !== 'undefined' && searchQuery) ? 'No accounts match this search.' : 'No user accounts yet.' %></td>
-                </tr>
-                <% } %>
-                <% users.forEach((u) => { %>
-                <tr>
-                  <td><%= u.email %></td>
-                  <td><%= u.displayName %></td>
-                  <td><%= (u.role === 'admin' || u.role === 'registrar') ? 'Registrar' : u.role === 'student' ? 'Student' : u.role === 'department' ? 'Department' : u.role %></td>
-                  <td><%= u.studentId || u.departmentCode || '—' %></td>
-                  <td class="tiny"><%= new Date(u.createdAt).toLocaleDateString() %></td>
-                  <td>
-                    <% if (u.email !== user.email) { %>
-                    <form method="post" action="/admin/users/<%= u.id %>/delete" style="display:inline;" onsubmit="return confirm('Permanently delete <%= u.email %>?');">
-                      <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
-                      <input type="hidden" name="redirectSearch" value="<%= searchQuery %>" />
-                      <% } %>
-                      <button type="submit" class="ghost tiny">Delete</button>
-                    </form>
-                    <% } else { %>
-                    <span class="muted tiny">Current session</span>
-                    <% } %>
-                  </td>
-                </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        </details>
       </main>
     </div>
 

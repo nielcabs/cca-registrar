@@ -62,10 +62,17 @@ body {
 .sidebar {
   background: #fff;
   border-right: 1px solid var(--line);
+  border-left: 3px solid #bbf7d0;
   padding: 1.2rem 1rem;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: 1rem;
+  outline: none;
+}
+
+.dashboard-shell .sidebar *:focus-visible {
+  outline: 2px solid #15803d;
+  outline-offset: 2px;
 }
 
 .brand {
@@ -137,6 +144,8 @@ body {
 
 .main-panel {
   padding: 1rem 1.15rem 1.5rem;
+  background: #f6faf7;
+  min-height: 100vh;
 }
 
 .main-topbar {
@@ -244,6 +253,80 @@ body {
   font-size: 1rem;
 }
 
+.card-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.card-head-row h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  align-self: center;
+}
+
+.accounts-meta {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.inline-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: min(100%, 280px);
+  max-width: min(100%, 540px);
+}
+
+.inline-search label {
+  flex: 1;
+  min-width: 140px;
+  margin: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.inline-search input {
+  width: 100%;
+}
+
+details.create-panel {
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 0.9rem 0.9rem;
+  background: var(--card);
+}
+
+details.create-panel > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #14532d;
+  padding: 0.75rem 0;
+  list-style: none;
+}
+
+details.create-panel > summary::marker {
+  color: #15803d;
+}
+
+details.create-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.create-panel[open] > summary {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0.75rem;
+}
+
 .narrow {
   max-width: 680px;
 }
@@ -343,6 +426,14 @@ th {
   background: #ecfdf3;
   position: sticky;
   top: 0;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #f7fdf9;
+}
+
+.data-table tbody tr:hover {
+  background: #ecfdf3;
 }
 
 .center {
