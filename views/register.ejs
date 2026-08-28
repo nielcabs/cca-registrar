@@ -19,7 +19,7 @@
   <body class="auth-bg">
     <main class="card auth-card">
       <h1>Create Student Account</h1>
-      <p class="muted">Register to submit document requests.</p>
+      <p class="muted">Register with your category, course, and section. Clearance requirements depend on your category.</p>
 
       <% if (error) { %>
       <div class="alert error"><%= error %></div>
@@ -35,8 +35,29 @@
           <input type="text" name="studentId" value="<%= form.studentId || '' %>" placeholder="2023001234" required />
         </label>
         <label>
+          Student category
+          <select name="studentCategory" required>
+            <option value="">Select category</option>
+            <% categories.forEach((c) => { %>
+            <option value="<%= c.value %>" <%= form.studentCategory === c.value ? 'selected' : '' %>><%= c.label %></option>
+            <% }) %>
+          </select>
+        </label>
+        <label>
+          Course / Program
+          <input type="text" name="course" value="<%= form.course || '' %>" placeholder="e.g. BS Information Technology" />
+        </label>
+        <label>
+          Section
+          <input type="text" name="section" value="<%= form.section || '' %>" placeholder="e.g. A" />
+        </label>
+        <label>
           Email
           <input type="email" name="email" value="<%= form.email || '' %>" placeholder="you@cca.edu.ph" required />
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" name="hasScholarship" value="1" <%= form.hasScholarship ? 'checked' : '' %> />
+          I have an active scholarship (receipt upload not required when requesting documents)
         </label>
         <label>
           Password
@@ -52,7 +73,6 @@
       <p class="tiny muted" style="margin-top: 0.8rem;">
         Already have an account? <a href="/login">Sign in</a>
       </p>
-      <p class="tiny muted">After registration you can sign in and submit document requests right away.</p>
     </main>
   </body>
 </html>

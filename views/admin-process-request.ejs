@@ -38,19 +38,26 @@
 
         <section class="grid">
           <section class="card">
-            <h2>Payment proof (uploaded image)</h2>
+            <h2>Payment proof</h2>
+            <% if (request.uploadedFilePath) { %>
             <p><a class="table-link" href="<%= request.uploadedFilePath %>" target="_blank" rel="noopener">Open full image</a></p>
             <img src="<%= request.uploadedFilePath %>" alt="Uploaded payment proof" class="preview" />
+            <% if (!readOnly) { %>
             <form method="post" action="/admin/request/<%= request.id %>/run-ocr">
               <button type="submit">Run OCR on this image</button>
             </form>
+            <% } %>
             <p class="tiny muted">OCR suggests values only — you must confirm or edit before saving.</p>
+            <% } else { %>
+            <p class="muted">No receipt uploaded (scholarship student or waived).</p>
+            <% } %>
           </section>
 
           <section class="card">
             <h2>Request details</h2>
             <dl class="detail-list">
               <div><dt>Document type</dt><dd><%= request.documentType %></dd></div>
+              <% if (request.batchId) { %><div><dt>Batch ID</dt><dd><%= request.batchId %></dd></div><% } %>
               <div><dt>Purpose</dt><dd><%= request.purpose %></dd></div>
               <div><dt>Submitted</dt><dd><%= dayjs(request.createdAt).format("MMM D, YYYY h:mm A") %></dd></div>
               <div><dt>Workflow status</dt><dd><%= request.status %></dd></div>
@@ -85,6 +92,7 @@
             <p class="tiny muted"><strong>Rule:</strong> Status may only be set to <em>Scheduled</em> or <em>Released</em> when every department shows <strong>Cleared</strong>.</p>
           </section>
 
+          <% if (!readOnly) { %>
           <section class="card full">
             <h2>Update request, OCR fields, and release schedule</h2>
             <form method="post" action="/admin/request/<%= request.id %>/update" class="form two-col">
@@ -153,6 +161,11 @@
               <% } %>
             </p>
           </section>
+          <% } else { %>
+          <section class="card full">
+            <p class="muted">View-only mode — VPAA cannot update request status or schedules.</p>
+          </section>
+          <% } %>
         </section>
       </main>
     </div>

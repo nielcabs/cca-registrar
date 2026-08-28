@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 720" font-family="Segoe UI, Arial, sans-serif">
+  <title>Use case diagram - CCA Registrar Student Portal</title>
+  <desc>Stick figure actor, system boundary, Use student portal + nine related use cases; solid association lines.</desc>
+
+  <circle cx="95" cy="280" r="16" fill="none" stroke="#000" stroke-width="2"/>
+  <line x1="95" y1="296" x2="95" y2="360" stroke="#000" stroke-width="2"/>
+  <line x1="95" y1="320" x2="62" y2="350" stroke="#000" stroke-width="2"/>
+  <line x1="95" y1="320" x2="128" y2="350" stroke="#000" stroke-width="2"/>
+  <line x1="95" y1="360" x2="72" y2="410" stroke="#000" stroke-width="2"/>
+  <line x1="95" y1="360" x2="118" y2="410" stroke="#000" stroke-width="2"/>
+  <text x="95" y="435" text-anchor="middle" font-size="13" font-weight="600">Student</text>
+
+  <rect x="175" y="45" width="710" height="630" fill="none" stroke="#000" stroke-width="2"/>
+  <text x="530" y="78" text-anchor="middle" font-size="15" font-weight="700">CCA Registrar Student Portal</text>
+
+  <ellipse cx="340" cy="220" rx="112" ry="44" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="340" y="225" text-anchor="middle" font-size="13" font-weight="600">Use student portal</text>
+
+  <!-- Actor to main: straight segment to left edge of main oval (cx-rx, cy) -->
+  <line x1="118" y1="305" x2="228" y2="220" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+
+  <g font-size="10">
+    <ellipse cx="720" cy="95" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="99" text-anchor="middle">Register account (school email)</text>
+    <ellipse cx="720" cy="145" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="149" text-anchor="middle">Log in</text>
+    <ellipse cx="720" cy="195" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="199" text-anchor="middle">View student dashboard</text>
+    <ellipse cx="720" cy="245" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="249" text-anchor="middle">Submit document request (upload receipt)</text>
+    <ellipse cx="720" cy="295" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="299" text-anchor="middle">Track document request status</text>
+    <ellipse cx="720" cy="345" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="349" text-anchor="middle">View clearance status</text>
+    <ellipse cx="720" cy="395" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="399" text-anchor="middle">View release slot / schedule</text>
+    <ellipse cx="720" cy="445" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="449" text-anchor="middle">Change password</text>
+    <ellipse cx="720" cy="495" rx="168" ry="22" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    <text x="720" y="499" text-anchor="middle">Manage profile (name / session)</text>
+  </g>
+
+  <!-- Main oval right (cx+rx,cy) to each detail oval left (cx-rx,cy); one hub point like Vocalingua -->
+  <g stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round">
+    <line x1="452" y1="220" x2="552" y2="95"/>
+    <line x1="452" y1="220" x2="552" y2="145"/>
+    <line x1="452" y1="220" x2="552" y2="195"/>
+    <line x1="452" y1="220" x2="552" y2="245"/>
+    <line x1="452" y1="220" x2="552" y2="295"/>
+    <line x1="452" y1="220" x2="552" y2="345"/>
+    <line x1="452" y1="220" x2="552" y2="395"/>
+    <line x1="452" y1="220" x2="552" y2="445"/>
+    <line x1="452" y1="220" x2="552" y2="495"/>
+  </g>
+</svg>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Announcements</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'announcements', unreadNotificationsCount }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Announcements',
+          subtitle: 'Create an announcement and it will appear in every user’s Notifications inbox.'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="card" style="margin-bottom: 1rem;">
+          <form method="post" action="/admin/announcements" class="form">
+            <label>
+              Title
+              <input name="title" maxlength="120" required placeholder="e.g. Release schedule update" />
+            </label>
+            <label>
+              Message
+              <textarea name="message" rows="4" maxlength="1000" required placeholder="Write the announcement…"></textarea>
+            </label>
+            <button type="submit">Post announcement</button>
+            <p class="tiny muted" style="margin:0;">This sends a saved notification to all accounts (students, department officers, registrar staff).</p>
+          </form>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head"><h2>Recent announcements</h2></div>
+          <% if (!announcements || !announcements.length) { %>
+            <p class="muted">No announcements yet.</p>
+          <% } else { %>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Posted</th>
+                    <th>By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% announcements.forEach((a) => { %>
+                    <tr>
+                      <td><strong><%= a.title %></strong></td>
+                      <td class="tiny"><%= a.message %></td>
+                      <td class="tiny"><%= new Date(a.createdAt).toLocaleString() %></td>
+                      <td class="tiny"><%= a.createdBy %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
+

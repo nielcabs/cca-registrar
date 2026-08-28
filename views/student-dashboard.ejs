@@ -63,6 +63,7 @@
               <thead>
                 <tr>
                   <th>Request ID</th>
+                  <th>Batch</th>
                   <th>Document</th>
                   <th>Status</th>
                   <th>Clearance</th>
@@ -74,6 +75,7 @@
                 <% requests.forEach((item) => { %>
                 <tr>
                   <td><%= item.id %></td>
+                  <td class="tiny"><%= item.batchId || '—' %></td>
                   <td><%= item.documentType %></td>
                   <td><span class="badge <%= item.statusClass %>"><%= item.status %></span></td>
                   <td><%= item.clearanceStatus %></td>

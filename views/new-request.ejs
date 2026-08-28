@@ -10,32 +10,30 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'Create New Request',
-          subtitle: 'Attach a clear photo or scan of your payment receipt (JPG or PNG). The registrar office may run OCR to speed up data entry.',
+          subtitle: user.hasScholarship
+            ? 'Scholarship student — receipt upload is optional. Select one or more documents below.'
+            : 'Non-scholarship student — attach payment receipt (JPG or PNG). Select one or more documents.',
           actionsHtml: '<a class="btn-link" href="/student/dashboard">Back to Dashboard</a>'
         }) %>
 
         <section class="hero-banner">
           <h2>Request Submission</h2>
-          <p>Fill out the details and attach your payment proof image.</p>
+          <p>Check every document you need in this transaction. One shared receipt applies to the whole batch.</p>
         </section>
 
         <section class="card narrow">
           <% if (error) { %><div class="alert error"><%= error %></div><% } %>
 
           <form method="post" action="/student/new-request" enctype="multipart/form-data" class="form">
-            <label>
-              Document Type
-              <select name="documentType" required>
-                <option value="">Select type</option>
-                <option value="Transcript of Records">Transcript of Records (TOR)</option>
-                <option value="Certificate of Enrollment">Certificate of Enrollment</option>
-                <option value="Certificate of Grades">Certificate of Grades</option>
-                <option value="Diploma Copy">Diploma Copy</option>
-                <option value="Certificate of Good Moral">Certificate of Good Moral</option>
-                <option value="Certificate of Graduation">Certificate of Graduation</option>
-                <option value="Honorable Dismissal">Honorable Dismissal</option>
-              </select>
-            </label>
+            <fieldset class="checkbox-group">
+              <legend>Document types (select one or more)</legend>
+              <% documentTypes.forEach((doc) => { %>
+              <label class="checkbox-row">
+                <input type="checkbox" name="documentTypes" value="<%= doc %>" />
+                <%= doc %>
+              </label>
+              <% }) %>
+            </fieldset>
 
             <label>
               Purpose
@@ -44,10 +42,15 @@
 
             <label>
               Upload Payment Proof (JPG/PNG only, max 5 MB)
-              <input type="file" name="documentFile" accept=".jpg,.jpeg,.png" required />
+              <% if (user.hasScholarship) { %>
+              <span class="muted tiny">Optional for scholarship students</span>
+              <% } else { %>
+              <span class="muted tiny">Required for non-scholarship students</span>
+              <% } %>
+              <input type="file" name="documentFile" accept=".jpg,.jpeg,.png" <%= user.hasScholarship ? '' : 'required' %> />
             </label>
 
-            <button type="submit">Submit Request</button>
+            <button type="submit">Submit Request<%= documentTypes.length > 1 ? 's' : '' %></button>
           </form>
         </section>
       </main>

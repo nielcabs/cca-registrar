@@ -6,7 +6,8 @@ const multer = require("multer");
 const {
   ensureStorageDirs,
   initializeDatabase,
-  UPLOADS_DIR
+  UPLOADS_DIR,
+  countUnreadNotifications
 } = require("./src/db");
 const { seedAll } = require("./src/seed");
 
@@ -14,7 +15,7 @@ const authRoutes = require("./src/routes/auth");
 const studentRoutes = require("./src/routes/student");
 const adminRoutes = require("./src/routes/admin");
 const departmentRoutes = require("./src/routes/department");
-const { isRegistrarStaff } = require("./src/middleware");
+const { isRegistrarStaff, isViewOnlyStaff } = require("./src/middleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,6 +47,21 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      res.locals.unreadNotificationsCount = 0;
+      next();
+      return;
+    }
+    res.locals.unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+    next();
+  } catch (e) {
+    res.locals.unreadNotificationsCount = 0;
+    next();
+  }
+});
+
 app.get("/", (req, res) => {
   if (!req.session.user) {
     res.redirect("/login");
@@ -54,6 +70,7 @@ app.get("/", (req, res) => {
   const role = req.session.user.role;
   if (role === "student") res.redirect("/student/dashboard");
   else if (isRegistrarStaff(role)) res.redirect("/admin/dashboard");
+  else if (isViewOnlyStaff(role)) res.redirect("/admin/dashboard");
   else if (role === "department") res.redirect("/department/dashboard");
   else res.redirect("/login");
 });
@@ -96,9 +113,10 @@ ensureStorageDirs()
       console.log(`CCA Registrar System running at http://localhost:${PORT}`);
       console.log("Seeded credentials (password for all = cca123):");
       console.log("  admin@cca.edu.ph (Registrar office — full access)");
+      console.log("  vpaa@cca.edu.ph (VPAA — view only)");
       console.log("  juan@cca.edu.ph | maria@cca.edu.ph | pedro@cca.edu.ph (students)");
       console.log("  library@cca.edu.ph | finance@cca.edu.ph | misso@cca.edu.ph");
-      console.log("  saso@cca.edu.ph | guidance@cca.edu.ph | extension@cca.edu.ph");
+      console.log("  saso@cca.edu.ph | guidance@cca.edu.ph | extension@cca.edu.ph | alumni@cca.edu.ph");
     });
   })
   .catch((error) => {

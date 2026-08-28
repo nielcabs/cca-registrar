@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" font-family="Segoe UI, Arial, sans-serif">
+  <title>Context diagram — Level 0 — CCA Registrar Office</title>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#000"/>
+    </marker>
+  </defs>
+
+  <!-- External: Student -->
+  <rect x="28" y="188" width="124" height="52" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="90" y="220" text-anchor="middle" font-size="14" font-weight="600">Student</text>
+
+  <!-- Process 0.0 -->
+  <circle cx="460" cy="220" r="104" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="460" y="205" text-anchor="middle" font-size="12" font-weight="600">Integrated Requisition</text>
+  <text x="460" y="222" text-anchor="middle" font-size="12" font-weight="600">and Scheduling System</text>
+  <text x="460" y="242" text-anchor="middle" font-size="10">(CCA Registrar Office)</text>
+
+  <!-- External: Registrar -->
+  <rect x="768" y="188" width="124" height="52" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="830" y="220" text-anchor="middle" font-size="13" font-weight="600">Registrar office staff</text>
+
+  <!-- External: Department officer -->
+  <rect x="383" y="392" width="154" height="52" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="460" y="424" text-anchor="middle" font-size="13" font-weight="600">Department officer</text>
+
+  <!-- Student → System (two flows) -->
+  <line x1="152" y1="205" x2="348" y2="205" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="250" y="198" text-anchor="middle" font-size="9.5">Registration / login</text>
+  <line x1="152" y1="228" x2="348" y2="228" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="250" y="238" text-anchor="middle" font-size="9.5">Document request / receipt</text>
+
+  <!-- System → Student -->
+  <line x1="348" y1="250" x2="152" y2="250" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="250" y="265" text-anchor="middle" font-size="9.5">Request status / clearance / schedule</text>
+
+  <!-- Registrar → System -->
+  <line x1="768" y1="214" x2="572" y2="214" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="670" y="206" text-anchor="middle" font-size="9.5">Accounts / queue / OCR / scheduling input</text>
+
+  <!-- System → Registrar (two flows) -->
+  <line x1="572" y1="198" x2="768" y2="198" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="670" y="191" text-anchor="middle" font-size="9.5">Reports / PDF / audit data</text>
+  <line x1="572" y1="182" x2="768" y2="182" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="670" y="175" text-anchor="middle" font-size="9.5">Queue listings / student records</text>
+
+  <!-- Department ↔ System (offset lines so both directions are visible) -->
+  <line x1="460" y1="388" x2="460" y2="326" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="475" y="360" font-size="9.5">Clearance updates</text>
+  <line x1="430" y1="326" x2="430" y2="388" stroke="#000" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="318" y="360" font-size="9.5">Student search / office views</text>
+
+  <text x="460" y="505" text-anchor="middle" font-size="13" font-weight="700">0-LEVEL DFD</text>
+</svg>

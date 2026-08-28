@@ -11,6 +11,10 @@ function isRegistrarStaff(role) {
   return role === "admin" || role === "registrar";
 }
 
+function isViewOnlyStaff(role) {
+  return role === "vpaa";
+}
+
 function requireRole(...roles) {
   return (req, res, next) => {
     const role = req.session.user?.role;
@@ -29,4 +33,22 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { requireAuth, requireRole, isRegistrarStaff };
+function requireWriteAccess(req, res, next) {
+  if (isViewOnlyStaff(req.session.user?.role)) {
+    res.status(403).render("error", {
+      user: req.session.user,
+      title: "View only",
+      message: "Your VPAA account can view records but cannot change data."
+    });
+    return;
+  }
+  next();
+}
+
+module.exports = {
+  requireAuth,
+  requireRole,
+  requireWriteAccess,
+  isRegistrarStaff,
+  isViewOnlyStaff
+};

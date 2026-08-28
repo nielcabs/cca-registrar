@@ -47,11 +47,37 @@ function formatDate(value) {
   return dayjs(value).format("MMM D, YYYY h:mm A");
 }
 
+function formatDate(value) {
+  if (!value) return "";
+  return dayjs(value).format("MMM D, YYYY h:mm A");
+}
+
+const DOCUMENT_TYPES = [
+  "Transcript of Records",
+  "Certificate of Enrollment",
+  "Certificate of Grades",
+  "Diploma Copy",
+  "Certificate of Good Moral",
+  "Certificate of Graduation",
+  "Honorable Dismissal"
+];
+
+function categoryLabel(value) {
+  const labels = {
+    undergraduate: "Undergraduate",
+    graduating: "Graduating",
+    graduate: "Graduate (Alumni)"
+  };
+  return labels[value] || value;
+}
+
 module.exports = {
   computeStatusBadge,
   computeClearanceBadge,
   generateUpcomingSlots,
   SLOT_CAPACITY,
   SLOT_TIMES,
-  formatDate
+  formatDate,
+  DOCUMENT_TYPES,
+  categoryLabel
 };

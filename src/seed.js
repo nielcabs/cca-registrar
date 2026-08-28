@@ -57,12 +57,25 @@ async function seedUsers() {
       createdAt: nowIso
     },
     {
+      id: "vpaa-001",
+      email: "vpaa@cca.edu.ph",
+      passwordHash: password,
+      role: "vpaa",
+      displayName: "VPAA Office",
+      isVerified: true,
+      createdAt: nowIso
+    },
+    {
       id: "student-001",
       email: "juan@cca.edu.ph",
       passwordHash: password,
       role: "student",
       displayName: "Juan Dela Cruz",
       studentId: "20230001",
+      studentCategory: "undergraduate",
+      course: "BS Information Technology",
+      section: "A",
+      hasScholarship: false,
       isVerified: true,
       createdAt: nowIso
     },
@@ -73,6 +86,10 @@ async function seedUsers() {
       role: "student",
       displayName: "Maria Santos",
       studentId: "20230002",
+      studentCategory: "graduating",
+      course: "BS Computer Science",
+      section: "B",
+      hasScholarship: true,
       isVerified: true,
       createdAt: nowIso
     },
@@ -83,6 +100,10 @@ async function seedUsers() {
       role: "student",
       displayName: "Pedro Reyes",
       studentId: "20230003",
+      studentCategory: "graduate",
+      course: "BS Business Administration",
+      section: "C",
+      hasScholarship: false,
       isVerified: true,
       createdAt: nowIso
     }
@@ -120,11 +141,12 @@ async function seedSampleRequests() {
       student_name: "Juan Dela Cruz",
       student_id: "20230001",
       document_type: "Transcript of Records",
-      purpose: "Scholarship application",
+      purpose: "Employment requirement",
       status: "For Verification",
       clearance_status: "Partially Cleared",
       uploaded_file_path: sampleFilePath,
       uploaded_file_name: path.basename(sampleFilePath),
+      batch_id: null,
       created_at: new Date(now - 1000 * 60 * 60 * 20).toISOString(),
       updated_at: new Date(now - 1000 * 60 * 20).toISOString(),
       schedule_date: null,
@@ -148,22 +170,47 @@ async function seedSampleRequests() {
       purpose: "Internship requirement",
       status: "Scheduled",
       clearance_status: "Cleared",
-      uploaded_file_path: sampleFilePath,
-      uploaded_file_name: path.basename(sampleFilePath),
+      uploaded_file_path: "",
+      uploaded_file_name: "",
+      batch_id: "BATCH1002",
       created_at: new Date(now - 1000 * 60 * 60 * 40).toISOString(),
       updated_at: new Date(now - 1000 * 60 * 30).toISOString(),
       schedule_date: dayjs().add(1, "day").format("YYYY-MM-DD"),
       schedule_time: "10:00",
-      registrar_remarks: "Bring school ID upon claiming.",
+      registrar_remarks: "Scholarship student — no receipt required.",
+      ocr_state: "not_run",
+      ocr_confidence: null,
+      ocr_raw_text: "",
+      ocr_extracted_student_name: "",
+      ocr_extracted_student_id: "",
+      ocr_extracted_or_number: "",
+      ocr_extracted_amount: "",
+      ocr_extracted_payment_date: ""
+    },
+    {
+      id: "DEMO1003",
+      student_name: "Pedro Reyes",
+      student_id: "20230003",
+      document_type: "Certificate of Graduation",
+      purpose: "Board exam application",
+      status: "Released",
+      clearance_status: "Cleared",
+      uploaded_file_path: sampleFilePath,
+      uploaded_file_name: path.basename(sampleFilePath),
+      batch_id: null,
+      created_at: new Date(now - 1000 * 60 * 60 * 80).toISOString(),
+      updated_at: new Date(now - 1000 * 60 * 60 * 72).toISOString(),
+      schedule_date: dayjs().subtract(2, "day").format("YYYY-MM-DD"),
+      schedule_time: "09:00",
+      registrar_remarks: "Completed transaction — document claimed.",
       ocr_state: "corrected",
-      ocr_confidence: 88.9,
-      ocr_raw_text:
-        "NAME: MARIA SANTOS\nID: 20230002\nREFERENCE NO: REF-90341\nPAID: PHP 150.00\nDATE: 04/14/2026",
-      ocr_extracted_student_name: "Maria Santos",
-      ocr_extracted_student_id: "20230002",
-      ocr_extracted_or_number: "REF-90341",
-      ocr_extracted_amount: "150.00",
-      ocr_extracted_payment_date: "04/14/2026"
+      ocr_confidence: 91.0,
+      ocr_raw_text: "PEDRO REYES 20230003 OR-55102",
+      ocr_extracted_student_name: "Pedro Reyes",
+      ocr_extracted_student_id: "20230003",
+      ocr_extracted_or_number: "OR-55102",
+      ocr_extracted_amount: "200.00",
+      ocr_extracted_payment_date: "03/01/2026"
     }
   ];
 
@@ -173,12 +220,12 @@ async function seedSampleRequests() {
       await db.run(
         `INSERT INTO requests (
           id, student_name, student_id, document_type, purpose, status, clearance_status,
-          uploaded_file_path, uploaded_file_name, created_at, updated_at,
+          uploaded_file_path, uploaded_file_name, batch_id, created_at, updated_at,
           schedule_date, schedule_time, registrar_remarks,
           ocr_state, ocr_confidence, ocr_raw_text,
           ocr_extracted_student_name, ocr_extracted_student_id, ocr_extracted_or_number,
           ocr_extracted_amount, ocr_extracted_payment_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         sample.id,
         sample.student_name,
         sample.student_id,
@@ -188,6 +235,7 @@ async function seedSampleRequests() {
         sample.clearance_status,
         sample.uploaded_file_path,
         sample.uploaded_file_name,
+        sample.batch_id,
         sample.created_at,
         sample.updated_at,
         sample.schedule_date,
@@ -207,8 +255,7 @@ async function seedSampleRequests() {
 }
 
 async function seedSampleClearances() {
-  // Student 20230001 (Juan): partially cleared
-  await ensureClearanceRows("20230001");
+  await ensureClearanceRows("20230001", "undergraduate");
   const juanPlan = {
     library: "Cleared",
     finance: "Pending",
@@ -227,9 +274,10 @@ async function seedSampleClearances() {
     });
   }
 
-  // Student 20230002 (Maria): fully cleared
-  await ensureClearanceRows("20230002");
-  for (const dept of DEPARTMENTS) {
+  await ensureClearanceRows("20230002", "graduating");
+  for (const dept of DEPARTMENTS.filter((d) =>
+    ["library", "finance", "misso", "saso", "guidance", "extension"].includes(d.code)
+  )) {
     await updateClearance({
       studentId: "20230002",
       departmentCode: dept.code,
@@ -239,8 +287,16 @@ async function seedSampleClearances() {
     });
   }
 
-  // Student 20230003 (Pedro): default clearance rows only
-  await ensureClearanceRows("20230003");
+  await ensureClearanceRows("20230003", "graduate");
+  for (const code of ["library", "finance", "misso", "guidance", "alumni"]) {
+    await updateClearance({
+      studentId: "20230003",
+      departmentCode: code,
+      status: "Cleared",
+      remarks: "Alumni clearance complete.",
+      updatedBy: `dept-${code}@cca.edu.ph`
+    });
+  }
 }
 
 async function seedAll() {

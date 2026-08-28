@@ -9,9 +9,10 @@ const {
   insertUser,
   updateUserPassword,
   ensureClearanceRows,
-  writeAudit
+  writeAudit,
+  STUDENT_CATEGORIES
 } = require("../db");
-const { requireAuth, isRegistrarStaff } = require("../middleware");
+const { requireAuth, isRegistrarStaff, isViewOnlyStaff } = require("../middleware");
 
 const router = express.Router();
 
@@ -23,7 +24,11 @@ function buildSessionUser(user) {
     displayName: user.displayName,
     studentId: user.studentId,
     departmentCode: user.departmentCode,
-    isVerified: user.isVerified
+    isVerified: user.isVerified,
+    studentCategory: user.studentCategory,
+    course: user.course,
+    section: user.section,
+    hasScholarship: user.hasScholarship
   };
 }
 
@@ -58,39 +63,66 @@ router.post("/login", async (req, res) => {
 
   if (user.role === "student") res.redirect("/student/dashboard");
   else if (isRegistrarStaff(user.role)) res.redirect("/admin/dashboard");
+  else if (isViewOnlyStaff(user.role)) res.redirect("/admin/dashboard");
   else if (user.role === "department") res.redirect("/department/dashboard");
   else res.redirect("/");
 });
 
 router.get("/register", (_req, res) => {
-  res.render("register", { error: null, form: {} });
+  res.render("register", { error: null, form: {}, categories: STUDENT_CATEGORIES });
 });
 
 router.post("/register", async (req, res) => {
-  const { email, password, confirmPassword, displayName, studentId } = req.body;
-  const form = { email, displayName, studentId };
+  const {
+    email,
+    password,
+    confirmPassword,
+    displayName,
+    studentId,
+    studentCategory,
+    course,
+    section,
+    hasScholarship
+  } = req.body;
+  const form = {
+    email,
+    displayName,
+    studentId,
+    studentCategory,
+    course,
+    section,
+    hasScholarship: hasScholarship === "1"
+  };
 
-  if (!email || !password || !confirmPassword || !displayName || !studentId) {
-    res.render("register", { error: "All fields are required.", form });
+  if (!email || !password || !confirmPassword || !displayName || !studentId || !studentCategory) {
+    res.render("register", { error: "All required fields must be filled in.", form, categories: STUDENT_CATEGORIES });
+    return;
+  }
+  if (!STUDENT_CATEGORIES.some((c) => c.value === studentCategory)) {
+    res.render("register", { error: "Select a valid student category.", form, categories: STUDENT_CATEGORIES });
     return;
   }
   if (password.length < 6) {
-    res.render("register", { error: "Password must be at least 6 characters.", form });
+    res.render("register", { error: "Password must be at least 6 characters.", form, categories: STUDENT_CATEGORIES });
     return;
   }
   if (password !== confirmPassword) {
-    res.render("register", { error: "Passwords do not match.", form });
+    res.render("register", { error: "Passwords do not match.", form, categories: STUDENT_CATEGORIES });
     return;
   }
 
   const existingEmail = await getUserByEmail(email);
   if (existingEmail) {
-    res.render("register", { error: "An account with this email already exists.", form });
+    res.render("register", { error: "An account with this email already exists.", form, categories: STUDENT_CATEGORIES });
     return;
   }
   const existingSid = await getUserByStudentId(studentId);
   if (existingSid) {
-    res.render("register", { error: "A student account with this Student ID already exists.", form });
+    res.render("register", {
+      error: "A student account with this Student ID already exists.",
+      form,
+      categories: STUDENT_CATEGORIES
+    });
     return;
   }
 
@@ -102,12 +134,16 @@ router.post("/register", async (req, res) => {
     role: "student",
     displayName: displayName.trim(),
     studentId: studentId.trim(),
+    studentCategory,
+    course: (course || "").trim(),
+    section: (section || "").trim(),
+    hasScholarship: hasScholarship === "1",
     isVerified: true,
     createdAt: new Date().toISOString()
   };
 
   await insertUser(newUser);
-  await ensureClearanceRows(newUser.studentId);
+  await ensureClearanceRows(newUser.studentId, studentCategory);
   await writeAudit(newUser.email, "register", `studentId=${newUser.studentId}`);
 
   res.redirect("/login?registered=1");

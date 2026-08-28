@@ -10,7 +10,7 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'Student clearance overview',
-          subtitle: 'Search by student name, ID, or email. Applies to all registered students. Links open the detailed grid for one student.'
+          subtitle: 'Filter by course and section. Clearance offices differ by student category (Undergrad, Graduating, Graduate).'
         }) %>
 
         <section class="card" style="margin-bottom: 1rem;">
@@ -19,16 +19,34 @@
               Search students (name, student ID, or email)
               <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="e.g. Maria, 20230002, @cca.edu.ph" />
             </label>
-            <button type="submit">Search</button>
-            <% if (searchQuery) { %>
-            <a class="btn-link" href="/admin/clearances">Show all students</a>
+            <label>
+              Course
+              <select name="course">
+                <option value="">All courses</option>
+                <% courses.forEach((c) => { %>
+                <option value="<%= c %>" <%= courseFilter === c ? 'selected' : '' %>><%= c %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Section
+              <select name="section">
+                <option value="">All sections</option>
+                <% sections.forEach((s) => { %>
+                <option value="<%= s %>" <%= sectionFilter === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+            </label>
+            <button type="submit">Apply filters</button>
+            <% if (searchQuery || courseFilter || sectionFilter) { %>
+            <a class="btn-link" href="/admin/clearances">Clear filters</a>
             <% } %>
           </form>
         </section>
 
         <section class="hero-banner">
           <h2>Registrar clearance monitoring</h2>
-          <p>Six offices: Library, Finance, MISSO, SASO, Guidance, Community Extension (NSTP). Each office uses its own login to update statuses.</p>
+          <p>Undergraduate &amp; Graduating: 6 offices. Graduate (Alumni): Library, Finance, MISSO, Guidance, Alumni Office.</p>
         </section>
 
         <section class="card data-card">
@@ -40,8 +58,10 @@
               <thead>
                 <tr>
                   <th>Student ID</th>
-                  <th>Full name</th>
-                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Course</th>
+                  <th>Section</th>
                   <th>Offices cleared</th>
                   <th>Overall</th>
                   <th>Action</th>
@@ -49,14 +69,16 @@
               </thead>
               <tbody>
                 <% if (!rows.length) { %>
-                <tr><td colspan="6" class="muted center">No students match this search.</td></tr>
+                <tr><td colspan="8" class="muted center">No students match this search.</td></tr>
                 <% } %>
                 <% rows.forEach((r) => { %>
                 <tr>
                   <td><%= r.studentId %></td>
                   <td><%= r.displayName %></td>
-                  <td class="tiny"><%= r.email %></td>
-                  <td><%= r.nCleared %> / <%= departments.length %></td>
+                  <td><%= r.categoryLabel %></td>
+                  <td class="tiny"><%= r.course || '—' %></td>
+                  <td><%= r.section || '—' %></td>
+                  <td><%= r.nCleared %> / <%= r.nRequired %></td>
                   <td><span class="badge <%= r.summaryBadge %>"><%= r.clearanceSummary %></span></td>
                   <td><a class="table-link" href="/admin/clearance/<%= r.studentId %>">Open detail</a></td>
                 </tr>

@@ -41,6 +41,7 @@
                   <th>Display name</th>
                   <th>Role</th>
                   <th>Student ID / office</th>
+                  <th>Category / course</th>
                   <th>Created</th>
                   <th>Actions</th>
                 </tr>
@@ -48,15 +49,21 @@
               <tbody>
                 <% if (!users.length) { %>
                 <tr>
-                  <td colspan="6" class="muted"><%= (typeof searchQuery !== 'undefined' && searchQuery) ? 'No accounts match this search.' : 'No user accounts yet.' %></td>
+                  <td colspan="7" class="muted"><%= (typeof searchQuery !== 'undefined' && searchQuery) ? 'No accounts match this search.' : 'No user accounts yet.' %></td>
                 </tr>
                 <% } %>
                 <% users.forEach((u) => { %>
                 <tr>
                   <td><%= u.email %></td>
                   <td><%= u.displayName %></td>
-                  <td><%= (u.role === 'admin' || u.role === 'registrar') ? 'Registrar' : u.role === 'student' ? 'Student' : u.role === 'department' ? 'Department' : u.role %></td>
+                  <td><%= (u.role === 'admin' || u.role === 'registrar') ? 'Registrar' : u.role === 'student' ? 'Student' : u.role === 'department' ? 'Department' : u.role === 'vpaa' ? 'VPAA (view only)' : u.role %></td>
                   <td><%= u.studentId || u.departmentCode || '—' %></td>
+                  <td class="tiny">
+                    <% if (u.role === 'student') { %>
+                    <%= u.studentCategory || 'undergraduate' %><% if (u.course) { %> · <%= u.course %><% } %><% if (u.section) { %> / <%= u.section %><% } %>
+                    <% if (u.hasScholarship) { %> · scholarship<% } %>
+                    <% } else { %>—<% } %>
+                  </td>
                   <td class="tiny"><%= new Date(u.createdAt).toLocaleDateString() %></td>
                   <td>
                     <% if (u.email !== user.email) { %>
@@ -78,7 +85,7 @@
         </section>
 
         <details class="create-panel">
-          <summary>Create new account — student, department officer, or registrar staff</summary>
+          <summary>Create new account — student, department officer, registrar, or VPAA</summary>
           <p class="tiny muted" style="margin-top:0;">Students may also register from the login page.</p>
           <form method="post" action="/admin/users/create" class="form two-col">
             <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
@@ -89,8 +96,9 @@
               <select name="role" id="roleSelect" required>
                 <option value="">Select role</option>
                 <option value="student">Student</option>
-                <option value="department">Department officer (Library, Finance, etc.)</option>
+                <option value="department">Department officer (Library, Finance, Alumni, etc.)</option>
                 <option value="registrar">Additional registrar staff</option>
+                <option value="vpaa">VPAA (view only)</option>
               </select>
             </label>
             <label>
@@ -108,6 +116,27 @@
             <label id="studentIdField" style="display:none;">
               Student ID number
               <input type="text" name="studentId" placeholder="e.g. 2023001234" />
+            </label>
+            <label id="studentCategoryField" style="display:none;">
+              Student category
+              <select name="studentCategory">
+                <option value="">Select category</option>
+                <% (categories || []).forEach((c) => { %>
+                <option value="<%= c.value %>"><%= c.label %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label id="courseField" style="display:none;">
+              Course / program
+              <input type="text" name="course" placeholder="e.g. BS Information Technology" />
+            </label>
+            <label id="sectionField" style="display:none;">
+              Section
+              <input type="text" name="section" placeholder="e.g. A" />
+            </label>
+            <label id="scholarshipField" style="display:none;" class="checkbox-row full-row">
+              <input type="checkbox" name="hasScholarship" value="1" />
+              Active scholarship (receipt not required on requests)
             </label>
             <label id="deptField" style="display:none;">
               Department (for officer login)
@@ -128,14 +157,25 @@
       (function () {
         var roleSelect = document.getElementById("roleSelect");
         var sidField = document.getElementById("studentIdField");
+        var catField = document.getElementById("studentCategoryField");
+        var courseField = document.getElementById("courseField");
+        var sectionField = document.getElementById("sectionField");
+        var scholarshipField = document.getElementById("scholarshipField");
         var deptField = document.getElementById("deptField");
         var sidInput = sidField.querySelector("input");
+        var catSelect = catField.querySelector("select");
         var deptSelect = deptField.querySelector("select");
         function sync() {
           var v = roleSelect.value;
-          sidField.style.display = v === "student" ? "block" : "none";
+          var isStudent = v === "student";
+          sidField.style.display = isStudent ? "block" : "none";
+          catField.style.display = isStudent ? "block" : "none";
+          courseField.style.display = isStudent ? "block" : "none";
+          sectionField.style.display = isStudent ? "block" : "none";
+          scholarshipField.style.display = isStudent ? "flex" : "none";
           deptField.style.display = v === "department" ? "block" : "none";
-          sidInput.required = v === "student";
+          sidInput.required = isStudent;
+          catSelect.required = isStudent;
           deptSelect.required = v === "department";
         }
         roleSelect.addEventListener("change", sync);

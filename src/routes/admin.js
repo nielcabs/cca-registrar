@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const {
   DEPARTMENTS,
+  STUDENT_CATEGORIES,
   ROOT_DIR,
   listUsers,
   getUserById,
@@ -25,19 +26,49 @@ const {
   ensureClearanceRows,
   writeAudit,
   listStudentsClearanceOverview,
-  countReleasedRequestsForStudent
+  countReleasedRequestsForStudent,
+  listAnnouncements,
+  createAnnouncement,
+  createNotificationForAllUsers,
+  listNotificationsForUser,
+  markNotificationRead,
+  countUnreadNotifications,
+  listDistinctCourses,
+  listDistinctSections
 } = require("../db");
-const { requireAuth, requireRole } = require("../middleware");
+const { requireAuth, requireRole, requireWriteAccess, isViewOnlyStaff } = require("../middleware");
 const { runOcr, parseOcrFields } = require("../ocr");
 const {
   computeStatusBadge,
   computeClearanceBadge,
   generateUpcomingSlots,
   SLOT_CAPACITY,
-  formatDate
+  formatDate,
+  categoryLabel
 } = require("../helpers");
 
 const router = express.Router();
+
+function requireRegistrarOnly(req, res, next) {
+  if (isViewOnlyStaff(req.session.user?.role)) {
+    res.status(403).render("error", {
+      user: req.session.user,
+      title: "View only",
+      message: "VPAA accounts cannot access user or announcement management."
+    });
+    return;
+  }
+  next();
+}
+
+function queueFilters(req) {
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const statusGroup =
+    req.query.view === "completed" ? "completed" : req.query.view === "all" ? "all" : "active";
+  const course = typeof req.query.course === "string" ? req.query.course.trim() : "";
+  const section = typeof req.query.section === "string" ? req.query.section.trim() : "";
+  return { q, statusGroup, course, section };
+}
 
 function usersPageSearch(req) {
   if (req.method === "POST" && Object.prototype.hasOwnProperty.call(req.body || {}, "redirectSearch")) {
@@ -47,7 +78,71 @@ function usersPageSearch(req) {
   return "";
 }
 
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requireRole("registrar", "vpaa"));
+
+router.get("/notifications", async (req, res) => {
+  const notifications = await listNotificationsForUser(req.session.user.id, 40);
+  const unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+  res.render("notifications", {
+    user: req.session.user,
+    notifications,
+    basePath: "/admin",
+    unreadNotificationsCount,
+    message: null
+  });
+});
+
+router.post("/notifications/:id/read", async (req, res) => {
+  await markNotificationRead(req.session.user.id, Number(req.params.id));
+  res.redirect("/admin/notifications");
+});
+
+router.get("/announcements", requireRegistrarOnly, async (req, res) => {
+  const announcements = await listAnnouncements(50);
+  const unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+  res.render("admin-announcements", {
+    user: req.session.user,
+    announcements,
+    unreadNotificationsCount,
+    error: null,
+    success: null
+  });
+});
+
+router.post("/announcements", requireRegistrarOnly, requireWriteAccess, async (req, res) => {
+  const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
+  const message = typeof req.body.message === "string" ? req.body.message.trim() : "";
+  const unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+  if (!title || !message) {
+    const announcements = await listAnnouncements(50);
+    res.render("admin-announcements", {
+      user: req.session.user,
+      announcements,
+      unreadNotificationsCount,
+      error: "Title and message are required.",
+      success: null
+    });
+    return;
+  }
+
+  await createAnnouncement({ title, message, createdBy: req.session.user.email });
+  await createNotificationForAllUsers({
+    title: `Announcement: ${title}`,
+    message,
+    link: null,
+    excludeUserId: req.session.user.id
+  });
+  await writeAudit(req.session.user.email, "create_announcement", `title=${title}`);
+
+  const announcements = await listAnnouncements(50);
+  res.render("admin-announcements", {
+    user: req.session.user,
+    announcements,
+    unreadNotificationsCount,
+    error: null,
+    success: "Announcement posted. All users can see it in Notifications."
+  });
+});
 
 router.get("/dashboard", async (req, res) => {
   const stats = await getDashboardStats();
@@ -72,16 +167,27 @@ router.get("/dashboard", async (req, res) => {
 });
 
 router.get("/requests", async (req, res) => {
-  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
-  const sorted = (await listRequests({ search: q })).map((item) => ({
+  const { q, statusGroup, course, section } = queueFilters(req);
+  const sorted = (
+    await listRequests({ search: q, statusGroup, course, section })
+  ).map((item) => ({
     ...item,
     statusClass: computeStatusBadge(item.status)
   }));
+
+  const courses = await listDistinctCourses();
+  const sections = await listDistinctSections();
 
   res.render("admin-queue", {
     user: req.session.user,
     requests: sorted,
     searchQuery: q,
+    statusGroup,
+    courseFilter: course,
+    sectionFilter: section,
+    courses,
+    sections,
+    readOnly: isViewOnlyStaff(req.session.user.role),
     active: "requests"
   });
 });
@@ -134,11 +240,12 @@ router.get("/request/:id", async (req, res) => {
     message: null,
     error: null,
     dayjs,
-    returningNote
+    returningNote,
+    readOnly: isViewOnlyStaff(req.session.user.role)
   });
 });
 
-router.post("/request/:id/run-ocr", async (req, res) => {
+router.post("/request/:id/run-ocr", requireWriteAccess, async (req, res) => {
   const current = await getRequestById(req.params.id);
   if (!current) {
     res.status(404).render("error", {
@@ -150,6 +257,26 @@ router.post("/request/:id/run-ocr", async (req, res) => {
   }
 
   const localFilePath = path.join(ROOT_DIR, current.uploadedFilePath.replace(/^\/+/, ""));
+
+  if (!current.uploadedFilePath) {
+    const clearances = await listClearancesForStudent(current.studentId);
+    const summary = await computeStudentClearanceSummary(current.studentId);
+    const slots = await buildSlotAvailability();
+    res.render("admin-process-request", {
+      user: req.session.user,
+      request: current,
+      clearances: clearances.map((c) => ({ ...c, badge: computeClearanceBadge(c.status) })),
+      clearanceSummary: summary,
+      clearanceSummaryBadge: computeClearanceBadge(summary),
+      slots,
+      message: null,
+      error: "No payment receipt was uploaded for this request.",
+      dayjs,
+      returningNote: null,
+      readOnly: isViewOnlyStaff(req.session.user.role)
+    });
+    return;
+  }
 
   try {
     const { rawText, confidence } = await runOcr(localFilePath);
@@ -187,7 +314,8 @@ router.post("/request/:id/run-ocr", async (req, res) => {
       message: "OCR completed. Review extracted values before saving.",
       error: null,
       dayjs,
-      returningNote
+      returningNote,
+      readOnly: isViewOnlyStaff(req.session.user.role)
     });
   } catch (error) {
     current.ocr = { ...current.ocr, state: "failed" };
@@ -213,12 +341,13 @@ router.post("/request/:id/run-ocr", async (req, res) => {
       message: null,
       error: `OCR failed: ${error.message}`,
       dayjs,
-      returningNote
+      returningNote,
+      readOnly: isViewOnlyStaff(req.session.user.role)
     });
   }
 });
 
-router.post("/request/:id/update", async (req, res) => {
+router.post("/request/:id/update", requireWriteAccess, async (req, res) => {
   const current = await getRequestById(req.params.id);
   if (!current) {
     res.status(404).render("error", {
@@ -315,7 +444,8 @@ router.post("/request/:id/update", async (req, res) => {
     message: error ? null : "Request updated successfully.",
     error,
     dayjs,
-    returningNote
+    returningNote,
+    readOnly: isViewOnlyStaff(req.session.user.role)
   });
 });
 
@@ -335,20 +465,30 @@ router.get("/clearance/:studentId", async (req, res) => {
 
 router.get("/clearances", async (req, res) => {
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
-  const rows = await listStudentsClearanceOverview(q);
+  const course = typeof req.query.course === "string" ? req.query.course.trim() : "";
+  const section = typeof req.query.section === "string" ? req.query.section.trim() : "";
+  const rows = await listStudentsClearanceOverview({ search: q, course, section });
+  const courses = await listDistinctCourses();
+  const sections = await listDistinctSections();
   res.render("admin-clearances", {
     user: req.session.user,
     rows: rows.map((r) => ({
       ...r,
-      summaryBadge: computeClearanceBadge(r.clearanceSummary)
+      summaryBadge: computeClearanceBadge(r.clearanceSummary),
+      categoryLabel: categoryLabel(r.studentCategory)
     })),
     searchQuery: q,
+    courseFilter: course,
+    sectionFilter: section,
+    courses,
+    sections,
     departments: DEPARTMENTS,
+    readOnly: isViewOnlyStaff(req.session.user.role),
     active: "clearances"
   });
 });
 
-router.get("/users", async (req, res) => {
+router.get("/users", requireRegistrarOnly, async (req, res) => {
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
   const users = await listUsers({ search: q });
   res.render("admin-users", {
@@ -358,12 +498,24 @@ router.get("/users", async (req, res) => {
     searchQuery: q,
     error: null,
     success: null,
-    active: "users"
+    active: "users",
+    categories: STUDENT_CATEGORIES
   });
 });
 
-router.post("/users/create", async (req, res) => {
-  let { email, password, role, displayName, studentId, departmentCode } = req.body;
+router.post("/users/create", requireWriteAccess, async (req, res) => {
+  let {
+    email,
+    password,
+    role,
+    displayName,
+    studentId,
+    departmentCode,
+    studentCategory,
+    course,
+    section,
+    hasScholarship
+  } = req.body;
   if (role === "admin" || role === "registrar") role = "registrar";
   const listQ = usersPageSearch(req);
   const users = await listUsers({ search: listQ });
@@ -376,7 +528,8 @@ router.post("/users/create", async (req, res) => {
       searchQuery: listQ,
       error: "Email, password, role, and name are required.",
       success: null,
-      active: "users"
+      active: "users",
+      categories: STUDENT_CATEGORIES
     });
     return;
   }
@@ -388,12 +541,13 @@ router.post("/users/create", async (req, res) => {
       searchQuery: listQ,
       error: "Password must be at least 6 characters.",
       success: null,
-      active: "users"
+      active: "users",
+      categories: STUDENT_CATEGORIES
     });
     return;
   }
 
-  const allowedRoles = ["student", "department", "registrar"];
+  const allowedRoles = ["student", "department", "registrar", "vpaa"];
   if (!allowedRoles.includes(role)) {
     res.render("admin-users", {
       user: req.session.user,
@@ -402,7 +556,8 @@ router.post("/users/create", async (req, res) => {
       searchQuery: listQ,
       error: "Invalid account role.",
       success: null,
-      active: "users"
+      active: "users",
+      categories: STUDENT_CATEGORIES
     });
     return;
   }
@@ -416,7 +571,8 @@ router.post("/users/create", async (req, res) => {
       searchQuery: listQ,
       error: "Email already in use.",
       success: null,
-      active: "users"
+      active: "users",
+      categories: STUDENT_CATEGORIES
     });
     return;
   }
@@ -430,7 +586,21 @@ router.post("/users/create", async (req, res) => {
         searchQuery: listQ,
         error: "Student ID is required for student accounts.",
         success: null,
-        active: "users"
+        active: "users",
+        categories: STUDENT_CATEGORIES
+      });
+      return;
+    }
+    if (!studentCategory || !STUDENT_CATEGORIES.some((c) => c.value === studentCategory)) {
+      res.render("admin-users", {
+        user: req.session.user,
+        users,
+        departments: DEPARTMENTS,
+        searchQuery: listQ,
+        error: "Student category is required.",
+        success: null,
+        active: "users",
+        categories: STUDENT_CATEGORIES
       });
       return;
     }
@@ -456,7 +626,8 @@ router.post("/users/create", async (req, res) => {
       searchQuery: listQ,
       error: "Department is required for department officers.",
       success: null,
-      active: "users"
+      active: "users",
+      categories: STUDENT_CATEGORIES
     });
     return;
   }
@@ -470,11 +641,15 @@ router.post("/users/create", async (req, res) => {
     displayName: displayName.trim(),
     studentId: role === "student" ? studentId.trim() : null,
     departmentCode: role === "department" ? departmentCode : null,
+    studentCategory: role === "student" ? studentCategory : "undergraduate",
+    course: role === "student" ? (course || "").trim() : "",
+    section: role === "student" ? (section || "").trim() : "",
+    hasScholarship: role === "student" && hasScholarship === "1",
     isVerified: true,
     createdAt: new Date().toISOString()
   };
   await insertUser(newUser);
-  if (role === "student") await ensureClearanceRows(newUser.studentId);
+  if (role === "student") await ensureClearanceRows(newUser.studentId, studentCategory);
   await writeAudit(req.session.user.email, "create_user", `email=${newUser.email} role=${role}`);
 
   const freshUsers = await listUsers({ search: listQ });
@@ -485,11 +660,12 @@ router.post("/users/create", async (req, res) => {
     searchQuery: listQ,
     error: null,
     success: `Account created for ${newUser.email}.`,
-    active: "users"
+    active: "users",
+    categories: STUDENT_CATEGORIES
   });
 });
 
-router.post("/users/:id/delete", async (req, res) => {
+router.post("/users/:id/delete", requireWriteAccess, async (req, res) => {
   const listQ = usersPageSearch(req);
   const target = await getUserById(req.params.id);
   if (target && target.email === req.session.user.email) {
@@ -509,11 +685,12 @@ router.get("/reports", async (req, res) => {
   res.render("admin-reports", {
     user: req.session.user,
     stats,
+    readOnly: isViewOnlyStaff(req.session.user.role),
     audit: audit.map((a) => ({ ...a, at_formatted: formatDate(a.at) }))
   });
 });
 
-router.get("/reports/export.pdf", async (req, res) => {
+router.get("/reports/export.pdf", requireWriteAccess, async (req, res) => {
   const stats = await getDashboardStats();
   const audit = await listAudit(40);
 

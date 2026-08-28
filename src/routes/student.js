@@ -10,10 +10,13 @@ const {
   insertRequest,
   listClearancesForStudent,
   computeStudentClearanceSummary,
-  writeAudit
+  writeAudit,
+  listNotificationsForUser,
+  markNotificationRead,
+  countUnreadNotifications
 } = require("../db");
 const { requireAuth, requireRole } = require("../middleware");
-const { computeStatusBadge, computeClearanceBadge } = require("../helpers");
+const { computeStatusBadge, computeClearanceBadge, DOCUMENT_TYPES } = require("../helpers");
 
 const router = express.Router();
 
@@ -39,6 +42,23 @@ const upload = multer({
 });
 
 router.use(requireAuth, requireRole("student"));
+
+router.get("/notifications", async (req, res) => {
+  const notifications = await listNotificationsForUser(req.session.user.id, 40);
+  const unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+  res.render("notifications", {
+    user: req.session.user,
+    notifications,
+    basePath: "/student",
+    unreadNotificationsCount,
+    message: null
+  });
+});
+
+router.post("/notifications/:id/read", async (req, res) => {
+  await markNotificationRead(req.session.user.id, Number(req.params.id));
+  res.redirect("/student/notifications");
+});
 
 router.get("/dashboard", async (req, res) => {
   const mine = (await listRequests({ studentId: req.session.user.studentId })).map(
@@ -72,25 +92,47 @@ router.get("/clearance", async (req, res) => {
 });
 
 router.get("/new-request", (req, res) => {
-  res.render("new-request", { user: req.session.user, error: null });
+  res.render("new-request", {
+    user: req.session.user,
+    error: null,
+    documentTypes: DOCUMENT_TYPES
+  });
 });
 
-router.post(
-  "/new-request",
-  upload.single("documentFile"),
-  async (req, res) => {
-    const { documentType, purpose } = req.body;
+router.post("/new-request", upload.single("documentFile"), async (req, res) => {
+  const { purpose } = req.body;
+  const documentTypes = []
+    .concat(req.body.documentTypes || [])
+    .filter(Boolean);
 
-    if (!documentType || !purpose || !req.file) {
-      res.render("new-request", {
-        user: req.session.user,
-        error: "Document type, purpose, and proof image are required."
-      });
-      return;
-    }
+  const hasScholarship = Boolean(req.session.user.hasScholarship);
+  const needsReceipt = !hasScholarship;
 
-    const clearanceSummary = await computeStudentClearanceSummary(req.session.user.studentId);
+  if (!documentTypes.length || !purpose) {
+    res.render("new-request", {
+      user: req.session.user,
+      error: "Select at least one document type and enter a purpose.",
+      documentTypes: DOCUMENT_TYPES
+    });
+    return;
+  }
 
+  if (needsReceipt && !req.file) {
+    res.render("new-request", {
+      user: req.session.user,
+      error: "Payment receipt is required for non-scholarship students.",
+      documentTypes: DOCUMENT_TYPES
+    });
+    return;
+  }
+
+  const clearanceSummary = await computeStudentClearanceSummary(req.session.user.studentId);
+  const batchId = documentTypes.length > 1 ? uuidv4().split("-")[0].toUpperCase() : null;
+  const now = new Date().toISOString();
+  const filePath = req.file ? `/uploads/${req.file.filename}` : "";
+  const fileName = req.file ? req.file.originalname : "";
+
+  for (const documentType of documentTypes) {
     const newRequest = {
       id: uuidv4().split("-")[0].toUpperCase(),
       studentName: req.session.user.displayName,
@@ -99,14 +141,15 @@ router.post(
       purpose,
       status: "Submitted",
       clearanceStatus: clearanceSummary,
-      uploadedFilePath: `/uploads/${req.file.filename}`,
-      uploadedFileName: req.file.originalname,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      uploadedFilePath: filePath,
+      uploadedFileName: fileName,
+      batchId,
+      createdAt: now,
+      updatedAt: now,
       schedule: null,
-      registrarRemarks: "",
+      registrarRemarks: hasScholarship && !req.file ? "Scholarship — no receipt uploaded." : "",
       ocr: {
-        state: "not_run",
+        state: req.file ? "not_run" : "not_run",
         confidence: null,
         rawText: "",
         extracted: {
@@ -123,11 +166,12 @@ router.post(
     await writeAudit(
       req.session.user.email,
       "submit_request",
-      `id=${newRequest.id} doc=${newRequest.documentType}`
+      `id=${newRequest.id} doc=${newRequest.documentType}${batchId ? ` batch=${batchId}` : ""}`
     );
-    res.redirect("/student/dashboard");
   }
-);
+
+  res.redirect("/student/dashboard");
+});
 
 router.get("/track/:id", async (req, res) => {
   const found = await getRequestById(req.params.id);

@@ -132,6 +132,23 @@ body {
   color: #fff;
 }
 
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 6px;
+  margin-left: 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
 .sidebar-foot {
   border-top: 1px solid var(--line);
   padding-top: 0.7rem;
@@ -629,4 +646,38 @@ a {
   .two-col {
     grid-template-columns: 1fr;
   }
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-weight: normal;
+}
+
+.checkbox-row input[type="checkbox"] {
+  margin-top: 0.2rem;
+}
+
+.checkbox-group {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.checkbox-group legend {
+  font-weight: 600;
+  padding: 0 0.25rem;
+}
+
+.tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.tab-row .active-tab {
+  font-weight: 700;
+  text-decoration: underline;
 }

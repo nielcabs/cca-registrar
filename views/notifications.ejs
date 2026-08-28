@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Notifications</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'notifications', unreadNotificationsCount }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Notifications',
+          subtitle: 'Announcements and system updates are listed here (no toast popups).'
+        }) %>
+
+        <% if (message) { %><div class="alert success"><%= message %></div><% } %>
+
+        <section class="card data-card">
+          <div class="card-head">
+            <h2>Latest</h2>
+          </div>
+
+          <% if (!notifications || !notifications.length) { %>
+            <p class="muted">No notifications yet.</p>
+          <% } else { %>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Time</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% notifications.forEach((n) => { %>
+                    <tr>
+                      <td>
+                        <% if (n.isRead) { %>
+                          <span class="badge badge-default">Read</span>
+                        <% } else { %>
+                          <span class="badge badge-verify">New</span>
+                        <% } %>
+                      </td>
+                      <td><strong><%= n.title %></strong></td>
+                      <td class="tiny"><%= n.message %></td>
+                      <td class="tiny"><%= new Date(n.createdAt).toLocaleString() %></td>
+                      <td style="white-space: nowrap;">
+                        <% if (n.link) { %><a class="table-link" href="<%= n.link %>">Open</a><% } %>
+                        <% if (!n.isRead) { %>
+                          <form method="post" action="<%= basePath %>/notifications/<%= n.id %>/read" style="display:inline;">
+                            <button type="submit" class="ghost tiny">Mark read</button>
+                          </form>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
+

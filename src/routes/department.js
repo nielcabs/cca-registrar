@@ -2,10 +2,14 @@ const express = require("express");
 
 const {
   DEPARTMENTS,
+  getClearanceDepartmentCodes,
   listClearancesForDepartment,
   listUsers,
   updateClearance,
-  writeAudit
+  writeAudit,
+  listNotificationsForUser,
+  markNotificationRead,
+  countUnreadNotifications
 } = require("../db");
 const { requireAuth, requireRole } = require("../middleware");
 const { computeClearanceBadge } = require("../helpers");
@@ -13,6 +17,23 @@ const { computeClearanceBadge } = require("../helpers");
 const router = express.Router();
 
 router.use(requireAuth, requireRole("department"));
+
+router.get("/notifications", async (req, res) => {
+  const notifications = await listNotificationsForUser(req.session.user.id, 40);
+  const unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+  res.render("notifications", {
+    user: req.session.user,
+    notifications,
+    basePath: "/department",
+    unreadNotificationsCount,
+    message: null
+  });
+});
+
+router.post("/notifications/:id/read", async (req, res) => {
+  await markNotificationRead(req.session.user.id, Number(req.params.id));
+  res.redirect("/department/notifications");
+});
 
 router.get("/dashboard", async (req, res) => {
   const code = req.session.user.departmentCode;
@@ -31,12 +52,17 @@ router.get("/dashboard", async (req, res) => {
   }
 
   const existingMap = new Map(existing.map((c) => [c.studentId, c]));
-  const rows = students.map((s) => {
+  const rows = students
+    .filter((s) => getClearanceDepartmentCodes(s.studentCategory || "undergraduate").includes(code))
+    .map((s) => {
     const c = existingMap.get(s.studentId);
     return {
       studentId: s.studentId,
       displayName: s.displayName,
       email: s.email,
+      studentCategory: s.studentCategory || "undergraduate",
+      course: s.course || "",
+      section: s.section || "",
       status: c?.status || "Pending",
       remarks: c?.remarks || "",
       badge: computeClearanceBadge(c?.status || "Pending"),

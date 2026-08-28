@@ -33,55 +33,61 @@ Web-based system that digitizes document requests, clearance verification, and r
 - **Date Utility:** Day.js
 - **PDF reports:** `pdfkit` (download from Reports page)
 
+## Diagrams (capstone / documentation)
+
+- **System needs (stakeholder requirements + gap analysis):** [`docs/SYSTEM_NEEDS.md`](docs/SYSTEM_NEEDS.md)
+- **Diagram images (PNG + SVG):** [`docs/diagrams/`](docs/diagrams/) — context Level 0, student use case, **multi-role** use case; run `npm run diagrams:png` to rebuild PNGs from SVG
+- **Context + use case (Mermaid sources + links):** [`docs/Context_and_Use_Case.md`](docs/Context_and_Use_Case.md)
+- **All diagrams (DFD Level 1, ERD, etc.):** [`docs/SYSTEM_DIAGRAMS.md`](docs/SYSTEM_DIAGRAMS.md)
+
 ## Roles
 
-1. **Student** — submits requests, tracks status, views clearance (no separate admin “verify” step)
-2. **Administrator / Registrar (single role)** — document queue, OCR, scheduling, clearance monitoring, reports + PDF, user accounts
-3. **Department Officer** — updates their office’s clearance per student (with search)
+1. **Student** — submits requests (multi-document, conditional receipt), tracks status, views category-specific clearance
+2. **Administrator / Registrar (single role)** — document queue (active/completed tabs), OCR, scheduling, clearance monitoring, reports + PDF, user accounts
+3. **Department Officer** — updates their office’s clearance per student (Library, Finance, MISSO, SASO, Guidance, Extension, **Alumni Office**)
+4. **VPAA (view only)** — read-only access to dashboard, requests, clearances, and reports
 
-Six department officers are provisioned:
-Library, Budget and Finance, MISSO, SASO, Guidance, Community Extension (NSTP).
+Six core department officers plus **Alumni Office** are provisioned:
+Library, Budget and Finance, MISSO, SASO, Guidance, Community Extension (NSTP), Alumni Office.
 
-## Clearance Rule
+## Student categories & clearance
 
-A request can only move to `Scheduled` or `Released` when all 6 department clearances are marked `Cleared`. The registrar cannot bypass this rule from the UI.
-
-## Scheduling Rule
-
-Release slots are limited to weekdays, 08:00–15:00 (hourly), capacity of 5 students per slot. Full slots are disabled in the picker.
-
-## Run Locally
-
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-2. Start server:
-
-   ```bash
-   npm start
-   ```
-
-3. Open:
-
-   [http://localhost:3000](http://localhost:3000)
+| Category | Required offices |
+|----------|------------------|
+| Undergraduate | Library, Finance, MISSO, SASO, Guidance, Extension |
+| Graduating | Library, Finance, MISSO, SASO, Guidance, Extension |
+| Graduate (Alumni) | Library, Finance, MISSO, Guidance, Alumni Office |
 
 ## Seeded Demo Accounts (password for all = `cca123`)
 
 | Email | Role | Notes |
 |---|---|---|
 | `admin@cca.edu.ph` | Admin + Registrar | Full office functions; use for OCR & scheduling |
-| `juan@cca.edu.ph` | Student (SID 20230001) | Seeded request DEMO1001 |
-| `maria@cca.edu.ph` | Student (SID 20230002) | Fully cleared, scheduled DEMO1002 |
-| `pedro@cca.edu.ph` | Student (SID 20230003) | Can submit like other students |
+| `vpaa@cca.edu.ph` | VPAA | View-only — no edits or PDF export |
+| `juan@cca.edu.ph` | Student (SID 20230001) | Undergraduate · BSIT Sec A · DEMO1001 |
+| `maria@cca.edu.ph` | Student (SID 20230002) | Graduating · scholarship · DEMO1002 |
+| `pedro@cca.edu.ph` | Student (SID 20230003) | Graduate · DEMO1003 (Released) |
 | `library@cca.edu.ph` | Department Officer | Library clearance |
 | `finance@cca.edu.ph` | Department Officer | Budget and Finance |
 | `misso@cca.edu.ph` | Department Officer | MISSO |
 | `saso@cca.edu.ph` | Department Officer | SASO |
 | `guidance@cca.edu.ph` | Department Officer | Guidance Office |
 | `extension@cca.edu.ph` | Department Officer | Community Extension / NSTP |
+| `alumni@cca.edu.ph` | Department Officer | Alumni Office (graduate clearances) |
+
+## Clearance & scheduling rules
+
+- **Clearance:** A request can only move to `Scheduled` or `Released` when all offices required for the student's category show `Cleared`.
+- **Scheduling:** Weekdays 08:00–15:00 (hourly), 5 students per slot.
+
+## Run locally
+
+```bash
+npm install
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000). Delete `data/app.db` and restart to reset demo data.
 
 ## Demo Script (for Defense / Pre-Oral)
 

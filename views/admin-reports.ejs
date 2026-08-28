@@ -10,8 +10,8 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'Reports & statistics',
-          subtitle: 'On-screen summary and downloadable PDF for presentations or records.',
-          actionsHtml: '<a class="btn-solid" href="/admin/reports/export.pdf">Download PDF report</a>'
+          subtitle: readOnly ? 'View-only summary for VPAA.' : 'On-screen summary and downloadable PDF for presentations or records.',
+          actionsHtml: readOnly ? '' : '<a class="btn-solid" href="/admin/reports/export.pdf">Download PDF report</a>'
         }) %>
 
         <section class="hero-banner">

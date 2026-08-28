@@ -14,8 +14,33 @@ const DEPARTMENTS = [
   { code: "misso", name: "Multimedia and Information Systems and Service Office (MISSO)" },
   { code: "saso", name: "Student Affairs and Service Office (SASO)" },
   { code: "guidance", name: "Guidance Office" },
-  { code: "extension", name: "Community Extension Office (NSTP)" }
+  { code: "extension", name: "Community Extension Office (NSTP)" },
+  { code: "alumni", name: "Alumni Office" }
 ];
+
+const STUDENT_CATEGORIES = [
+  { value: "undergraduate", label: "Undergraduate" },
+  { value: "graduating", label: "Graduating" },
+  { value: "graduate", label: "Graduate (Alumni)" }
+];
+
+/** Department codes required per student category (CCA registrar policy). */
+const CLEARANCE_BY_CATEGORY = {
+  undergraduate: ["library", "finance", "misso", "saso", "guidance", "extension"],
+  graduating: ["library", "finance", "misso", "saso", "guidance", "extension"],
+  graduate: ["library", "finance", "misso", "guidance", "alumni"]
+};
+
+const ACTIVE_REQUEST_STATUSES = ["Submitted", "For Verification", "Scheduled"];
+
+function getClearanceDepartmentCodes(category) {
+  return CLEARANCE_BY_CATEGORY[category] || CLEARANCE_BY_CATEGORY.undergraduate;
+}
+
+function getClearanceDepartmentsForCategory(category) {
+  const codes = getClearanceDepartmentCodes(category);
+  return DEPARTMENTS.filter((d) => codes.includes(d.code));
+}
 
 let db;
 
@@ -82,11 +107,55 @@ async function initializeDatabase() {
       details TEXT DEFAULT '',
       at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS announcements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      link TEXT,
+      is_read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
   `);
 
   // Registrar and admin are equivalent; canonical role in DB is `registrar`.
   await db.run("UPDATE users SET role = 'registrar' WHERE role = 'admin'");
   await db.run("UPDATE users SET is_verified = 1 WHERE role = 'student'");
+
+  await migrateSchema();
+}
+
+async function migrateSchema() {
+  const userCols = (await db.all("PRAGMA table_info(users)")).map((c) => c.name);
+  if (!userCols.includes("student_category")) {
+    await db.run(
+      "ALTER TABLE users ADD COLUMN student_category TEXT NOT NULL DEFAULT 'undergraduate'"
+    );
+  }
+  if (!userCols.includes("course")) {
+    await db.run("ALTER TABLE users ADD COLUMN course TEXT NOT NULL DEFAULT ''");
+  }
+  if (!userCols.includes("section")) {
+    await db.run("ALTER TABLE users ADD COLUMN section TEXT NOT NULL DEFAULT ''");
+  }
+  if (!userCols.includes("has_scholarship")) {
+    await db.run("ALTER TABLE users ADD COLUMN has_scholarship INTEGER NOT NULL DEFAULT 0");
+  }
+
+  const reqCols = (await db.all("PRAGMA table_info(requests)")).map((c) => c.name);
+  if (!reqCols.includes("batch_id")) {
+    await db.run("ALTER TABLE requests ADD COLUMN batch_id TEXT");
+  }
 }
 
 function mapRequestRow(row) {
@@ -101,6 +170,7 @@ function mapRequestRow(row) {
     clearanceStatus: row.clearance_status,
     uploadedFilePath: row.uploaded_file_path,
     uploadedFileName: row.uploaded_file_name,
+    batchId: row.batch_id || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     schedule:
@@ -137,34 +207,63 @@ function mapUserRow(row) {
     studentId: row.student_id,
     departmentCode: row.department_code,
     isVerified: Boolean(row.is_verified),
+    studentCategory: row.student_category || "undergraduate",
+    course: row.course || "",
+    section: row.section || "",
+    hasScholarship: Boolean(row.has_scholarship),
     createdAt: row.created_at
   };
 }
 
 async function listRequests(filter = {}) {
+  const conditions = [];
+  const params = [];
+
   if (filter.studentId) {
-    const rows = await db.all(
-      "SELECT * FROM requests WHERE student_id = ? ORDER BY created_at DESC",
-      filter.studentId
-    );
-    return rows.map(mapRequestRow);
+    conditions.push("r.student_id = ?");
+    params.push(filter.studentId);
   }
+
   const search = typeof filter.search === "string" ? filter.search.trim() : "";
   if (search) {
     const s = `%${search.replace(/%/g, "%%")}%`;
-    const rows = await db.all(
-      `SELECT * FROM requests WHERE
-        student_name LIKE ? OR student_id LIKE ? OR document_type LIKE ? OR purpose LIKE ? OR id LIKE ?
-        ORDER BY created_at DESC`,
-      s,
-      s,
-      s,
-      s,
-      s
+    conditions.push(
+      "(r.student_name LIKE ? OR r.student_id LIKE ? OR r.document_type LIKE ? OR r.purpose LIKE ? OR r.id LIKE ? OR IFNULL(r.batch_id,'') LIKE ?)"
     );
-    return rows.map(mapRequestRow);
+    params.push(s, s, s, s, s, s);
   }
-  const rows = await db.all("SELECT * FROM requests ORDER BY created_at DESC");
+
+  const statusGroup = filter.statusGroup || "all";
+  if (statusGroup === "active") {
+    conditions.push(`r.status IN (${ACTIVE_REQUEST_STATUSES.map(() => "?").join(", ")})`);
+    params.push(...ACTIVE_REQUEST_STATUSES);
+  } else if (statusGroup === "completed") {
+    conditions.push("r.status = ?");
+    params.push("Released");
+  }
+
+  const course =
+    typeof filter.course === "string" && filter.course.trim() ? filter.course.trim() : "";
+  if (course) {
+    conditions.push("LOWER(IFNULL(u.course,'')) = LOWER(?)");
+    params.push(course);
+  }
+
+  const section =
+    typeof filter.section === "string" && filter.section.trim() ? filter.section.trim() : "";
+  if (section) {
+    conditions.push("LOWER(IFNULL(u.section,'')) = LOWER(?)");
+    params.push(section);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const rows = await db.all(
+    `SELECT r.* FROM requests r
+     LEFT JOIN users u ON u.student_id = r.student_id AND u.role = 'student'
+     ${where}
+     ORDER BY r.created_at DESC`,
+    ...params
+  );
   return rows.map(mapRequestRow);
 }
 
@@ -177,12 +276,12 @@ async function insertRequest(request) {
   await db.run(
     `INSERT INTO requests (
       id, student_name, student_id, document_type, purpose, status, clearance_status,
-      uploaded_file_path, uploaded_file_name, created_at, updated_at,
+      uploaded_file_path, uploaded_file_name, batch_id, created_at, updated_at,
       schedule_date, schedule_time, registrar_remarks,
       ocr_state, ocr_confidence, ocr_raw_text,
       ocr_extracted_student_name, ocr_extracted_student_id, ocr_extracted_or_number,
       ocr_extracted_amount, ocr_extracted_payment_date
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     request.id,
     request.studentName,
     request.studentId,
@@ -190,8 +289,9 @@ async function insertRequest(request) {
     request.purpose,
     request.status,
     request.clearanceStatus,
-    request.uploadedFilePath,
-    request.uploadedFileName,
+    request.uploadedFilePath || "",
+    request.uploadedFileName || "",
+    request.batchId || null,
     request.createdAt,
     request.updatedAt,
     request.schedule?.date ?? null,
@@ -293,8 +393,10 @@ async function listUsers(filter = {}) {
 
 async function insertUser(user) {
   await db.run(
-    `INSERT INTO users (id, email, password_hash, role, display_name, student_id, department_code, is_verified, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (
+      id, email, password_hash, role, display_name, student_id, department_code,
+      is_verified, student_category, course, section, has_scholarship, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     user.id,
     user.email.toLowerCase(),
     user.passwordHash,
@@ -303,6 +405,10 @@ async function insertUser(user) {
     user.studentId || null,
     user.departmentCode || null,
     user.isVerified ? 1 : 0,
+    user.studentCategory || "undergraduate",
+    user.course || "",
+    user.section || "",
+    user.hasScholarship ? 1 : 0,
     user.createdAt
   );
 }
@@ -323,26 +429,36 @@ async function deleteUser(id) {
   await db.run("DELETE FROM users WHERE id = ?", id);
 }
 
-async function ensureClearanceRows(studentId) {
+async function getStudentCategory(studentId) {
+  const row = await db.get(
+    "SELECT student_category FROM users WHERE student_id = ? AND role = 'student'",
+    studentId
+  );
+  return row?.student_category || "undergraduate";
+}
+
+async function ensureClearanceRows(studentId, category) {
+  const cat = category || (await getStudentCategory(studentId));
   const nowIso = new Date().toISOString();
-  for (const dept of DEPARTMENTS) {
+  for (const code of getClearanceDepartmentCodes(cat)) {
     await db.run(
       `INSERT OR IGNORE INTO clearances (student_id, department_code, status, remarks, updated_at)
        VALUES (?, ?, 'Pending', '', ?)`,
       studentId,
-      dept.code,
+      code,
       nowIso
     );
   }
 }
 
 async function listClearancesForStudent(studentId) {
-  await ensureClearanceRows(studentId);
+  const category = await getStudentCategory(studentId);
+  await ensureClearanceRows(studentId, category);
   const rows = await db.all(
     "SELECT * FROM clearances WHERE student_id = ?",
     studentId
   );
-  return DEPARTMENTS.map((dept) => {
+  return getClearanceDepartmentsForCategory(category).map((dept) => {
     const row = rows.find((r) => r.department_code === dept.code);
     return {
       departmentCode: dept.code,
@@ -406,15 +522,18 @@ async function computeStudentClearanceSummary(studentId) {
   return "Pending";
 }
 
-async function listStudentsClearanceOverview(search = "") {
+async function listStudentsClearanceOverview(filter = {}) {
+  const search = typeof filter === "string" ? filter : filter.search || "";
+  const course =
+    typeof filter === "object" && typeof filter.course === "string" ? filter.course.trim() : "";
+  const section =
+    typeof filter === "object" && typeof filter.section === "string" ? filter.section.trim() : "";
+
   const n = search.trim();
   let sql = `
     SELECT u.student_id AS student_id, u.display_name AS display_name, u.email AS email,
-      SUM(CASE WHEN COALESCE(c.status, '') = 'Cleared' THEN 1 ELSE 0 END) AS n_cleared,
-      SUM(CASE WHEN c.status = 'Not Cleared' THEN 1 ELSE 0 END) AS n_denied,
-      COUNT(c.department_code) AS n_tracked
+      u.student_category AS student_category, u.course AS course, u.section AS section
     FROM users u
-    LEFT JOIN clearances c ON c.student_id = u.student_id
     WHERE u.role = 'student'
   `;
   const params = [];
@@ -423,25 +542,64 @@ async function listStudentsClearanceOverview(search = "") {
     sql += " AND (u.display_name LIKE ? OR u.student_id LIKE ? OR u.email LIKE ?)";
     params.push(like, like, like);
   }
-  sql += " GROUP BY u.student_id, u.display_name, u.email ORDER BY u.display_name";
+  if (course) {
+    sql += " AND LOWER(IFNULL(u.course,'')) = LOWER(?)";
+    params.push(course);
+  }
+  if (section) {
+    sql += " AND LOWER(IFNULL(u.section,'')) = LOWER(?)";
+    params.push(section);
+  }
+  sql += " ORDER BY u.display_name";
   const rows = await db.all(sql, ...params);
-  const totalDepts = DEPARTMENTS.length;
-  return rows.map((r) => {
+
+  const results = [];
+  for (const r of rows) {
+    const category = r.student_category || "undergraduate";
+    const requiredCodes = getClearanceDepartmentCodes(category);
+    const clearanceRows = await db.all(
+      "SELECT department_code, status FROM clearances WHERE student_id = ?",
+      r.student_id
+    );
+    const applicable = clearanceRows.filter((c) => requiredCodes.includes(c.department_code));
+    const nCleared = applicable.filter((c) => c.status === "Cleared").length;
+    const nDenied = applicable.filter((c) => c.status === "Not Cleared").length;
+    const nRequired = requiredCodes.length;
+
     let clearanceSummary;
-    if (Number(r.n_denied) > 0) clearanceSummary = "Not Cleared";
-    else if (Number(r.n_cleared) === totalDepts && Number(r.n_tracked) >= totalDepts) {
-      clearanceSummary = "Cleared";
-    } else if (Number(r.n_cleared) > 0) clearanceSummary = "Partially Cleared";
+    if (nDenied > 0) clearanceSummary = "Not Cleared";
+    else if (nCleared === nRequired && applicable.length >= nRequired) clearanceSummary = "Cleared";
+    else if (nCleared > 0) clearanceSummary = "Partially Cleared";
     else clearanceSummary = "Pending";
-    return {
+
+    results.push({
       studentId: r.student_id,
       displayName: r.display_name,
       email: r.email,
+      studentCategory: category,
+      course: r.course || "",
+      section: r.section || "",
       clearanceSummary,
-      nCleared: Number(r.n_cleared),
-      nTracked: Number(r.n_tracked)
-    };
-  });
+      nCleared,
+      nRequired,
+      nTracked: applicable.length
+    });
+  }
+  return results;
+}
+
+async function listDistinctCourses() {
+  const rows = await db.all(
+    "SELECT DISTINCT course FROM users WHERE role = 'student' AND TRIM(IFNULL(course,'')) != '' ORDER BY course"
+  );
+  return rows.map((r) => r.course);
+}
+
+async function listDistinctSections() {
+  const rows = await db.all(
+    "SELECT DISTINCT section FROM users WHERE role = 'student' AND TRIM(IFNULL(section,'')) != '' ORDER BY section"
+  );
+  return rows.map((r) => r.section);
 }
 
 async function countReleasedRequestsForStudent(studentId) {
@@ -468,6 +626,86 @@ async function listAudit(limit = 50) {
     limit
   );
   return rows;
+}
+
+async function createAnnouncement({ title, message, createdBy }) {
+  const nowIso = new Date().toISOString();
+  const result = await db.run(
+    "INSERT INTO announcements (title, message, created_by, created_at) VALUES (?, ?, ?, ?)",
+    title,
+    message,
+    createdBy,
+    nowIso
+  );
+  return { id: Number(result.lastID), title, message, createdBy, createdAt: nowIso };
+}
+
+async function listAnnouncements(limit = 50) {
+  const rows = await db.all(
+    "SELECT * FROM announcements ORDER BY created_at DESC LIMIT ?",
+    limit
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    title: r.title,
+    message: r.message,
+    createdBy: r.created_by,
+    createdAt: r.created_at
+  }));
+}
+
+async function createNotification({ userId, title, message, link = null }) {
+  const nowIso = new Date().toISOString();
+  const result = await db.run(
+    "INSERT INTO notifications (user_id, title, message, link, is_read, created_at) VALUES (?, ?, ?, ?, 0, ?)",
+    userId,
+    title,
+    message,
+    link,
+    nowIso
+  );
+  return { id: Number(result.lastID), userId, title, message, link, isRead: false, createdAt: nowIso };
+}
+
+async function createNotificationForAllUsers({ title, message, link = null, excludeUserId = null }) {
+  const users = await listUsers();
+  for (const u of users) {
+    if (excludeUserId && u.id === excludeUserId) continue;
+    await createNotification({ userId: u.id, title, message, link });
+  }
+}
+
+async function listNotificationsForUser(userId, limit = 30) {
+  const rows = await db.all(
+    "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+    userId,
+    limit
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    userId: r.user_id,
+    title: r.title,
+    message: r.message,
+    link: r.link || null,
+    isRead: Boolean(r.is_read),
+    createdAt: r.created_at
+  }));
+}
+
+async function countUnreadNotifications(userId) {
+  const row = await db.get(
+    "SELECT COUNT(*) AS n FROM notifications WHERE user_id = ? AND is_read = 0",
+    userId
+  );
+  return Number(row?.n || 0);
+}
+
+async function markNotificationRead(userId, notificationId) {
+  await db.run(
+    "UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?",
+    notificationId,
+    userId
+  );
 }
 
 async function getDashboardStats() {
@@ -511,6 +749,11 @@ function getDb() {
 
 module.exports = {
   DEPARTMENTS,
+  STUDENT_CATEGORIES,
+  CLEARANCE_BY_CATEGORY,
+  ACTIVE_REQUEST_STATUSES,
+  getClearanceDepartmentCodes,
+  getClearanceDepartmentsForCategory,
   ROOT_DIR,
   DATA_DIR,
   DB_FILE,
@@ -519,6 +762,9 @@ module.exports = {
   initializeDatabase,
   listRequests,
   listStudentsClearanceOverview,
+  listDistinctCourses,
+  listDistinctSections,
+  getStudentCategory,
   countReleasedRequestsForStudent,
   getRequestById,
   insertRequest,
@@ -540,5 +786,12 @@ module.exports = {
   writeAudit,
   listAudit,
   getDashboardStats,
+  createAnnouncement,
+  listAnnouncements,
+  createNotification,
+  createNotificationForAllUsers,
+  listNotificationsForUser,
+  countUnreadNotifications,
+  markNotificationRead,
   getDb
 };

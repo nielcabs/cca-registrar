@@ -9,76 +9,108 @@
     <% const scheduledCount = requests.filter((item) => item.status === "Scheduled").length; %>
     <% const releasedCount = requests.filter((item) => item.status === "Released").length; %>
     <% const ocrProcessedCount = requests.filter((item) => item.ocr?.state === "processed" || item.ocr?.state === "corrected").length; %>
+    <% const viewParam = statusGroup === 'completed' ? 'completed' : statusGroup === 'all' ? 'all' : 'active'; %>
 
     <div class="dashboard-shell">
       <%- include('partials/sidebar', { user, active: 'requests' }) %>
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'Document request queue',
-          subtitle: 'Search by student name, ID, document type, or request number. Process OCR, verify payment, and assign release slots.'
+          subtitle: readOnly
+            ? 'View-only access (VPAA). Active and completed transactions are listed separately.'
+            : 'Search, filter by course/section, and process OCR, payment verification, and release slots.'
         }) %>
 
         <section class="card" style="margin-bottom: 1rem;">
+          <div class="tab-row" style="margin-bottom: 0.75rem;">
+            <a class="btn-link <%= viewParam === 'active' ? 'active-tab' : '' %>" href="/admin/requests?view=active">Active requests</a>
+            <a class="btn-link <%= viewParam === 'completed' ? 'active-tab' : '' %>" href="/admin/requests?view=completed">Completed (Released)</a>
+            <a class="btn-link <%= viewParam === 'all' ? 'active-tab' : '' %>" href="/admin/requests?view=all">All</a>
+          </div>
           <form method="get" action="/admin/requests" class="form two-col" style="align-items: end;">
+            <input type="hidden" name="view" value="<%= viewParam %>" />
             <label class="full-row">
-              Search requests (applies to all columns in the table below)
-              <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="e.g. Juan, 20230001, TOR, DEMO1001" />
+              Search
+              <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="Name, ID, document type, request or batch ID" />
             </label>
-            <button type="submit">Search</button>
-            <% if (searchQuery) { %>
-            <a class="btn-link" href="/admin/requests">Clear search</a>
+            <label>
+              Course
+              <select name="course">
+                <option value="">All courses</option>
+                <% courses.forEach((c) => { %>
+                <option value="<%= c %>" <%= courseFilter === c ? 'selected' : '' %>><%= c %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Section
+              <select name="section">
+                <option value="">All sections</option>
+                <% sections.forEach((s) => { %>
+                <option value="<%= s %>" <%= sectionFilter === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+            </label>
+            <button type="submit">Apply filters</button>
+            <% if (searchQuery || courseFilter || sectionFilter) { %>
+            <a class="btn-link" href="/admin/requests?view=<%= viewParam %>">Clear filters</a>
             <% } %>
           </form>
         </section>
 
         <section class="hero-banner">
-          <h2>Registrar operations</h2>
-          <p>Document processing, OCR, and scheduling for the Registrar Office.</p>
+          <h2><%= viewParam === 'completed' ? 'Completed transactions' : viewParam === 'active' ? 'Active queue' : 'All requests' %></h2>
+          <p><%= viewParam === 'completed' ? 'Released documents are kept here separately from pending work.' : 'Registrar operations for document processing and scheduling.' %></p>
         </section>
 
         <section class="stat-grid">
           <article class="stat-card"><h3><%= requests.length %></h3><p>Requests shown</p></article>
+          <% if (viewParam !== 'completed') { %>
           <article class="stat-card"><h3><%= forVerificationCount %></h3><p>For verification</p></article>
           <article class="stat-card"><h3><%= scheduledCount %></h3><p>Scheduled</p></article>
+          <% } else { %>
+          <article class="stat-card"><h3><%= releasedCount %></h3><p>Released in view</p></article>
+          <% } %>
           <article class="stat-card"><h3><%= ocrProcessedCount %></h3><p>OCR processed</p></article>
         </section>
 
         <section class="card data-card">
           <div class="card-head">
             <h2>Request list</h2>
-            <p class="muted">Released (all time): <%= releasedCount %></p>
           </div>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
                 <tr>
                   <th>Request ID</th>
+                  <th>Batch</th>
                   <th>Student</th>
                   <th>Document type</th>
                   <th>Status</th>
-                  <th>Clearance (at submit)</th>
-                  <th>OCR</th>
+                  <th>Receipt</th>
+                  <th>Clearance</th>
                   <th>Created</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 <% if (!requests.length) { %>
-                <tr><td colspan="8" class="muted center">No requests match your search.</td></tr>
+                <tr><td colspan="9" class="muted center">No requests match your filters.</td></tr>
                 <% } %>
                 <% requests.forEach((item) => { %>
                 <tr>
                   <td><%= item.id %></td>
+                  <td class="tiny"><%= item.batchId || '—' %></td>
                   <td>
                     <%= item.studentName %> (<%= item.studentId %>)
-                    <div class="tiny"><a class="table-link" href="/admin/clearance/<%= item.studentId %>">View clearance record</a></div>
+                    <div class="tiny"><a class="table-link" href="/admin/clearance/<%= item.studentId %>">View clearance</a></div>
                   </td>
                   <td><%= item.documentType %></td>
                   <td><span class="badge <%= item.statusClass %>"><%= item.status %></span></td>
+                  <td class="tiny"><%= item.uploadedFilePath ? 'Attached' : 'None (scholarship)' %></td>
                   <td><%= item.clearanceStatus %></td>
-                  <td><%= item.ocr?.state || "not_run" %></td>
                   <td class="tiny"><%= new Date(item.createdAt).toLocaleString() %></td>
-                  <td><a class="table-link" href="/admin/request/<%= item.id %>">Open &amp; process</a></td>
+                  <td><a class="table-link" href="/admin/request/<%= item.id %>"><%= readOnly ? 'View' : 'Open & process' %></a></td>
                 </tr>
                 <% }) %>
               </tbody>

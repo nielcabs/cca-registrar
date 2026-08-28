@@ -41,6 +41,8 @@
                 <tr>
                   <th>Student ID</th>
                   <th>Name &amp; email</th>
+                  <th>Category</th>
+                  <th>Course / section</th>
                   <th>Your office status</th>
                   <th>Last updated</th>
                   <th>Update form</th>
@@ -48,7 +50,7 @@
               </thead>
               <tbody>
                 <% if (!students.length) { %>
-                <tr><td colspan="5" class="muted center">No students match this search.</td></tr>
+                <tr><td colspan="7" class="muted center">No students in your clearance list match this search.</td></tr>
                 <% } %>
                 <% students.forEach((s) => { %>
                 <tr>
@@ -57,6 +59,8 @@
                     <strong><%= s.displayName %></strong>
                     <div class="tiny muted"><%= s.email %></div>
                   </td>
+                  <td class="tiny"><%= s.studentCategory %></td>
+                  <td class="tiny"><%= s.course || '—' %> / <%= s.section || '—' %></td>
                   <td>
                     <span class="badge <%= s.badge %>"><%= s.status %></span>
                     <% if (s.remarks) { %><div class="tiny muted"><%= s.remarks %></div><% } %>
