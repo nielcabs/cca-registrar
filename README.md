@@ -130,6 +130,26 @@ eng.traineddata            # Tesseract English model
 - **Maintainability** — modular split (routes, db, helpers, ocr)
 - **Performance Efficiency** — lightweight Node + SQLite, suitable for on-campus deployment
 
+## Email & SMS alerts
+
+Users can enable external alerts at **`/notification-settings`** (sidebar: **Email & SMS alerts**).
+
+| Channel | Local demo (default) | Production |
+|---|---|---|
+| **Email** | **Ethereal demo** — preview link after sample send | `NOTIFY_EMAIL_MODE=pingram` + `PINGRAM_API_KEY`, or SMTP (see `.env.example`) |
+| **SMS** | **Demo only** — shown in delivery log | `NOTIFY_SMS_MODE=unisms` + `UNISMS_API_KEY` ([UniSMS](https://unismsapi.com)) for Philippine numbers |
+
+Optional: `APP_NAME`, `APP_URL` (used in email links).
+
+Alerts are sent (when enabled per user) for:
+
+- Registrar **announcements**
+- **Request status / schedule** changes (student)
+- **Clearance updates** from department officers (student)
+- **Request submission** confirmation (student)
+
+In-app bell notifications are always created; email/SMS follow each user’s preferences.
+
 ## Notes
 
 - OCR quality depends on image clarity. Final validation always requires registrar approval.

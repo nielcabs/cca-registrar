@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Email &amp; SMS Alerts</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'notify-settings' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Email & SMS alerts',
+          subtitle: 'Choose how you receive updates in addition to in-app notifications.'
+        }) %>
+
+        <section class="hero-banner">
+          <h2>External alerts</h2>
+          <p>In-app notifications always appear in your bell inbox. Enable email and/or SMS here for important updates such as request status, clearance changes, and registrar announcements.</p>
+        </section>
+
+        <section class="card narrow">
+          <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+          <% if (success) { %>
+            <div class="alert success"><%= success %></div>
+            <% if (typeof emailPreviewUrl !== 'undefined' && emailPreviewUrl) { %>
+              <p class="mb-sm"><a class="btn-solid" href="<%= emailPreviewUrl %>" target="_blank" rel="noopener">Open demo email preview</a></p>
+            <% } %>
+          <% } %>
+
+          <div class="alert <%= (deliveryModes.email === 'pingram' || deliveryModes.email === 'smtp') && (deliveryModes.sms === 'unisms' || deliveryModes.sms === 'philsms' || deliveryModes.sms === 'pingram' || deliveryModes.sms === 'twilio') ? 'success' : '' %>" style="<%= (deliveryModes.email === 'pingram' || deliveryModes.email === 'smtp') && (deliveryModes.sms === 'unisms' || deliveryModes.sms === 'philsms' || deliveryModes.sms === 'pingram' || deliveryModes.sms === 'twilio') ? '' : 'background:#eff6ff;border-color:#bfdbfe;color:#1e40af' %>">
+            <strong>How delivery works right now</strong>
+            <ul class="tiny" style="margin:0.5rem 0 0;padding-left:1.2rem;">
+              <li><strong>Email:</strong>
+                <% if (deliveryModes.email === 'pingram') { %>
+                  Real email via <a href="https://www.pingram.io" target="_blank" rel="noopener">Pingram.io</a>.
+                <% } else if (deliveryModes.email === 'smtp') { %>
+                  Real SMTP — messages go to the user's inbox.
+                <% } else if (deliveryModes.email === 'ethereal') { %>
+                  Demo mode — click <em>Open demo email preview</em> after sending a sample (configure Pingram or SMTP in <code>.env</code> for real inbox delivery).
+                <% } else { %>
+                  Console only — check the server terminal.
+                <% } %>
+              </li>
+              <li><strong>SMS:</strong>
+                <% if (deliveryModes.sms === 'unisms') { %>
+                  Real texts to Philippine numbers via <a href="https://unismsapi.com" target="_blank" rel="noopener">UniSMS</a>.
+                <% } else if (deliveryModes.sms === 'philsms') { %>
+                  Real texts to Philippine numbers via <a href="https://philsms.com" target="_blank" rel="noopener">PhilSMS</a>.
+                <% } else if (deliveryModes.sms === 'pingram') { %>
+                  Real texts via <a href="https://www.pingram.io" target="_blank" rel="noopener">Pingram.io</a>.
+                <% } else if (deliveryModes.sms === 'twilio') { %>
+                  Real texts via Twilio.
+                <% } else { %>
+                  Demo only — message is shown in the delivery log. Add <code>UNISMS_API_KEY</code> to <code>.env</code> (from UniSMS → API Keys) and set your phone on this page.
+                <% } %>
+              </li>
+            </ul>
+          </div>
+
+          <p class="tiny muted">
+            Email mode: <strong><%= deliveryModes.email %></strong>
+            &nbsp;|&nbsp; SMS mode: <strong><%= deliveryModes.sms %></strong>
+          </p>
+
+          <form method="post" action="/notification-settings" class="form">
+            <label>
+              Mobile number (for SMS)
+              <input type="tel" name="phone" value="<%= user.phone || '' %>" placeholder="e.g. 09171234567 or +639171234567" />
+              <span class="tiny muted">Philippine format accepted. Required if SMS alerts are enabled.</span>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="notifyEmail" value="1" <%= user.notifyEmail !== false ? 'checked' : '' %> />
+              Send email alerts to <%= user.email %>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="notifySms" value="1" <%= user.notifySms ? 'checked' : '' %> />
+              Send SMS text alerts to my mobile number
+            </label>
+
+            <div class="actions" style="margin-top: 0.25rem;">
+              <button type="submit">Save alert preferences</button>
+              <button type="submit" class="btn-outline" formaction="/notification-settings/sample" formmethod="post">Send sample alert</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head"><h2>Recent email &amp; SMS delivery log</h2></div>
+          <% if (!deliveries.length) { %>
+            <p class="muted">No external alerts sent yet. Post an announcement or update a request to see entries here.</p>
+          <% } else { %>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>Channel</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% deliveries.forEach((d) => { %>
+                  <tr>
+                    <td class="tiny"><%= new Date(d.createdAt).toLocaleString() %></td>
+                    <td><%= d.channel.toUpperCase() %></td>
+                    <td><%= d.title %></td>
+                    <td><span class="badge <%= d.status === 'sent' ? 'badge-released' : d.status === 'failed' ? 'badge-rejected' : d.status === 'demo' ? 'badge-verify' : 'badge-default' %>"><%= d.status %></span></td>
+                    <td class="tiny muted">
+                      <% if (d.detail && d.detail.includes('http')) { %>
+                        <% const urlMatch = d.detail.match(/https?:\/\/\S+/); const previewUrl = urlMatch ? urlMatch[0] : ''; %>
+                        <% if (previewUrl) { %>
+                          <a class="table-link" href="<%= previewUrl %>" target="_blank" rel="noopener">Open preview</a>
+                        <% } else { %>
+                          <%= d.detail %>
+                        <% } %>
+                      <% } else { %>
+                        <%= d.detail || '—' %>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

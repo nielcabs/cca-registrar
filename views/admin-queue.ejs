@@ -21,13 +21,13 @@
             : 'Search, filter by course/section, and process OCR, payment verification, and release slots.'
         }) %>
 
-        <section class="card" style="margin-bottom: 1rem;">
-          <div class="tab-row" style="margin-bottom: 0.75rem;">
+        <section class="card panel-toolbar">
+          <div class="tab-row mb-sm">
             <a class="btn-link <%= viewParam === 'active' ? 'active-tab' : '' %>" href="/admin/requests?view=active">Active requests</a>
             <a class="btn-link <%= viewParam === 'completed' ? 'active-tab' : '' %>" href="/admin/requests?view=completed">Completed (Released)</a>
             <a class="btn-link <%= viewParam === 'all' ? 'active-tab' : '' %>" href="/admin/requests?view=all">All</a>
           </div>
-          <form method="get" action="/admin/requests" class="form two-col" style="align-items: end;">
+          <form method="get" action="/admin/requests" class="form two-col form-end">
             <input type="hidden" name="view" value="<%= viewParam %>" />
             <label class="full-row">
               Search
@@ -66,12 +66,12 @@
         <section class="stat-grid">
           <article class="stat-card"><h3><%= requests.length %></h3><p>Requests shown</p></article>
           <% if (viewParam !== 'completed') { %>
-          <article class="stat-card"><h3><%= forVerificationCount %></h3><p>For verification</p></article>
-          <article class="stat-card"><h3><%= scheduledCount %></h3><p>Scheduled</p></article>
+          <article class="stat-card stat-orange"><h3><%= forVerificationCount %></h3><p>For verification</p></article>
+          <article class="stat-card stat-teal"><h3><%= scheduledCount %></h3><p>Scheduled</p></article>
           <% } else { %>
-          <article class="stat-card"><h3><%= releasedCount %></h3><p>Released in view</p></article>
+          <article class="stat-card stat-teal"><h3><%= releasedCount %></h3><p>Released in view</p></article>
           <% } %>
-          <article class="stat-card"><h3><%= ocrProcessedCount %></h3><p>OCR processed</p></article>
+          <article class="stat-card stat-purple"><h3><%= ocrProcessedCount %></h3><p>OCR processed</p></article>
         </section>
 
         <section class="card data-card">

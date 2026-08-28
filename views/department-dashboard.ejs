@@ -15,8 +15,12 @@
 
         <% if (message) { %><div class="alert success"><%= message %></div><% } %>
 
-        <section class="card" style="margin-bottom: 1rem;">
-          <form method="get" action="/department/dashboard" class="form two-col" style="align-items: end;">
+        <% const clearedCount = students.filter((s) => s.status === 'Cleared').length; %>
+        <% const pendingCount = students.filter((s) => s.status === 'Pending').length; %>
+        <% const notClearedCount = students.filter((s) => s.status === 'Not Cleared').length; %>
+
+        <section class="card panel-toolbar">
+          <form method="get" action="/department/dashboard" class="form two-col form-end">
             <label class="full-row">
               Search students (name, student ID, or email)
               <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' && searchQuery ? searchQuery : '' %>" placeholder="Search all students…" />
@@ -31,6 +35,13 @@
         <section class="hero-banner">
           <h2>Department clearance</h2>
           <p>Use <strong>Cleared</strong> when requirements are satisfied, <strong>Not cleared</strong> when the student must return, or <strong>Pending</strong> while reviewing.</p>
+        </section>
+
+        <section class="stat-grid">
+          <article class="stat-card"><h3><%= students.length %></h3><p>Students shown</p></article>
+          <article class="stat-card stat-teal"><h3><%= clearedCount %></h3><p>Cleared</p></article>
+          <article class="stat-card stat-orange"><h3><%= pendingCount %></h3><p>Pending</p></article>
+          <article class="stat-card stat-purple"><h3><%= notClearedCount %></h3><p>Not cleared</p></article>
         </section>
 
         <section class="card data-card">

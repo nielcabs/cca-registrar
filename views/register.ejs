@@ -3,23 +3,12 @@
   <head>
     <%- include('partials/head') %>
     <title>Student Registration</title>
-    <style>
-      body.auth-bg {
-        background: linear-gradient(135deg, #14532d 0%, #15803d 38%, #22c55e 100%) !important;
-      }
-      body.auth-bg .auth-card button[type="submit"] {
-        background: #166534 !important;
-        border: 1px solid #14532d !important;
-      }
-      body.auth-bg .auth-card button[type="submit"]:hover {
-        background: #14532d !important;
-      }
-    </style>
   </head>
   <body class="auth-bg">
-    <main class="card auth-card">
-      <h1>Create Student Account</h1>
-      <p class="muted">Register with your category, course, and section. Clearance requirements depend on your category.</p>
+    <main class="card auth-card" style="width: min(560px, 92vw);">
+      <div class="brand" style="margin-bottom: 0.5rem;">CCA Registrar</div>
+      <h1 style="margin: 0 0 0.35rem;">Create student account</h1>
+      <p class="muted">Register with your category, course, and section.</p>
 
       <% if (error) { %>
       <div class="alert error"><%= error %></div>
@@ -55,6 +44,10 @@
           Email
           <input type="email" name="email" value="<%= form.email || '' %>" placeholder="you@cca.edu.ph" required />
         </label>
+        <label>
+          Mobile number (optional, for SMS alerts)
+          <input type="tel" name="phone" value="<%= form.phone || '' %>" placeholder="09171234567" />
+        </label>
         <label class="checkbox-row">
           <input type="checkbox" name="hasScholarship" value="1" <%= form.hasScholarship ? 'checked' : '' %> />
           I have an active scholarship (receipt upload not required when requesting documents)
@@ -70,7 +63,7 @@
         <button type="submit">Register</button>
       </form>
 
-      <p class="tiny muted" style="margin-top: 0.8rem;">
+      <p class="tiny muted" style="margin-top: 0.9rem;">
         Already have an account? <a href="/login">Sign in</a>
       </p>
     </main>

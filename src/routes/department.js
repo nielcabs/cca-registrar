@@ -13,6 +13,7 @@ const {
 } = require("../db");
 const { requireAuth, requireRole } = require("../middleware");
 const { computeClearanceBadge } = require("../helpers");
+const { notifyStudentByStudentId } = require("../notify");
 
 const router = express.Router();
 
@@ -100,6 +101,13 @@ router.post("/update/:studentId", async (req, res) => {
     "update_clearance",
     `student=${req.params.studentId} dept=${code} status=${status}`
   );
+
+  const dept = DEPARTMENTS.find((d) => d.code === code);
+  await notifyStudentByStudentId(req.params.studentId, {
+    title: `${dept?.name || "Department"} clearance updated`,
+    message: `Your clearance at ${dept?.name || code} is now "${status}".${remarks ? ` ${remarks}` : ""}`,
+    link: "/student/clearance"
+  });
 
   const q = typeof req.body.returnQ === "string" ? req.body.returnQ : "";
   const suffix = q ? `?saved=1&q=${encodeURIComponent(q)}` : "?saved=1";

@@ -3,24 +3,12 @@
   <head>
     <%- include('partials/head') %>
     <title>CCA Registrar System - Login</title>
-    <style>
-      /* Inline fallback if an old styles.css is cached without green auth rules */
-      body.auth-bg {
-        background: linear-gradient(135deg, #14532d 0%, #15803d 38%, #22c55e 100%) !important;
-      }
-      body.auth-bg .auth-card button[type="submit"] {
-        background: #166534 !important;
-        border: 1px solid #14532d !important;
-      }
-      body.auth-bg .auth-card button[type="submit"]:hover {
-        background: #14532d !important;
-      }
-    </style>
   </head>
   <body class="auth-bg">
     <main class="card auth-card">
-      <h1>CCA Registrar Office Portal</h1>
-      <p class="muted">Integrated requisition, clearance tracking, and release scheduling</p>
+      <div class="brand" style="margin-bottom: 0.5rem;">CCA Registrar</div>
+      <h1 style="margin: 0 0 0.35rem;">Welcome back</h1>
+      <p class="muted">Document requisition, clearance verification &amp; scheduling</p>
 
       <% if (error) { %>
       <div class="alert error"><%= error %></div>
@@ -38,10 +26,10 @@
           Password
           <input type="password" name="password" required />
         </label>
-        <button type="submit">Login</button>
+        <button type="submit">Sign in</button>
       </form>
 
-      <p class="tiny muted" style="margin-top: 0.8rem;">
+      <p class="tiny muted" style="margin-top: 0.9rem;">
         New student? <a href="/register">Create an account</a>
       </p>
     </main>

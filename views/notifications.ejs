@@ -23,47 +23,56 @@
           <% if (!notifications || !notifications.length) { %>
             <p class="muted">No notifications yet.</p>
           <% } else { %>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Status</th>
-                    <th>Title</th>
-                    <th>Message</th>
-                    <th>Time</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% notifications.forEach((n) => { %>
-                    <tr>
-                      <td>
-                        <% if (n.isRead) { %>
-                          <span class="badge badge-default">Read</span>
-                        <% } else { %>
-                          <span class="badge badge-verify">New</span>
-                        <% } %>
-                      </td>
-                      <td><strong><%= n.title %></strong></td>
-                      <td class="tiny"><%= n.message %></td>
-                      <td class="tiny"><%= new Date(n.createdAt).toLocaleString() %></td>
-                      <td style="white-space: nowrap;">
-                        <% if (n.link) { %><a class="table-link" href="<%= n.link %>">Open</a><% } %>
-                        <% if (!n.isRead) { %>
-                          <form method="post" action="<%= basePath %>/notifications/<%= n.id %>/read" style="display:inline;">
-                            <button type="submit" class="ghost tiny">Mark read</button>
-                          </form>
-                        <% } %>
-                      </td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            </div>
+            <ul class="notif-page-list">
+              <% notifications.forEach((n) => { %>
+                <li
+                  class="notif-page-item <%= n.isRead ? 'is-read' : 'is-unread' %>"
+                  data-id="<%= n.id %>"
+                >
+                  <button type="button" class="notif-page-open" data-id="<%= n.id %>" aria-label="View notification">
+                    <span class="notif-page-item-top">
+                      <% if (n.isRead) { %>
+                        <span class="badge badge-default">Read</span>
+                      <% } else { %>
+                        <span class="badge badge-verify">New</span>
+                      <% } %>
+                      <strong class="notif-page-title"><%= n.title %></strong>
+                      <time class="notif-page-time"><%= new Date(n.createdAt).toLocaleString() %></time>
+                    </span>
+                    <span class="notif-page-preview"><%= n.message %></span>
+                  </button>
+                </li>
+              <% }) %>
+            </ul>
+
+            <script type="application/json" id="notifications-data"><%- JSON.stringify(notifications) %></script>
           <% } %>
         </section>
       </main>
     </div>
+
+    <div class="notif-modal" id="notif-modal" hidden>
+      <div class="notif-modal-backdrop" data-notif-close tabindex="-1"></div>
+      <div
+        class="notif-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notif-modal-title"
+      >
+        <div class="notif-modal-header">
+          <span class="badge badge-verify" id="notif-modal-status">New</span>
+          <button type="button" class="notif-modal-close" data-notif-close aria-label="Close">&times;</button>
+        </div>
+        <h2 class="notif-modal-title" id="notif-modal-title"></h2>
+        <p class="notif-modal-time" id="notif-modal-time"></p>
+        <div class="notif-modal-body" id="notif-modal-body"></div>
+        <div class="notif-modal-actions">
+          <a href="#" class="btn-solid" id="notif-modal-link" hidden>Go to related page</a>
+          <button type="button" class="btn-outline" data-notif-close>Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/public/notifications-page.js?v=1" defer></script>
   </body>
 </html>
-

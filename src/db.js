@@ -151,6 +151,28 @@ async function migrateSchema() {
   if (!userCols.includes("has_scholarship")) {
     await db.run("ALTER TABLE users ADD COLUMN has_scholarship INTEGER NOT NULL DEFAULT 0");
   }
+  if (!userCols.includes("phone")) {
+    await db.run("ALTER TABLE users ADD COLUMN phone TEXT NOT NULL DEFAULT ''");
+  }
+  if (!userCols.includes("notify_email")) {
+    await db.run("ALTER TABLE users ADD COLUMN notify_email INTEGER NOT NULL DEFAULT 1");
+  }
+  if (!userCols.includes("notify_sms")) {
+    await db.run("ALTER TABLE users ADD COLUMN notify_sms INTEGER NOT NULL DEFAULT 0");
+  }
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS notification_deliveries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      title TEXT NOT NULL,
+      status TEXT NOT NULL,
+      detail TEXT DEFAULT '',
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
 
   const reqCols = (await db.all("PRAGMA table_info(requests)")).map((c) => c.name);
   if (!reqCols.includes("batch_id")) {
@@ -211,6 +233,9 @@ function mapUserRow(row) {
     course: row.course || "",
     section: row.section || "",
     hasScholarship: Boolean(row.has_scholarship),
+    phone: row.phone || "",
+    notifyEmail: row.notify_email !== 0,
+    notifySms: Boolean(row.notify_sms),
     createdAt: row.created_at
   };
 }
@@ -395,8 +420,9 @@ async function insertUser(user) {
   await db.run(
     `INSERT INTO users (
       id, email, password_hash, role, display_name, student_id, department_code,
-      is_verified, student_category, course, section, has_scholarship, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      is_verified, student_category, course, section, has_scholarship,
+      phone, notify_email, notify_sms, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     user.id,
     user.email.toLowerCase(),
     user.passwordHash,
@@ -409,6 +435,9 @@ async function insertUser(user) {
     user.course || "",
     user.section || "",
     user.hasScholarship ? 1 : 0,
+    user.phone || "",
+    user.notifyEmail === false ? 0 : 1,
+    user.notifySms ? 1 : 0,
     user.createdAt
   );
 }
@@ -423,6 +452,16 @@ async function setUserVerified(id, isVerified) {
 
 async function updateUserPassword(id, passwordHash) {
   await db.run("UPDATE users SET password_hash = ? WHERE id = ?", passwordHash, id);
+}
+
+async function updateUserNotificationPrefs(id, { phone, notifyEmail, notifySms }) {
+  await db.run(
+    "UPDATE users SET phone = ?, notify_email = ?, notify_sms = ? WHERE id = ?",
+    phone || "",
+    notifyEmail ? 1 : 0,
+    notifySms ? 1 : 0,
+    id
+  );
 }
 
 async function deleteUser(id) {
@@ -708,6 +747,36 @@ async function markNotificationRead(userId, notificationId) {
   );
 }
 
+async function logNotificationDelivery({ userId, channel, title, status, detail = "" }) {
+  await db.run(
+    `INSERT INTO notification_deliveries (user_id, channel, title, status, detail, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    userId,
+    channel,
+    title,
+    status,
+    detail,
+    new Date().toISOString()
+  );
+}
+
+async function listNotificationDeliveries(userId, limit = 12) {
+  const rows = await db.all(
+    "SELECT * FROM notification_deliveries WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+    userId,
+    limit
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    userId: r.user_id,
+    channel: r.channel,
+    title: r.title,
+    status: r.status,
+    detail: r.detail || "",
+    createdAt: r.created_at
+  }));
+}
+
 async function getDashboardStats() {
   const total = (await db.get("SELECT COUNT(*) AS n FROM requests")).n;
   const released = (await db.get("SELECT COUNT(*) AS n FROM requests WHERE status = 'Released'")).n;
@@ -777,6 +846,7 @@ module.exports = {
   insertUser,
   setUserVerified,
   updateUserPassword,
+  updateUserNotificationPrefs,
   deleteUser,
   ensureClearanceRows,
   listClearancesForStudent,
@@ -793,5 +863,7 @@ module.exports = {
   listNotificationsForUser,
   countUnreadNotifications,
   markNotificationRead,
+  logNotificationDelivery,
+  listNotificationDeliveries,
   getDb
 };

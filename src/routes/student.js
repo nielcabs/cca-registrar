@@ -17,6 +17,7 @@ const {
 } = require("../db");
 const { requireAuth, requireRole } = require("../middleware");
 const { computeStatusBadge, computeClearanceBadge, DOCUMENT_TYPES } = require("../helpers");
+const { notifyUser } = require("../notify");
 
 const router = express.Router();
 
@@ -169,6 +170,12 @@ router.post("/new-request", upload.single("documentFile"), async (req, res) => {
       `id=${newRequest.id} doc=${newRequest.documentType}${batchId ? ` batch=${batchId}` : ""}`
     );
   }
+
+  await notifyUser(req.session.user.id, {
+    title: "Document request submitted",
+    message: `Submitted ${documentTypes.length} document request(s)${batchId ? ` under batch ${batchId}` : ""}. The registrar office will review your payment proof and clearance.`,
+    link: "/student/dashboard"
+  });
 
   res.redirect("/student/dashboard");
 });

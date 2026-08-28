@@ -29,7 +29,6 @@ const {
   countReleasedRequestsForStudent,
   listAnnouncements,
   createAnnouncement,
-  createNotificationForAllUsers,
   listNotificationsForUser,
   markNotificationRead,
   countUnreadNotifications,
@@ -46,6 +45,7 @@ const {
   formatDate,
   categoryLabel
 } = require("../helpers");
+const { notifyAllUsers, notifyStudentByStudentId } = require("../notify");
 
 const router = express.Router();
 
@@ -126,7 +126,7 @@ router.post("/announcements", requireRegistrarOnly, requireWriteAccess, async (r
   }
 
   await createAnnouncement({ title, message, createdBy: req.session.user.email });
-  await createNotificationForAllUsers({
+  await notifyAllUsers({
     title: `Announcement: ${title}`,
     message,
     link: null,
@@ -140,7 +140,7 @@ router.post("/announcements", requireRegistrarOnly, requireWriteAccess, async (r
     announcements,
     unreadNotificationsCount,
     error: null,
-    success: "Announcement posted. All users can see it in Notifications."
+    success: "Announcement posted. In-app, email, and SMS alerts were sent based on each user’s preferences."
   });
 });
 
@@ -391,6 +391,11 @@ router.post("/request/:id/update", requireWriteAccess, async (req, res) => {
     }
   }
 
+  const prevStatus = current.status;
+  const prevSchedule = current.schedule
+    ? `${current.schedule.date} ${current.schedule.time}`
+    : null;
+
   if (!error) {
     current.status = status || current.status;
     current.clearanceStatus = liveClearance;
@@ -421,6 +426,25 @@ router.post("/request/:id/update", requireWriteAccess, async (req, res) => {
       "update_request",
       `id=${current.id} status=${current.status}`
     );
+
+    const statusChanged = current.status !== prevStatus;
+    const scheduleChanged =
+      (current.schedule ? `${current.schedule.date} ${current.schedule.time}` : null) !== prevSchedule;
+
+    if (statusChanged || scheduleChanged) {
+      let msg = `Your ${current.documentType} request (${current.id}) is now ${current.status}.`;
+      if (current.schedule) {
+        msg += ` Release appointment: ${current.schedule.date} at ${current.schedule.time}.`;
+      }
+      if (current.registrarRemarks) {
+        msg += ` Remarks: ${current.registrarRemarks}`;
+      }
+      await notifyStudentByStudentId(current.studentId, {
+        title: statusChanged ? `Request ${current.status}` : "Release schedule updated",
+        message: msg,
+        link: `/student/track/${current.id}`
+      });
+    }
   }
 
   const clearances = await listClearancesForStudent(current.studentId);

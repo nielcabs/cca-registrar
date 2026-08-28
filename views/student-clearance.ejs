@@ -14,8 +14,8 @@
         }) %>
 
         <section class="hero-banner">
-          <h2>Overall Status: <%= summary %></h2>
-          <p>All six offices must mark you as <strong>Cleared</strong> before the registrar office can set your request to scheduled or released.</p>
+          <h2>Overall status: <span class="badge <%= summaryBadge %>"><%= summary %></span></h2>
+          <p>All <%= clearances.length %> required offices must mark you as <strong>Cleared</strong> before the registrar can schedule or release your documents.</p>
         </section>
 
         <section class="card data-card">

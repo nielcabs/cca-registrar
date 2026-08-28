@@ -13,8 +13,8 @@
           subtitle: 'Filter by course and section. Clearance offices differ by student category (Undergrad, Graduating, Graduate).'
         }) %>
 
-        <section class="card" style="margin-bottom: 1rem;">
-          <form method="get" action="/admin/clearances" class="form two-col" style="align-items: end;">
+        <section class="card panel-toolbar">
+          <form method="get" action="/admin/clearances" class="form two-col form-end">
             <label class="full-row">
               Search students (name, student ID, or email)
               <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="e.g. Maria, 20230002, @cca.edu.ph" />

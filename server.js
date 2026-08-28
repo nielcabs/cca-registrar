@@ -3,11 +3,15 @@ const session = require("express-session");
 const path = require("path");
 const multer = require("multer");
 
+require("dotenv").config();
+
 const {
   ensureStorageDirs,
   initializeDatabase,
   UPLOADS_DIR,
-  countUnreadNotifications
+  countUnreadNotifications,
+  listNotificationsForUser,
+  markNotificationRead
 } = require("./src/db");
 const { seedAll } = require("./src/seed");
 
@@ -15,7 +19,7 @@ const authRoutes = require("./src/routes/auth");
 const studentRoutes = require("./src/routes/student");
 const adminRoutes = require("./src/routes/admin");
 const departmentRoutes = require("./src/routes/department");
-const { isRegistrarStaff, isViewOnlyStaff } = require("./src/middleware");
+const { isRegistrarStaff, isViewOnlyStaff, requireAuth } = require("./src/middleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,14 +55,27 @@ app.use(async (req, res, next) => {
   try {
     if (!req.session.user) {
       res.locals.unreadNotificationsCount = 0;
+      res.locals.recentNotifications = [];
       next();
       return;
     }
-    res.locals.unreadNotificationsCount = await countUnreadNotifications(req.session.user.id);
+    const userId = req.session.user.id;
+    res.locals.unreadNotificationsCount = await countUnreadNotifications(userId);
+    res.locals.recentNotifications = await listNotificationsForUser(userId, 8);
     next();
   } catch (e) {
     res.locals.unreadNotificationsCount = 0;
+    res.locals.recentNotifications = [];
     next();
+  }
+});
+
+app.post("/api/notifications/:id/read", requireAuth, async (req, res) => {
+  try {
+    await markNotificationRead(req.session.user.id, Number(req.params.id));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Could not mark notification as read." });
   }
 });
 

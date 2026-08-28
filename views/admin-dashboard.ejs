@@ -13,8 +13,8 @@
           subtitle: 'Document requisitions, OCR validation, release scheduling, and student lookup.'
         }) %>
 
-        <section class="card" style="margin-bottom: 1rem;">
-          <form method="get" action="/admin/dashboard" class="form two-col" style="align-items: end;">
+        <section class="card panel-toolbar">
+          <form method="get" action="/admin/dashboard" class="form two-col form-end">
             <label class="full-row">
               Search students &amp; requests (filters the table below; same data as the full queue)
               <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="Student name, ID, document type, or request ID (e.g. Juan, 20230001, DEMO1001)" />
@@ -29,8 +29,8 @@
 
         <section class="hero-banner">
           <h2>Quick actions</h2>
-          <p style="margin-bottom: 0.75rem;">Use the sidebar for full menus. Shortcuts:</p>
-          <div class="actions" style="flex-wrap: wrap;">
+          <p class="mb-sm">Use the sidebar for full menus. Shortcuts:</p>
+          <div class="actions">
             <a class="btn-solid" href="/admin/requests">Open document request queue</a>
             <a class="btn-solid" href="/admin/clearances">Search student clearances</a>
             <a class="btn-link" href="/admin/reports">View reports</a>
@@ -39,10 +39,10 @@
         </section>
 
         <section class="stat-grid">
-          <article class="stat-card"><h3><%= recent.length %></h3><p>Requests shown below<% if (typeof searchQuery !== 'undefined' && searchQuery) { %> (search)<% } %></p></article>
-          <article class="stat-card"><h3><%= stats.forVerification %></h3><p>For verification (office-wide)</p></article>
-          <article class="stat-card"><h3><%= stats.scheduled %></h3><p>Scheduled (office-wide)</p></article>
-          <article class="stat-card"><h3><%= typeof ocrProcessedCount !== 'undefined' ? ocrProcessedCount : 0 %></h3><p>OCR processed<% if (typeof searchQuery !== 'undefined' && searchQuery) { %> (matches search)<% } else { %> (all requests)<% } %></p></article>
+          <article class="stat-card"><h3><%= recent.length %></h3><p>Requests shown<% if (typeof searchQuery !== 'undefined' && searchQuery) { %> (search)<% } %></p></article>
+          <article class="stat-card stat-orange"><h3><%= stats.forVerification %></h3><p>For verification</p></article>
+          <article class="stat-card stat-teal"><h3><%= stats.scheduled %></h3><p>Scheduled</p></article>
+          <article class="stat-card stat-purple"><h3><%= typeof ocrProcessedCount !== 'undefined' ? ocrProcessedCount : 0 %></h3><p>OCR processed</p></article>
         </section>
 
         <section class="grid">
@@ -62,14 +62,18 @@
             <% if (!stats.byDocType.length) { %>
               <p class="muted">No data yet.</p>
             <% } else { %>
-              <table class="data-table">
-                <thead><tr><th>Document type</th><th>Count</th></tr></thead>
-                <tbody>
-                  <% stats.byDocType.forEach((d) => { %>
-                  <tr><td><%= d.documentType %></td><td><%= d.count %></td></tr>
-                  <% }) %>
-                </tbody>
-              </table>
+              <% const maxDocCount = Math.max(...stats.byDocType.map((d) => d.count)); %>
+              <div class="bar-chart">
+                <% stats.byDocType.slice(0, 6).forEach((d, i) => { %>
+                <div class="bar-row">
+                  <span class="bar-row-label"><%= d.documentType %></span>
+                  <span class="bar-row-meta"><%= d.count %></span>
+                  <div class="bar-track">
+                    <div class="bar-fill <%= i % 3 === 1 ? 'bar-fill-teal' : i % 3 === 2 ? 'bar-fill-purple' : '' %>" style="width: <%= Math.round((d.count / maxDocCount) * 100) %>%;"></div>
+                  </div>
+                </div>
+                <% }) %>
+              </div>
             <% } %>
           </section>
 

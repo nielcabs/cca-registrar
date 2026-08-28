@@ -8,11 +8,14 @@ const {
   getUserByStudentId,
   insertUser,
   updateUserPassword,
+  updateUserNotificationPrefs,
+  listNotificationDeliveries,
   ensureClearanceRows,
   writeAudit,
   STUDENT_CATEGORIES
 } = require("../db");
 const { requireAuth, isRegistrarStaff, isViewOnlyStaff } = require("../middleware");
+const { getDeliveryModes, normalizePhone, notifyUser, formatSampleAlertMessage } = require("../notify");
 
 const router = express.Router();
 
@@ -28,7 +31,10 @@ function buildSessionUser(user) {
     studentCategory: user.studentCategory,
     course: user.course,
     section: user.section,
-    hasScholarship: user.hasScholarship
+    hasScholarship: user.hasScholarship,
+    phone: user.phone || "",
+    notifyEmail: user.notifyEmail !== false,
+    notifySms: Boolean(user.notifySms)
   };
 }
 
@@ -82,7 +88,8 @@ router.post("/register", async (req, res) => {
     studentCategory,
     course,
     section,
-    hasScholarship
+    hasScholarship,
+    phone
   } = req.body;
   const form = {
     email,
@@ -91,7 +98,8 @@ router.post("/register", async (req, res) => {
     studentCategory,
     course,
     section,
-    hasScholarship: hasScholarship === "1"
+    hasScholarship: hasScholarship === "1",
+    phone: phone || ""
   };
 
   if (!email || !password || !confirmPassword || !displayName || !studentId || !studentCategory) {
@@ -138,6 +146,9 @@ router.post("/register", async (req, res) => {
     course: (course || "").trim(),
     section: (section || "").trim(),
     hasScholarship: hasScholarship === "1",
+    phone: normalizePhone(phone || ""),
+    notifyEmail: true,
+    notifySms: false,
     isVerified: true,
     createdAt: new Date().toISOString()
   };
@@ -203,6 +214,110 @@ router.post("/change-password", requireAuth, async (req, res) => {
     user: req.session.user,
     error: null,
     success: "Password updated successfully."
+  });
+});
+
+router.get("/notification-settings", requireAuth, async (req, res) => {
+  const fresh = await getUserById(req.session.user.id);
+  if (!fresh) {
+    res.redirect("/login");
+    return;
+  }
+  const deliveries = await listNotificationDeliveries(fresh.id, 12);
+  res.render("notification-settings", {
+    user: { ...req.session.user, ...fresh },
+    error: null,
+    success: null,
+    deliveries,
+    deliveryModes: getDeliveryModes()
+  });
+});
+
+router.post("/notification-settings", requireAuth, async (req, res) => {
+  const fresh = await getUserById(req.session.user.id);
+  if (!fresh) {
+    res.redirect("/login");
+    return;
+  }
+
+  const phone = normalizePhone(req.body.phone || "");
+  const notifyEmail = req.body.notifyEmail === "1";
+  const notifySms = req.body.notifySms === "1";
+
+  if (notifySms && !phone) {
+    const deliveries = await listNotificationDeliveries(fresh.id, 12);
+    res.render("notification-settings", {
+      user: fresh,
+      error: "Add a mobile number to enable SMS alerts.",
+      success: null,
+      deliveries,
+      deliveryModes: getDeliveryModes()
+    });
+    return;
+  }
+
+  await updateUserNotificationPrefs(fresh.id, { phone, notifyEmail, notifySms });
+  req.session.user = buildSessionUser({ ...fresh, phone, notifyEmail, notifySms });
+  await writeAudit(fresh.email, "update_notification_prefs", `email=${notifyEmail} sms=${notifySms}`);
+
+  const deliveries = await listNotificationDeliveries(fresh.id, 12);
+  res.render("notification-settings", {
+    user: req.session.user,
+    error: null,
+    success: "Email and SMS alert preferences saved.",
+    deliveries,
+    deliveryModes: getDeliveryModes()
+  });
+});
+
+router.post("/notification-settings/sample", requireAuth, async (req, res) => {
+  const fresh = await getUserById(req.session.user.id);
+  if (!fresh) {
+    res.redirect("/login");
+    return;
+  }
+
+  const channels = [];
+  if (fresh.notifyEmail) channels.push("email");
+  if (fresh.notifySms && fresh.phone) channels.push("SMS");
+  if (fresh.notifySms && !fresh.phone) {
+    const deliveries = await listNotificationDeliveries(fresh.id, 12);
+    res.render("notification-settings", {
+      user: fresh,
+      error: "Add a mobile number or disable SMS before sending a sample SMS alert.",
+      success: null,
+      deliveries,
+      deliveryModes: getDeliveryModes()
+    });
+    return;
+  }
+  if (!channels.length) {
+    const deliveries = await listNotificationDeliveries(fresh.id, 12);
+    res.render("notification-settings", {
+      user: fresh,
+      error: "Enable email or SMS alerts above before sending a sample.",
+      success: null,
+      deliveries,
+      deliveryModes: getDeliveryModes()
+    });
+    return;
+  }
+
+  const results = await notifyUser(fresh.id, {
+    title: "CCA Registrar",
+    message: "You will receive request and clearance updates on this number.",
+    link: "/notification-settings"
+  });
+  await writeAudit(fresh.email, "send_sample_alert", `channels=${channels.join(",")}`);
+
+  const deliveries = await listNotificationDeliveries(fresh.id, 12);
+  res.render("notification-settings", {
+    user: fresh,
+    error: null,
+    success: formatSampleAlertMessage(results),
+    emailPreviewUrl: results.email?.previewUrl || null,
+    deliveries,
+    deliveryModes: getDeliveryModes()
   });
 });
 

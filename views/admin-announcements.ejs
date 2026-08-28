@@ -16,7 +16,7 @@
         <% if (error) { %><div class="alert error"><%= error %></div><% } %>
         <% if (success) { %><div class="alert success"><%= success %></div><% } %>
 
-        <section class="card" style="margin-bottom: 1rem;">
+        <section class="card panel-toolbar">
           <form method="post" action="/admin/announcements" class="form">
             <label>
               Title
@@ -27,7 +27,7 @@
               <textarea name="message" rows="4" maxlength="1000" required placeholder="Write the announcement…"></textarea>
             </label>
             <button type="submit">Post announcement</button>
-            <p class="tiny muted" style="margin:0;">This sends a saved notification to all accounts (students, department officers, registrar staff).</p>
+            <p class="tiny muted" style="margin:0;">This sends in-app notifications plus email/SMS alerts based on each user’s preferences.</p>
           </form>
         </section>
 
