@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Edit user — Registrar</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'users' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Edit user account',
+          subtitle: target.email,
+          actionsHtml: '<a class="btn-link" href="/admin/users">Back to accounts</a>'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="card narrow">
+          <form method="post" action="/admin/users/<%= target.id %>/edit" class="form">
+            <label>
+              Display name
+              <input type="text" name="displayName" value="<%= target.displayName %>" required />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" value="<%= target.email %>" required />
+            </label>
+
+            <% if (target.role === 'student') { %>
+            <label>
+              Student category
+              <select name="studentCategory">
+                <% categories.forEach((c) => { %>
+                <option value="<%= c.value %>" <%= target.studentCategory === c.value ? 'selected' : '' %>><%= c.label %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Institute / program
+              <%- include('partials/course-select', { name: 'course', selected: target.course || '', required: true, courseGroups }) %>
+            </label>
+            <label>
+              Section
+              <%- include('partials/section-input', { name: 'section', value: target.section || '', sections: sectionSuggestions, listId: 'admin-section-suggestions' }) %>
+            </label>
+            <label>
+              Year level
+              <select name="yearLevel">
+                <option value="">Select year level</option>
+                <% yearLevels.forEach((y) => { %>
+                <option value="<%= y %>" <%= target.yearLevel === y ? 'selected' : '' %>><%= y %> year</option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Semester
+              <select name="semester">
+                <option value="">Select semester</option>
+                <% semesters.forEach((s) => { %>
+                <option value="<%= s %>" <%= target.semester === s ? 'selected' : '' %>><%= s %> semester</option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Mobile number
+              <input type="tel" name="phone" value="<%= target.phone || '' %>" />
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" name="hasScholarship" value="1" <%= target.hasScholarship ? 'checked' : '' %> />
+              Active scholarship (registrar only — no tuition receipt required)
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" name="isVerified" value="1" <%= target.isVerified ? 'checked' : '' %> />
+              Enrollment verified (allows document requests)
+            </label>
+            <% } else { %>
+            <input type="hidden" name="studentCategory" value="<%= target.studentCategory || 'undergraduate' %>" />
+            <input type="hidden" name="isVerified" value="<%= target.isVerified ? '1' : '0' %>" />
+            <% } %>
+
+            <button type="submit" class="btn-solid">Save changes</button>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

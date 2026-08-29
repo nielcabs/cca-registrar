@@ -2,6 +2,8 @@
 
 Web-based system that digitizes document requests, clearance verification, and release scheduling for the City College of Angeles Registrar's Office.
 
+Standard UI terms (Institute, Signed clearance, etc.) are documented in [`docs/TERMINOLOGIES.md`](docs/TERMINOLOGIES.md).
+
 ## Paper-to-System Module Mapping
 
 | Paper Module (Chapter 3: Design and Implementation) | Implemented Location |
@@ -28,7 +30,7 @@ Web-based system that digitizes document requests, clearance verification, and r
 - **Templating:** EJS (with partials)
 - **Database:** SQLite (`sqlite` + `sqlite3`)
 - **Authentication:** `bcryptjs` password hashing + `express-session`
-- **File Upload:** Multer (5 MB limit, JPG/PNG)
+- **File Upload:** Multer (5 MB limit, JPG/PNG/PDF)
 - **OCR Engine:** Tesseract.js with English traineddata
 - **Date Utility:** Day.js
 - **PDF reports:** `pdfkit` (download from Reports page)
@@ -42,10 +44,11 @@ Web-based system that digitizes document requests, clearance verification, and r
 
 ## Roles
 
-1. **Student** — submits requests (multi-document, conditional receipt), tracks status, views category-specific clearance
-2. **Administrator / Registrar (single role)** — document queue (active/completed tabs), OCR, scheduling, clearance monitoring, reports + PDF, user accounts
-3. **Department Officer** — updates their office’s clearance per student (Library, Finance, MISSO, SASO, Guidance, Extension, **Alumni Office**)
-4. **VPAA (view only)** — read-only access to dashboard, requests, clearances, and reports
+1. **Student** — submits requests (multi-document, conditional receipt), tracks status, views clearance, books/reschedules/cancels appointments
+2. **Registrar** — document queue (active/completed/archived), OCR, scheduling, clearance monitoring, reports + PDF, announcements
+3. **System administrator (`sysadmin`)** — user accounts, enrollment roster import, archive management, reports/audit
+4. **Department Officer** — updates office clearance (optional sign-off photo) and Finance tuition records
+5. **VPAA (view only)** — read-only access to dashboard, requests, clearances, and reports
 
 Six core department officers plus **Alumni Office** are provisioned:
 Library, Budget and Finance, MISSO, SASO, Guidance, Community Extension (NSTP), Alumni Office.
@@ -54,17 +57,18 @@ Library, Budget and Finance, MISSO, SASO, Guidance, Community Extension (NSTP), 
 
 | Category | Required offices |
 |----------|------------------|
-| Undergraduate | Library, Finance, MISSO, SASO, Guidance, Extension |
-| Graduating | Library, Finance, MISSO, SASO, Guidance, Extension |
-| Graduate (Alumni) | Library, Finance, MISSO, Guidance, Alumni Office |
+| Undergraduate | Library, MISSO, Extension, Guidance, Student Affairs, Finance, **Registrar** |
+| Graduating | Library, MISSO, Extension, Guidance, Student Affairs, Finance, **Registrar** |
+| Graduate (Alumni) | Library, Finance, MISSO, Guidance, Alumni Office, **Registrar** |
 
 ## Seeded Demo Accounts (password for all = `cca123`)
 
 | Email | Role | Notes |
 |---|---|---|
-| `admin@cca.edu.ph` | Admin + Registrar | Full office functions; use for OCR & scheduling |
+| `admin@cca.edu.ph` | Registrar | Document processing, OCR, clearances |
+| `sysadmin@cca.edu.ph` | System admin | Users, roster, archive |
 | `vpaa@cca.edu.ph` | VPAA | View-only — no edits or PDF export |
-| `juan@cca.edu.ph` | Student (SID 20230001) | Undergraduate · BSIT Sec A · DEMO1001 |
+| `juan@cca.edu.ph` | Student (SID 20230001) | Undergraduate · BSIS Sec A · DEMO1001 |
 | `maria@cca.edu.ph` | Student (SID 20230002) | Graduating · scholarship · DEMO1002 |
 | `pedro@cca.edu.ph` | Student (SID 20230003) | Graduate · DEMO1003 (Released) |
 | `library@cca.edu.ph` | Department Officer | Library clearance |
@@ -77,7 +81,7 @@ Library, Budget and Finance, MISSO, SASO, Guidance, Community Extension (NSTP), 
 
 ## Clearance & scheduling rules
 
-- **Clearance:** A request can only move to `Scheduled` or `Released` when all offices required for the student's category show `Cleared`.
+- **Clearance:** A request can only move to `Scheduled` or `Released` when all offices required for the student's category show **Signed**.
 - **Scheduling:** Weekdays 08:00–15:00 (hourly), 5 students per slot.
 
 ## Run locally
@@ -92,7 +96,7 @@ Open [http://localhost:3000](http://localhost:3000). Delete `data/app.db` and re
 ## Demo Script (for Defense / Pre-Oral)
 
 1. Log in as `juan@cca.edu.ph` → **New document request** → upload payment proof → submit.
-2. Log in as `library@cca.edu.ph` → use **search** if needed → mark Juan **Cleared** (repeat for other offices as needed).
+2. Log in as `library@cca.edu.ph` → use **search** if needed → mark Juan **Signed** (repeat for other offices as needed).
 3. Log in as `admin@cca.edu.ph` → **Document requests** → open Juan’s row → **Run OCR** → correct fields if needed → pick **release slot** → set **Scheduled** → save.
 4. Log in as `juan@cca.edu.ph` → **Track** → confirm schedule and office remarks.
 5. Log in as `admin@cca.edu.ph` → **Student clearances** → search by name → open detail.

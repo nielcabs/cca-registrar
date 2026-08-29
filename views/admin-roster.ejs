@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Enrollment roster — System admin</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'roster' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Enrollment roster',
+          subtitle: 'Import official student list for automatic verification on self-registration.',
+          actionsHtml: '<a class="btn-link" href="/admin/users">User accounts</a>'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="hero-banner">
+          <h2><%= rosterCount %> student(s) on roster</h2>
+          <p>When a student registers with a matching <strong>Student ID</strong> and <strong>name</strong>, the account is auto-verified. Partial matches stay pending for manual review.</p>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Import CSV</h2></div>
+          <p class="muted tiny">Required columns: <code>student_id</code>, <code>display_name</code>. Optional: email, course, section, year_level, semester, student_category, academic_term. Sample file: <code>data/roster-sample.csv</code></p>
+          <form method="post" action="/admin/roster/import" class="form" enctype="multipart/form-data">
+            <label>
+              Upload CSV file
+              <input type="file" name="csvFile" accept=".csv,text/csv" />
+            </label>
+            <label>
+              Or paste CSV content
+              <textarea name="csvText" rows="8" placeholder="student_id,display_name,email,..."></textarea>
+            </label>
+            <button type="submit" class="btn-solid">Import / update roster</button>
+          </form>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head">
+            <h2>Roster entries</h2>
+            <form method="get" action="/admin/roster" class="form form-end" style="margin:0;">
+              <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="Search ID, name, email" />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Program</th>
+                  <th>Section</th>
+                  <th>Term</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!roster.length) { %>
+                <tr><td colspan="6" class="muted center">No roster rows yet. Import a CSV above.</td></tr>
+                <% } %>
+                <% roster.forEach((row) => { %>
+                <tr>
+                  <td><%= row.studentId %></td>
+                  <td><%= row.displayName %></td>
+                  <td class="tiny"><%= row.email || '—' %></td>
+                  <td class="tiny"><%= row.course || '—' %></td>
+                  <td><%= row.section || '—' %></td>
+                  <td class="tiny"><%= row.academicTerm || '—' %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

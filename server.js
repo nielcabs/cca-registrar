@@ -19,7 +19,7 @@ const authRoutes = require("./src/routes/auth");
 const studentRoutes = require("./src/routes/student");
 const adminRoutes = require("./src/routes/admin");
 const departmentRoutes = require("./src/routes/department");
-const { isRegistrarStaff, isViewOnlyStaff, requireAuth } = require("./src/middleware");
+const { isRegistrarStaff, isViewOnlyStaff, requireAuth, isSystemAdmin } = require("./src/middleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -86,6 +86,7 @@ app.get("/", (req, res) => {
   }
   const role = req.session.user.role;
   if (role === "student") res.redirect("/student/dashboard");
+  else if (isSystemAdmin(role)) res.redirect("/admin/users");
   else if (isRegistrarStaff(role)) res.redirect("/admin/dashboard");
   else if (isViewOnlyStaff(role)) res.redirect("/admin/dashboard");
   else if (role === "department") res.redirect("/department/dashboard");
@@ -113,7 +114,8 @@ app.use("/department", departmentRoutes);
 app.use((error, _req, res, _next) => {
   if (
     error instanceof multer.MulterError ||
-    error.message === "Only JPG and PNG files are supported for OCR demo."
+    error.message === "Only JPG and PNG files are supported for OCR demo." ||
+    error.message === "Only JPG, PNG, and PDF files are supported."
   ) {
     res.status(400).send(`Upload error: ${error.message}`);
     return;
@@ -129,7 +131,8 @@ ensureStorageDirs()
     app.listen(PORT, () => {
       console.log(`CCA Registrar System running at http://localhost:${PORT}`);
       console.log("Seeded credentials (password for all = cca123):");
-      console.log("  admin@cca.edu.ph (Registrar office — full access)");
+      console.log("  admin@cca.edu.ph (Registrar office — document processing)");
+      console.log("  sysadmin@cca.edu.ph (System administrator — users & roster)");
       console.log("  vpaa@cca.edu.ph (VPAA — view only)");
       console.log("  juan@cca.edu.ph | maria@cca.edu.ph | pedro@cca.edu.ph (students)");
       console.log("  library@cca.edu.ph | finance@cca.edu.ph | misso@cca.edu.ph");

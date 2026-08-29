@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Tuition payment</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'tuition' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Tuition payment',
+          subtitle: profile.hasScholarship
+            ? 'You are listed as a scholarship student — no tuition receipt upload required.'
+            : 'Upload your tuition OR / receipt so Finance can verify enrollment payment.'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="hero-banner">
+          <h2>Payment status: <span class="badge <%= tuitionBadge %>"><%= tuitionStatus %></span></h2>
+          <% if (profile.hasScholarship) { %>
+          <p>Your account is marked as a <strong>scholarship student</strong> by the registrar office. Finance will see this on their dashboard — no tuition receipt is needed from you.</p>
+          <% } else { %>
+          <p>After paying tuition at the Budget and Finance Office, upload a clear photo or scan of your official receipt (OR). Finance uses this to confirm your enrollment payment before signing your clearance.</p>
+          <% } %>
+        </section>
+
+        <% if (!profile.hasScholarship) { %>
+        <section class="card clearance-upload-card">
+          <div class="card-head"><h2>Tuition receipt upload</h2></div>
+
+          <% if (profile.tuitionReceiptPath) { %>
+          <div class="clearance-current">
+            <p class="muted tiny">Current file: <strong><%= profile.tuitionReceiptName || 'Uploaded receipt' %></strong>
+              <% if (profile.tuitionReceiptUpdatedAt) { %> · Uploaded <%= new Date(profile.tuitionReceiptUpdatedAt).toLocaleString() %><% } %>
+            </p>
+            <a class="table-link" href="<%= profile.tuitionReceiptPath %>" target="_blank">View receipt</a>
+            <img src="<%= profile.tuitionReceiptPath %>" alt="Tuition receipt" class="preview clearance-preview" />
+          </div>
+          <% } else { %>
+          <p class="muted">No tuition receipt uploaded yet.</p>
+          <% } %>
+
+          <% if (user.isVerified) { %>
+          <form method="post" action="/student/tuition/upload" enctype="multipart/form-data" class="form clearance-upload-form">
+            <label>
+              <%= profile.tuitionReceiptPath ? 'Replace tuition receipt (JPG/PNG/PDF, max 5 MB)' : 'Upload tuition receipt (JPG/PNG/PDF, max 5 MB)' %>
+              <input type="file" name="tuitionReceipt" accept="image/jpeg,image/png,application/pdf,.pdf" required />
+            </label>
+            <button type="submit"><%= profile.tuitionReceiptPath ? 'Update receipt' : 'Upload receipt' %></button>
+          </form>
+          <% } else { %>
+          <p class="muted tiny">Your account must be verified by the registrar before uploading a tuition receipt.</p>
+          <% } %>
+        </section>
+        <% } %>
+
+        <section class="card narrow">
+          <h3>How it works</h3>
+          <ol class="muted" style="padding-left: 1.2rem; line-height: 1.6;">
+            <li>Pay tuition at the Budget and Finance Office (unless you are a scholar).</li>
+            <li>Upload your OR here — status becomes <strong>For Verification</strong>.</li>
+            <li>Finance reviews your receipt and marks tuition as <strong>Paid</strong>.</li>
+            <li>Scholarship status is set only by the <strong>registrar/admin</strong>, not during registration.</li>
+          </ol>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

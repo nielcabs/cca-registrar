@@ -1,7 +1,11 @@
 <aside class="sidebar">
-  <div class="brand">CCA Registrar</div>
+  <div class="brand">
+    <img src="/cca-logo.png" alt="CCA" class="brand-logo" width="34" height="34" />
+    <span>CCA Registrar</span>
+  </div>
   <p class="sidebar-role">
     <% if (user.role === "student") { %>Student portal
+    <% } else if (user.role === "sysadmin") { %>System administrator
     <% } else if (user.role === "admin" || user.role === "registrar") { %>Registrar office
     <% } else if (user.role === "vpaa") { %>VPAA · view only
     <% } else if (user.role === "department") { %>Department officer
@@ -19,8 +23,23 @@
       </a>
       <a href="/student/new-request" class="<%= active === 'new-request' ? 'active' : '' %>"><span class="nav-icon nav-icon-doc"></span>New document request</a>
       <a href="/student/clearance" class="<%= active === 'clearance' ? 'active' : '' %>"><span class="nav-icon nav-icon-clear"></span>My clearance status</a>
+      <a href="/student/tuition" class="<%= active === 'tuition' ? 'active' : '' %>"><span class="nav-icon nav-icon-doc"></span>Tuition payment</a>
+      <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>"><span class="nav-icon nav-icon-users"></span>My profile</a>
       <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>"><span class="nav-icon nav-icon-lock"></span>Change password</a>
       <a href="/notification-settings" class="<%= active === 'notify-settings' ? 'active' : '' %>"><span class="nav-icon nav-icon-bell"></span>Email &amp; SMS alerts</a>
+    <% } else if (user.role === "sysadmin") { %>
+      <a href="/admin/users" class="<%= active === 'users' ? 'active' : '' %>"><span class="nav-icon nav-icon-users"></span>User accounts</a>
+      <a href="/admin/roster" class="<%= active === 'roster' ? 'active' : '' %>"><span class="nav-icon nav-icon-doc"></span>Enrollment roster</a>
+      <a href="/admin/archive" class="<%= active === 'archive' ? 'active' : '' %>"><span class="nav-icon nav-icon-report"></span>Archived requests</a>
+      <a href="/admin/reports" class="<%= active === 'reports' ? 'active' : '' %>"><span class="nav-icon nav-icon-report"></span>Reports &amp; audit</a>
+      <a href="/admin/notifications" class="<%= active === 'notifications' ? 'active' : '' %>">
+        <span class="nav-icon nav-icon-bell"></span>Notifications
+        <% if (typeof unreadNotificationsCount !== 'undefined' && unreadNotificationsCount > 0) { %>
+          <span class="pill"><%= unreadNotificationsCount %></span>
+        <% } %>
+      </a>
+      <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>"><span class="nav-icon nav-icon-lock"></span>Change password</a>
+      <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>"><span class="nav-icon nav-icon-users"></span>My profile</a>
     <% } else if (user.role === "admin" || user.role === "registrar" || user.role === "vpaa") { %>
       <a href="/admin/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>"><span class="nav-icon nav-icon-dashboard"></span>Overview dashboard</a>
       <a href="/admin/notifications" class="<%= active === 'notifications' ? 'active' : '' %>">
@@ -35,10 +54,8 @@
       <a href="/admin/requests" class="<%= active === 'requests' ? 'active' : '' %>"><span class="nav-icon nav-icon-doc"></span>Document requests</a>
       <a href="/admin/clearances" class="<%= active === 'clearances' ? 'active' : '' %>"><span class="nav-icon nav-icon-clear"></span>Student clearances</a>
       <a href="/admin/reports" class="<%= active === 'reports' ? 'active' : '' %>"><span class="nav-icon nav-icon-report"></span>Reports &amp; export</a>
-      <% if (user.role !== "vpaa") { %>
-      <a href="/admin/users" class="<%= active === 'users' ? 'active' : '' %>"><span class="nav-icon nav-icon-users"></span>User accounts</a>
-      <% } %>
       <a href="/change-password" class="<%= active === 'password' ? 'active' : '' %>"><span class="nav-icon nav-icon-lock"></span>Change password</a>
+      <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>"><span class="nav-icon nav-icon-users"></span>My profile</a>
       <a href="/notification-settings" class="<%= active === 'notify-settings' ? 'active' : '' %>"><span class="nav-icon nav-icon-bell"></span>Email &amp; SMS alerts</a>
     <% } else if (user.role === "department") { %>
       <a href="/department/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>"><span class="nav-icon nav-icon-office"></span>My office — clearances</a>

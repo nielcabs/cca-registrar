@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>My profile</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'profile' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'My profile',
+          subtitle: 'View and update your account information.'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="card narrow">
+          <div class="card-head"><h2>Account details</h2></div>
+
+          <dl class="detail-list mb-sm">
+            <div><dt>Email (login)</dt><dd><%= profile.email %></dd></div>
+            <div><dt>Student ID</dt><dd><%= profile.studentId || '—' %></dd></div>
+            <div><dt>Category</dt><dd><%= profile.studentCategory || '—' %></dd></div>
+            <div><dt>Year level</dt><dd><%= profile.yearLevel || '—' %></dd></div>
+            <div><dt>Semester</dt><dd><%= profile.semester || '—' %></dd></div>
+            <div><dt>Verification</dt><dd><%= profile.isVerified ? 'Verified by registrar' : 'Pending verification' %></dd></div>
+            <div><dt>Scholarship</dt><dd><%= profile.hasScholarship ? 'Yes — assigned by registrar' : 'No' %></dd></div>
+          </dl>
+
+          <% if (readOnly) { %>
+            <p class="muted">Profile editing for this role is managed by the registrar office.</p>
+          <% } else { %>
+          <form method="post" action="/profile" class="form">
+            <label>
+              Full name
+              <input type="text" name="displayName" value="<%= profile.displayName %>" required />
+            </label>
+            <label>
+              Institute / program
+              <%- include('partials/course-select', { name: 'course', selected: profile.course || '', required: true, courseGroups }) %>
+            </label>
+            <label>
+              Section
+              <%- include('partials/section-input', { name: 'section', value: profile.section || '', sections: sectionSuggestions }) %>
+            </label>
+            <label>
+              Year level
+              <select name="yearLevel">
+                <option value="">Select year level</option>
+                <% yearLevels.forEach((y) => { %>
+                <option value="<%= y %>" <%= profile.yearLevel === y ? 'selected' : '' %>><%= y %> year</option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Semester
+              <select name="semester">
+                <option value="">Select semester</option>
+                <% semesters.forEach((s) => { %>
+                <option value="<%= s %>" <%= profile.semester === s ? 'selected' : '' %>><%= s %> semester</option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Mobile number
+              <input type="tel" name="phone" value="<%= profile.phone || '' %>" placeholder="09171234567" />
+            </label>
+            <button type="submit" class="btn-solid">Save profile</button>
+          </form>
+          <% } %>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

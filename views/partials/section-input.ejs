@@ -1,0 +1,13 @@
+<input
+  type="text"
+  name="<%= name || 'section' %>"
+  value="<%= value || '' %>"
+  list="<%= listId || 'section-suggestions' %>"
+  placeholder="<%= typeof placeholder !== 'undefined' ? placeholder : 'e.g. 1703' %>"
+  <%= required ? 'required' : '' %>
+/>
+<datalist id="<%= listId || 'section-suggestions' %>">
+  <% (sections || []).forEach((s) => { %>
+  <option value="<%= s %>"></option>
+  <% }) %>
+</datalist>

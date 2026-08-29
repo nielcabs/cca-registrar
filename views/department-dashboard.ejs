@@ -10,14 +10,20 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: department.name,
-          subtitle: 'Update clearance for your office only. Students and the registrar office see changes immediately.'
+          subtitle: isFinance
+            ? 'Update tuition payment and finance clearance separately for each student.'
+            : 'Update clearance for your office only. Students and the registrar office see changes immediately.'
         }) %>
 
         <% if (message) { %><div class="alert success"><%= message %></div><% } %>
 
-        <% const clearedCount = students.filter((s) => s.status === 'Cleared').length; %>
+        <% const signedCount = students.filter((s) => s.status === 'Signed' || s.status === 'Cleared').length; %>
         <% const pendingCount = students.filter((s) => s.status === 'Pending').length; %>
-        <% const notClearedCount = students.filter((s) => s.status === 'Not Cleared').length; %>
+        <% const notSignedCount = students.filter((s) => s.status === 'Not Signed' || s.status === 'Not Cleared').length; %>
+        <% const tuitionPaidCount = isFinance ? students.filter((s) => s.tuitionDisplayStatus === 'Paid').length : 0; %>
+        <% const tuitionUnpaidCount = isFinance ? students.filter((s) => !s.hasScholarship && (s.tuitionDisplayStatus === 'Unpaid' || s.tuitionDisplayStatus === 'For Verification')).length : 0; %>
+        <% const tuitionScholarCount = isFinance ? students.filter((s) => s.hasScholarship).length : 0; %>
+        <% const colCount = isFinance ? 10 : 7; %>
 
         <section class="card panel-toolbar">
           <form method="get" action="/department/dashboard" class="form two-col form-end">
@@ -33,15 +39,25 @@
         </section>
 
         <section class="hero-banner">
-          <h2>Department clearance</h2>
-          <p>Use <strong>Cleared</strong> when requirements are satisfied, <strong>Not cleared</strong> when the student must return, or <strong>Pending</strong> while reviewing.</p>
+          <h2><%= isFinance ? 'Finance clearance & tuition' : 'Department clearance' %></h2>
+          <% if (isFinance) { %>
+          <p>Review uploaded <strong>tuition receipts</strong> and mark payment as <strong>Paid</strong> when verified. Update <strong>tuition</strong> and <strong>clearance</strong> using the separate forms in each row. Scholarship students are assigned by the registrar — no receipt required.</p>
+          <% } else { %>
+          <p>Use <strong>Signed</strong> when requirements are satisfied, <strong>Not Signed</strong> when the student must return, or <strong>Pending</strong> while reviewing.</p>
+          <% } %>
         </section>
 
         <section class="stat-grid">
           <article class="stat-card"><h3><%= students.length %></h3><p>Students shown</p></article>
-          <article class="stat-card stat-teal"><h3><%= clearedCount %></h3><p>Cleared</p></article>
+          <% if (isFinance) { %>
+          <article class="stat-card stat-teal"><h3><%= tuitionPaidCount %></h3><p>Tuition paid</p></article>
+          <article class="stat-card stat-orange"><h3><%= tuitionUnpaidCount %></h3><p>Awaiting payment / review</p></article>
+          <article class="stat-card stat-purple"><h3><%= tuitionScholarCount %></h3><p>Scholarship</p></article>
+          <% } else { %>
+          <article class="stat-card stat-teal"><h3><%= signedCount %></h3><p>Signed</p></article>
           <article class="stat-card stat-orange"><h3><%= pendingCount %></h3><p>Pending</p></article>
-          <article class="stat-card stat-purple"><h3><%= notClearedCount %></h3><p>Not cleared</p></article>
+          <article class="stat-card stat-purple"><h3><%= notSignedCount %></h3><p>Not signed</p></article>
+          <% } %>
         </section>
 
         <section class="card data-card">
@@ -51,17 +67,19 @@
               <thead>
                 <tr>
                   <th>Student ID</th>
-                  <th>Name &amp; email</th>
+                  <th>Name & email</th>
                   <th>Category</th>
-                  <th>Course / section</th>
+                  <th>Institute / section</th>
+                  <% if (isFinance) { %><th>Tuition</th><th>Receipt</th><% } %>
                   <th>Your office status</th>
                   <th>Last updated</th>
-                  <th>Update form</th>
+                  <% if (isFinance) { %><th>Update tuition</th><% } %>
+                  <th>Update clearance</th>
                 </tr>
               </thead>
               <tbody>
                 <% if (!students.length) { %>
-                <tr><td colspan="7" class="muted center">No students in your clearance list match this search.</td></tr>
+                <tr><td colspan="<%= colCount %>" class="muted center">No students in your clearance list match this search.</td></tr>
                 <% } %>
                 <% students.forEach((s) => { %>
                 <tr>
@@ -72,23 +90,64 @@
                   </td>
                   <td class="tiny"><%= s.studentCategory %></td>
                   <td class="tiny"><%= s.course || '—' %> / <%= s.section || '—' %></td>
+                  <% if (isFinance) { %>
+                  <td>
+                    <span class="badge <%= s.tuitionPaymentBadge %>"><%= s.tuitionDisplayStatus %></span>
+                    <% if (s.hasScholarship) { %><div class="tiny muted">Registrar assigned</div><% } else if (s.tuitionPaymentRemarks) { %><div class="tiny muted"><%= s.tuitionPaymentRemarks %></div><% } %>
+                  </td>
+                  <td class="tiny">
+                    <% if (s.hasScholarship) { %>
+                      <span class="muted">N/A (scholar)</span>
+                    <% } else if (s.tuitionReceiptPath) { %>
+                      <a class="table-link" href="<%= s.tuitionReceiptPath %>" target="_blank">View OR</a>
+                    <% } else { %>
+                      <span class="muted">Not uploaded</span>
+                    <% } %>
+                  </td>
+                  <% } %>
                   <td>
                     <span class="badge <%= s.badge %>"><%= s.status %></span>
                     <% if (s.remarks) { %><div class="tiny muted"><%= s.remarks %></div><% } %>
                   </td>
                   <td class="tiny"><%= s.updatedAt ? new Date(s.updatedAt).toLocaleString() : '—' %></td>
+                  <% if (isFinance) { %>
                   <td>
-                    <form method="post" action="/department/update/<%= s.studentId %>" class="form" style="gap:0.3rem;">
+                    <% if (!s.hasScholarship) { %>
+                    <form method="post" action="/department/tuition/<%= s.studentId %>" class="form dept-inline-form">
                       <input type="hidden" name="returnQ" value="<%= typeof searchQuery !== 'undefined' && searchQuery ? searchQuery : '' %>" />
-                      <label class="tiny" style="margin:0;">Status
+                      <label class="tiny">Payment status
+                        <select name="tuitionPaymentStatus" required>
+                          <% tuitionStatuses.forEach((v) => { %>
+                          <option value="<%= v %>" <%= s.tuitionPaymentStatus === v ? 'selected' : '' %>><%= v %></option>
+                          <% }) %>
+                        </select>
+                      </label>
+                      <input type="text" name="tuitionPaymentRemarks" value="<%= s.tuitionPaymentRemarks || '' %>" placeholder="Finance OR / remarks" />
+                      <button type="submit" class="tiny">Save tuition</button>
+                    </form>
+                    <% } else { %>
+                    <p class="tiny muted" style="margin:0;">Scholarship — set by registrar</p>
+                    <% } %>
+                  </td>
+                  <% } %>
+                  <td>
+                    <form method="post" action="/department/clearance/<%= s.studentId %>" class="form dept-inline-form" enctype="multipart/form-data">
+                      <input type="hidden" name="returnQ" value="<%= typeof searchQuery !== 'undefined' && searchQuery ? searchQuery : '' %>" />
+                      <label class="tiny">Clearance status
                         <select name="status" required>
-                          <% ["Pending","Cleared","Not Cleared"].forEach((v) => { %>
-                          <option value="<%= v %>" <%= s.status === v ? 'selected' : '' %>><%= v %></option>
+                          <% ["Pending","Signed","Not Signed"].forEach((v) => { %>
+                          <option value="<%= v %>" <%= s.status === v || (v === 'Signed' && s.status === 'Cleared') || (v === 'Not Signed' && s.status === 'Not Cleared') ? 'selected' : '' %>><%= v %></option>
                           <% }) %>
                         </select>
                       </label>
                       <input type="text" name="remarks" value="<%= s.remarks || '' %>" placeholder="Optional remarks" />
-                      <button type="submit" class="tiny">Save</button>
+                      <label class="tiny">Office sign-off photo (optional)
+                        <input type="file" name="clearancePhoto" accept="image/jpeg,image/png,.jpg,.jpeg,.png" />
+                      </label>
+                      <% if (s.photoPath) { %>
+                      <a class="table-link tiny" href="<%= s.photoPath %>" target="_blank">View current photo</a>
+                      <% } %>
+                      <button type="submit" class="tiny">Save clearance</button>
                     </form>
                   </td>
                 </tr>

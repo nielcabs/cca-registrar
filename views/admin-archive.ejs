@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head') %>
+    <title>Archived requests — System admin</title>
+  </head>
+  <body class="app-body">
+    <div class="dashboard-shell">
+      <%- include('partials/sidebar', { user, active: 'archive' }) %>
+      <main class="main-panel">
+        <%- include('partials/topbar', {
+          title: 'Archived document requests',
+          subtitle: 'Released and rejected requests moved out of the active completed queue.',
+          actionsHtml: '<a class="btn-link" href="/admin/requests?view=completed">Completed queue</a>'
+        }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
+        <section class="card">
+          <div class="card-head"><h2>Bulk archive old records</h2></div>
+          <p class="muted tiny">Archive released/rejected requests older than the selected number of days (based on last update).</p>
+          <form method="post" action="/admin/archive/run" class="form two-col" onsubmit="return confirm('Archive matching old requests?');">
+            <label>
+              Older than (days)
+              <input type="number" name="days" value="90" min="30" max="3650" required />
+            </label>
+            <button type="submit" class="btn-solid">Run bulk archive</button>
+          </form>
+        </section>
+
+        <section class="card data-card">
+          <div class="card-head"><h2>Archived requests (<%= requests.length %>)</h2></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student</th>
+                  <th>Document</th>
+                  <th>Status</th>
+                  <th>Archived</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!requests.length) { %>
+                <tr><td colspan="6" class="muted center">No archived requests yet.</td></tr>
+                <% } %>
+                <% requests.forEach((item) => { %>
+                <tr>
+                  <td><%= item.id %></td>
+                  <td><%= item.studentName %> (<%= item.studentId %>)</td>
+                  <td><%= item.documentType %></td>
+                  <td><span class="badge <%= item.statusClass %>"><%= item.status %></span></td>
+                  <td class="tiny"><%= item.archivedAt ? new Date(item.archivedAt).toLocaleString() : '—' %></td>
+                  <td>
+                    <form method="post" action="/admin/request/<%= item.id %>/unarchive" style="display:inline;">
+                      <button type="submit" class="btn-link">Restore</button>
+                    </form>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+student_id,display_name,email,course,section,year_level,semester,student_category,academic_term
+20230001,Juan Dela Cruz,juan@cca.edu.ph,Bachelor of Science in Information Systems,A,3rd,1st,undergraduate,2025-2026
+20230002,Maria Santos,maria@cca.edu.ph,Bachelor of Science in Computer Science,B,4th,1st,graduating,2025-2026
+23-0343,Joshua Louise C. Casuga,joshua.casuga@cca.edu.ph,Bachelor of Science in Information Systems,1703,3rd,1st,undergraduate,2025-2026

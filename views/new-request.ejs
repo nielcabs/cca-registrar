@@ -10,15 +10,13 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'Create New Request',
-          subtitle: user.hasScholarship
-            ? 'Scholarship student — receipt upload is optional. Select one or more documents below.'
-            : 'Non-scholarship student — attach payment receipt (JPG or PNG). Select one or more documents.',
+          subtitle: 'Select one or more documents below. Payment receipt upload is optional — attach if available.',
           actionsHtml: '<a class="btn-link" href="/student/dashboard">Back to Dashboard</a>'
         }) %>
 
         <section class="hero-banner">
           <h2>Request Submission</h2>
-          <p>Check every document you need in this transaction. One shared receipt applies to the whole batch.</p>
+          <p>Check every document you need in this transaction. One shared receipt applies to the whole batch when you upload one.</p>
         </section>
 
         <section class="card narrow">
@@ -41,13 +39,9 @@
             </label>
 
             <label>
-              Upload Payment Proof (JPG/PNG only, max 5 MB)
-              <% if (user.hasScholarship) { %>
-              <span class="muted tiny">Optional for scholarship students</span>
-              <% } else { %>
-              <span class="muted tiny">Required for non-scholarship students</span>
-              <% } %>
-              <input type="file" name="documentFile" accept=".jpg,.jpeg,.png" <%= user.hasScholarship ? '' : 'required' %> />
+              Upload Payment Proof (JPG/PNG/PDF, max 5 MB)
+              <span class="muted tiny">Optional — scholarship students and others may submit without a receipt; the registrar may verify payment separately.</span>
+              <input type="file" name="documentFile" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" />
             </label>
 
             <button type="submit">Submit Request<%= documentTypes.length > 1 ? 's' : '' %></button>

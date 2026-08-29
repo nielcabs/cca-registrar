@@ -12,7 +12,10 @@ const {
   getUserByEmail,
   insertUser,
   ensureClearanceRows,
-  updateClearance
+  updateClearance,
+  updateTuitionPayment,
+  syncTuitionScholarshipStatus,
+  upsertRosterRows
 } = require("./db");
 
 async function ensureSampleProofImage() {
@@ -57,6 +60,15 @@ async function seedUsers() {
       createdAt: nowIso
     },
     {
+      id: "sysadmin-001",
+      email: "sysadmin@cca.edu.ph",
+      passwordHash: password,
+      role: "sysadmin",
+      displayName: "CCA System Administrator",
+      isVerified: true,
+      createdAt: nowIso
+    },
+    {
       id: "vpaa-001",
       email: "vpaa@cca.edu.ph",
       passwordHash: password,
@@ -73,7 +85,7 @@ async function seedUsers() {
       displayName: "Juan Dela Cruz",
       studentId: "20230001",
       studentCategory: "undergraduate",
-      course: "BS Information Technology",
+      course: "Bachelor of Science in Information Systems",
       section: "A",
       hasScholarship: false,
       isVerified: true,
@@ -87,7 +99,7 @@ async function seedUsers() {
       displayName: "Maria Santos",
       studentId: "20230002",
       studentCategory: "graduating",
-      course: "BS Computer Science",
+      course: "Bachelor of Science in Computer Science",
       section: "B",
       hasScholarship: true,
       isVerified: true,
@@ -101,8 +113,22 @@ async function seedUsers() {
       displayName: "Pedro Reyes",
       studentId: "20230003",
       studentCategory: "graduate",
-      course: "BS Business Administration",
+      course: "Bachelor of Science in Entrepreneurship",
       section: "C",
+      hasScholarship: false,
+      isVerified: true,
+      createdAt: nowIso
+    },
+    {
+      id: "student-004",
+      email: "joshua.casuga@cca.edu.ph",
+      passwordHash: password,
+      role: "student",
+      displayName: "Joshua Louise C. Casuga",
+      studentId: "23-0343",
+      studentCategory: "undergraduate",
+      course: "Bachelor of Science in Information Systems",
+      section: "1703",
       hasScholarship: false,
       isVerified: true,
       createdAt: nowIso
@@ -143,7 +169,7 @@ async function seedSampleRequests() {
       document_type: "Transcript of Records",
       purpose: "Employment requirement",
       status: "For Verification",
-      clearance_status: "Partially Cleared",
+      clearance_status: "Partially Signed",
       uploaded_file_path: sampleFilePath,
       uploaded_file_name: path.basename(sampleFilePath),
       batch_id: null,
@@ -169,7 +195,7 @@ async function seedSampleRequests() {
       document_type: "Certificate of Enrollment",
       purpose: "Internship requirement",
       status: "Scheduled",
-      clearance_status: "Cleared",
+      clearance_status: "Signed",
       uploaded_file_path: "",
       uploaded_file_name: "",
       batch_id: "BATCH1002",
@@ -194,7 +220,7 @@ async function seedSampleRequests() {
       document_type: "Certificate of Graduation",
       purpose: "Board exam application",
       status: "Released",
-      clearance_status: "Cleared",
+      clearance_status: "Signed",
       uploaded_file_path: sampleFilePath,
       uploaded_file_name: path.basename(sampleFilePath),
       batch_id: null,
@@ -257,11 +283,11 @@ async function seedSampleRequests() {
 async function seedSampleClearances() {
   await ensureClearanceRows("20230001", "undergraduate");
   const juanPlan = {
-    library: "Cleared",
+    library: "Signed",
     finance: "Pending",
-    misso: "Cleared",
-    saso: "Cleared",
-    guidance: "Cleared",
+    misso: "Signed",
+    saso: "Signed",
+    guidance: "Signed",
     extension: "Pending"
   };
   for (const [code, status] of Object.entries(juanPlan)) {
@@ -281,7 +307,7 @@ async function seedSampleClearances() {
     await updateClearance({
       studentId: "20230002",
       departmentCode: dept.code,
-      status: "Cleared",
+      status: "Signed",
       remarks: "All requirements met.",
       updatedBy: `dept-${dept.code}@cca.edu.ph`
     });
@@ -292,17 +318,86 @@ async function seedSampleClearances() {
     await updateClearance({
       studentId: "20230003",
       departmentCode: code,
-      status: "Cleared",
+      status: "Signed",
       remarks: "Alumni clearance complete.",
       updatedBy: `dept-${code}@cca.edu.ph`
     });
   }
+
+  await ensureClearanceRows("23-0343", "undergraduate");
+}
+
+async function seedTuitionPayments() {
+  await syncTuitionScholarshipStatus("20230002", true, "finance@cca.edu.ph");
+  await updateTuitionPayment({
+    studentId: "20230001",
+    status: "Paid",
+    remarks: "Full payment — SY 2025-2026",
+    updatedBy: "finance@cca.edu.ph"
+  });
+  await updateTuitionPayment({
+    studentId: "20230003",
+    status: "Unpaid",
+    remarks: "",
+    updatedBy: "finance@cca.edu.ph"
+  });
+}
+
+async function seedEnrollmentRoster() {
+  await upsertRosterRows([
+    {
+      studentId: "20230001",
+      displayName: "Juan Dela Cruz",
+      email: "juan@cca.edu.ph",
+      course: "Bachelor of Science in Information Systems",
+      section: "A",
+      yearLevel: "3rd",
+      semester: "1st",
+      studentCategory: "undergraduate",
+      academicTerm: "2025-2026"
+    },
+    {
+      studentId: "20230002",
+      displayName: "Maria Santos",
+      email: "maria@cca.edu.ph",
+      course: "Bachelor of Science in Computer Science",
+      section: "B",
+      yearLevel: "4th",
+      semester: "1st",
+      studentCategory: "graduating",
+      academicTerm: "2025-2026"
+    },
+    {
+      studentId: "20230003",
+      displayName: "Pedro Reyes",
+      email: "pedro@cca.edu.ph",
+      course: "Bachelor of Science in Entrepreneurship",
+      section: "C",
+      yearLevel: "4th",
+      semester: "2nd",
+      studentCategory: "graduate",
+      academicTerm: "2025-2026"
+    },
+    {
+      studentId: "23-0343",
+      displayName: "Joshua Louise C. Casuga",
+      email: "joshua.casuga@cca.edu.ph",
+      course: "Bachelor of Science in Information Systems",
+      section: "1703",
+      yearLevel: "3rd",
+      semester: "1st",
+      studentCategory: "undergraduate",
+      academicTerm: "2025-2026"
+    }
+  ]);
 }
 
 async function seedAll() {
   await seedUsers();
+  await seedEnrollmentRoster();
   await seedSampleRequests();
   await seedSampleClearances();
+  await seedTuitionPayments();
 }
 
 module.exports = { seedAll };

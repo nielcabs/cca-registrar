@@ -14,6 +14,9 @@
           actionsHtml: '<a class="btn-link" href="/student/dashboard">Back to Dashboard</a>'
         }) %>
 
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+
         <section class="hero-banner">
           <h2>Status: <%= request.status %></h2>
           <p>
@@ -37,10 +40,85 @@
             </dl>
           </section>
 
+          <% if (canBook) { %>
+          <section class="card">
+            <h2>Book release appointment</h2>
+            <p class="muted tiny">Choose an available slot once your clearance is complete. Each slot accepts up to 5 students.</p>
+            <form method="post" action="/student/track/<%= request.id %>/book" class="form">
+              <label>
+                Available slot
+                <select name="scheduleSlot" id="scheduleSlot" required>
+                  <option value="">Select date and time</option>
+                  <% slots.filter((s) => s.available).forEach((slot) => { %>
+                  <option value="<%= slot.date %>|<%= slot.time %>"><%= slot.date %> <%= slot.time %> (<%= slot.capacity - slot.booked %> left)</option>
+                  <% }) %>
+                </select>
+              </label>
+              <input type="hidden" name="scheduleDate" id="scheduleDate" />
+              <input type="hidden" name="scheduleTime" id="scheduleTime" />
+              <button type="submit" class="btn-solid">Book appointment</button>
+            </form>
+            <script>
+              document.getElementById("scheduleSlot")?.addEventListener("change", (e) => {
+                const [date, time] = (e.target.value || "").split("|");
+                document.getElementById("scheduleDate").value = date || "";
+                document.getElementById("scheduleTime").value = time || "";
+              });
+            </script>
+          </section>
+          <% } %>
+
+          <% if (canReschedule) { %>
+          <section class="card">
+            <h2>Reschedule appointment</h2>
+            <p class="muted tiny">Current slot: <strong><%= request.schedule.date %> <%= request.schedule.time %></strong></p>
+            <form method="post" action="/student/track/<%= request.id %>/reschedule" class="form">
+              <label>
+                New slot
+                <select name="scheduleSlot" id="rescheduleSlot" required>
+                  <option value="">Select date and time</option>
+                  <% slots.filter((s) => s.available || (s.date === request.schedule.date && s.time === request.schedule.time)).forEach((slot) => { %>
+                  <option value="<%= slot.date %>|<%= slot.time %>" <%= slot.date === request.schedule.date && slot.time === request.schedule.time ? 'selected' : '' %>><%= slot.date %> <%= slot.time %> (<%= slot.capacity - slot.booked %> left)</option>
+                  <% }) %>
+                </select>
+              </label>
+              <input type="hidden" name="scheduleDate" id="rescheduleDate" />
+              <input type="hidden" name="scheduleTime" id="rescheduleTime" />
+              <button type="submit" class="btn-solid">Save new time</button>
+            </form>
+            <script>
+              (function () {
+                const select = document.getElementById("rescheduleSlot");
+                const sync = () => {
+                  const [date, time] = (select?.value || "").split("|");
+                  document.getElementById("rescheduleDate").value = date || "";
+                  document.getElementById("rescheduleTime").value = time || "";
+                };
+                select?.addEventListener("change", sync);
+                sync();
+              })();
+            </script>
+          </section>
+          <% } %>
+
+          <% if (canCancel) { %>
+          <section class="card">
+            <h2>Cancel appointment</h2>
+            <p class="muted tiny">Cancelling returns your request to <strong>For Verification</strong>. You can book again when ready.</p>
+            <form method="post" action="/student/track/<%= request.id %>/cancel-appointment" class="form" onsubmit="return confirm('Cancel this release appointment?');">
+              <button type="submit" class="btn-outline">Cancel appointment</button>
+            </form>
+          </section>
+          <% } %>
+
           <section class="card">
             <h2>Uploaded Proof</h2>
+            <% if (request.uploadedFilePath) { %>
             <p><a class="table-link" href="<%= request.uploadedFilePath %>" target="_blank">View uploaded file</a></p>
             <img src="<%= request.uploadedFilePath %>" alt="Uploaded proof document" class="preview" />
+            <% } else { %>
+            <p class="muted">No payment receipt uploaded.</p>
+            <% } %>
           </section>
 
           <section class="card full">

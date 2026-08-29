@@ -10,7 +10,7 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'Student clearance overview',
-          subtitle: 'Filter by course and section. Clearance offices differ by student category (Undergrad, Graduating, Graduate).'
+          subtitle: 'Filter by institute and section. Clearance offices differ by student category (Undergrad, Graduating, Graduate).'
         }) %>
 
         <section class="card panel-toolbar">
@@ -20,9 +20,9 @@
               <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="e.g. Maria, 20230002, @cca.edu.ph" />
             </label>
             <label>
-              Course
+              Institute
               <select name="course">
-                <option value="">All courses</option>
+                <option value="">All institutes</option>
                 <% courses.forEach((c) => { %>
                 <option value="<%= c %>" <%= courseFilter === c ? 'selected' : '' %>><%= c %></option>
                 <% }) %>
@@ -46,7 +46,7 @@
 
         <section class="hero-banner">
           <h2>Registrar clearance monitoring</h2>
-          <p>Undergraduate &amp; Graduating: 6 offices. Graduate (Alumni): Library, Finance, MISSO, Guidance, Alumni Office.</p>
+          <p>Undergraduate & Graduating: Library → MISSO → Extension → Guidance → Student Affairs → Finance → Registrar. Graduate (Alumni): includes Alumni Office.</p>
         </section>
 
         <section class="card data-card">
@@ -60,9 +60,9 @@
                   <th>Student ID</th>
                   <th>Name</th>
                   <th>Category</th>
-                  <th>Course</th>
+                  <th>Institute</th>
                   <th>Section</th>
-                  <th>Offices cleared</th>
+                  <th>Offices signed</th>
                   <th>Overall</th>
                   <th>Action</th>
                 </tr>
@@ -78,7 +78,7 @@
                   <td><%= r.categoryLabel %></td>
                   <td class="tiny"><%= r.course || '—' %></td>
                   <td><%= r.section || '—' %></td>
-                  <td><%= r.nCleared %> / <%= r.nRequired %></td>
+                  <td><%= r.nSigned %> / <%= r.nRequired %></td>
                   <td><span class="badge <%= r.summaryBadge %>"><%= r.clearanceSummary %></span></td>
                   <td><a class="table-link" href="/admin/clearance/<%= r.studentId %>">Open detail</a></td>
                 </tr>

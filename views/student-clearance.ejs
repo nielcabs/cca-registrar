@@ -10,13 +10,83 @@
       <main class="main-panel">
         <%- include('partials/topbar', {
           title: 'My Clearance Status',
-          subtitle: 'View your clearance status across participating departments.'
+          subtitle: 'Upload one signed clearance form. Replace the image anytime — OCR runs automatically on upload.'
         }) %>
+
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
 
         <section class="hero-banner">
           <h2>Overall status: <span class="badge <%= summaryBadge %>"><%= summary %></span></h2>
-          <p>All <%= clearances.length %> required offices must mark you as <strong>Cleared</strong> before the registrar can schedule or release your documents.</p>
+          <p>Upload a photo or scan of your <strong>complete signed clearance form</strong>. Offices follow the CCA form: Library → MISSO → Extension → Guidance → Student Affairs → Finance → <strong>Registrar (last)</strong>. The Dean is not included in the system. All offices must be <strong>Signed</strong> before booking release.</p>
         </section>
+
+        <section class="card clearance-upload-card">
+          <div class="card-head">
+            <h2>Clearance form upload</h2>
+          </div>
+
+          <% if (clearanceUpload && clearanceUpload.photoPath) { %>
+          <div class="clearance-current">
+            <p class="muted tiny">Current file: <strong><%= clearanceUpload.photoName || 'Uploaded image' %></strong>
+              <% if (clearanceUpload.photoUpdatedAt) { %> · Updated <%= new Date(clearanceUpload.photoUpdatedAt).toLocaleString() %><% } %>
+            </p>
+            <a class="table-link" href="<%= clearanceUpload.photoPath %>" target="_blank">View full image</a>
+            <img src="<%= clearanceUpload.photoPath %>" alt="Uploaded clearance form" class="preview clearance-preview" />
+          </div>
+          <% } else { %>
+          <p class="muted">No clearance form uploaded yet.</p>
+          <% } %>
+
+          <% if (user.isVerified) { %>
+          <form method="post" action="/student/clearance/upload" enctype="multipart/form-data" class="form clearance-upload-form">
+            <label>
+              <%= clearanceUpload && clearanceUpload.photoPath ? 'Replace clearance form (JPG/PNG/PDF, max 5 MB)' : 'Upload clearance form (JPG/PNG/PDF, max 5 MB)' %>
+              <input type="file" name="clearancePhoto" accept="image/jpeg,image/png,application/pdf,.pdf" required />
+            </label>
+            <button type="submit"><%= clearanceUpload && clearanceUpload.photoPath ? 'Update image &amp; re-run OCR' : 'Upload &amp; run OCR' %></button>
+          </form>
+          <% } else { %>
+          <p class="muted tiny">Account verification is required before uploading a clearance form.</p>
+          <% } %>
+        </section>
+
+        <% if (clearanceUpload && clearanceUpload.ocr && clearanceUpload.ocr.state !== 'not_run') { %>
+        <section class="card">
+          <h2>OCR result</h2>
+          <% if (clearanceUpload.ocr.state === 'failed') { %>
+            <p class="alert error">OCR could not read this image. Try a clearer, well-lit photo or scan.</p>
+          <% } else { %>
+            <p class="muted">Confidence: <strong><%= clearanceUpload.ocr.confidence ?? 'N/A' %>%</strong></p>
+            <% if (ocrCompare && ocrCompare.warnings && ocrCompare.warnings.length) { %>
+            <div class="alert error">
+              <strong>Profile mismatch</strong>
+              <ul class="tiny" style="margin:0.35rem 0 0 1rem;">
+                <% ocrCompare.warnings.forEach((w) => { %><li><%= w %></li><% }) %>
+              </ul>
+              <p class="tiny muted" style="margin-top:0.35rem;">Contact the registrar if your profile details are incorrect.</p>
+            </div>
+            <% } else if (ocrCompare && (ocrCompare.nameMatch || ocrCompare.idMatch)) { %>
+            <p class="alert success tiny">OCR name and student ID match your profile.</p>
+            <% } %>
+            <dl class="detail-list">
+              <div><dt>Student name (read)</dt><dd><%= clearanceUpload.ocr.extracted.studentName || '—' %></dd></div>
+              <div><dt>Student ID (read)</dt><dd><%= clearanceUpload.ocr.extracted.studentId || '—' %></dd></div>
+              <div><dt>Date (read)</dt><dd><%= clearanceUpload.ocr.extracted.clearanceDate || '—' %></dd></div>
+              <div><dt>Offices detected in text</dt>
+                <dd>
+                  <% if (clearanceUpload.ocr.extracted.detectedOffices && clearanceUpload.ocr.extracted.detectedOffices.length) { %>
+                    <% clearanceUpload.ocr.extracted.detectedOffices.forEach((code) => {
+                      const dept = departments.find((d) => d.code === code);
+                    %><span class="badge badge-default" style="margin-right:0.35rem;"><%= dept ? dept.name : code %></span><% }) %>
+                  <% } else { %>—<% } %>
+                </dd>
+              </div>
+            </dl>
+            <p class="tiny muted">Tip: photograph or scan <strong>only the paper clearance form</strong> (not a screenshot of this page). Use good lighting and keep the form flat for best OCR results.</p>
+          <% } %>
+        </section>
+        <% } %>
 
         <section class="card data-card">
           <div class="card-head">

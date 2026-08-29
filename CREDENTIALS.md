@@ -45,6 +45,6 @@ Each office dashboard has a **search bar** (name, ID, email).
 
 1. **Admin** → **Document requests** → search / open request → **Run OCR** → assign slot → save.  
 2. **Admin** → **Student clearances** → search by name → open detail grid.  
-3. **Department** (e.g. Library) → search student → set **Cleared**.  
+3. **Department** (e.g. Library) → search student → set **Signed**.  
 4. **Student** → track request / view clearance.  
 5. **Admin** → **Reports** → **Download PDF report**.

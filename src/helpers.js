@@ -13,9 +13,12 @@ function computeStatusBadge(status) {
 
 function computeClearanceBadge(status) {
   const lookup = {
+    Signed: "badge-released",
     Cleared: "badge-released",
+    "Partially Signed": "badge-scheduled",
     "Partially Cleared": "badge-scheduled",
     Pending: "badge-verify",
+    "Not Signed": "badge-rejected",
     "Not Cleared": "badge-rejected"
   };
   return lookup[status] || "badge-default";
@@ -47,9 +50,20 @@ function formatDate(value) {
   return dayjs(value).format("MMM D, YYYY h:mm A");
 }
 
-function formatDate(value) {
-  if (!value) return "";
-  return dayjs(value).format("MMM D, YYYY h:mm A");
+async function buildSlotAvailability(countScheduleBookings) {
+  const slots = generateUpcomingSlots(14);
+  const results = [];
+  for (const slot of slots) {
+    const booked = await countScheduleBookings(slot.date, slot.time);
+    results.push({
+      date: slot.date,
+      time: slot.time,
+      booked,
+      capacity: SLOT_CAPACITY,
+      available: booked < SLOT_CAPACITY
+    });
+  }
+  return results;
 }
 
 const DOCUMENT_TYPES = [
@@ -61,6 +75,25 @@ const DOCUMENT_TYPES = [
   "Certificate of Graduation",
   "Honorable Dismissal"
 ];
+
+function computeTuitionBadge(status) {
+  const lookup = {
+    Paid: "badge-released",
+    Unpaid: "badge-rejected",
+    Partial: "badge-scheduled",
+    "For Verification": "badge-verify",
+    Scholarship: "badge-verify"
+  };
+  return lookup[status] || "badge-default";
+}
+
+const TUITION_PAYMENT_STATUSES = ["Unpaid", "For Verification", "Paid", "Partial"];
+const FINANCE_TUITION_STATUSES = ["Unpaid", "For Verification", "Paid", "Partial"];
+
+function displayTuitionStatus(user) {
+  if (user.hasScholarship) return "Scholarship";
+  return user.tuitionPaymentStatus || "Unpaid";
+}
 
 function categoryLabel(value) {
   const labels = {
@@ -74,10 +107,15 @@ function categoryLabel(value) {
 module.exports = {
   computeStatusBadge,
   computeClearanceBadge,
+  computeTuitionBadge,
+  TUITION_PAYMENT_STATUSES,
+  FINANCE_TUITION_STATUSES,
+  displayTuitionStatus,
   generateUpcomingSlots,
   SLOT_CAPACITY,
   SLOT_TIMES,
   formatDate,
+  buildSlotAvailability,
   DOCUMENT_TYPES,
   categoryLabel
 };

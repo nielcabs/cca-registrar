@@ -72,8 +72,8 @@ flowchart TB
 Major processes and data stores inside the system. Flows are labeled with the main data moved.
 
 ```mermaid
-flowchart LR
-  subgraph external[" "]
+flowchart TB
+  subgraph external["External entities"]
     S((Student))
     R((Registrar))
     O((Dept officer))
@@ -126,6 +126,12 @@ flowchart LR
   P6 <-->|read| D2
   P6 <-->|read| D1
   P6 <-->|read| D4
+
+  P1 --> P2
+  P2 --> P3
+  P3 --> P4
+  P4 --> P5
+  P5 --> P6
 ```
 
 
@@ -139,7 +145,7 @@ flowchart LR
 | 2.0 | Manage user accounts    | Registrar creates student / department / registrar staff accounts            |
 | 3.0 | Submit & list requests  | Student submits request + receipt file; registrar lists/filters queue        |
 | 4.0 | Process request         | OCR on upload, edit extracted fields, set status, pick release slot, remarks |
-| 5.0 | Maintain clearances     | Officers set Pending/Cleared/etc.; students and registrar read               |
+| 5.0 | Maintain clearances     | Officers set Pending/Signed/Not Signed; students and registrar read               |
 | 6.0 | Reports & audit         | Aggregated stats, audit trail, PDF export                                    |
 
 

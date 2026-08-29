@@ -645,6 +645,7 @@ module.exports = {
   notifyAllUsers,
   notifyStudentByStudentId,
   getDeliveryModes,
+  sendEmail,
   normalizePhone,
   normalizePhoneForPhilSms,
   smsBody,

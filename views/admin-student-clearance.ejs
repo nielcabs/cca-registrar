@@ -14,13 +14,75 @@
           actionsHtml: '<a class="btn-link" href="/admin/requests">Back to document requests</a> <a class="btn-link" href="/admin/clearances">All students</a>'
         }) %>
 
+        <% if (message) { %><div class="alert success"><%= message %></div><% } %>
+        <% if (typeof error !== 'undefined' && error) { %><div class="alert error"><%= error %></div><% } %>
+
         <section class="hero-banner">
-          <h2>Overall clearance: <%= summary %></h2>
+          <h2>Overall clearance: <span class="badge <%= summaryBadge %>"><%= summary %></span></h2>
           <p>
-            Prior documents marked <strong>Released</strong> for this student: <strong><%= releasedCount %></strong>.
-            Offices update their own rows; this page is read-only for the registrar.
+            Offices follow the CCA clearance form order. <strong>Office of the Registrar</strong> is last.
+            The Dean is on the paper form but is <strong>not</strong> tracked in this system.
+            Department officers update their own rows; registrar staff signs the final registrar row below.
           </p>
         </section>
+
+        <section class="card clearance-upload-card">
+          <div class="card-head"><h2>Uploaded clearance form</h2></div>
+          <% if (clearanceUpload && clearanceUpload.photoPath) { %>
+            <p class="muted tiny"><%= clearanceUpload.photoName || 'Image' %>
+              <% if (clearanceUpload.photoUpdatedAt) { %> · <%= new Date(clearanceUpload.photoUpdatedAt).toLocaleString() %><% } %>
+            </p>
+            <a class="table-link" href="<%= clearanceUpload.photoPath %>" target="_blank">View full image</a>
+            <img src="<%= clearanceUpload.photoPath %>" alt="Clearance form" class="preview clearance-preview" />
+            <% if (!readOnly) { %>
+            <form method="post" action="/admin/clearance/<%= studentId %>/run-ocr" class="form" style="margin-top:0.75rem;">
+              <button type="submit">Re-run OCR on clearance form</button>
+            </form>
+            <% } %>
+          <% } else { %>
+            <p class="muted">Student has not uploaded a clearance form yet.</p>
+          <% } %>
+        </section>
+
+        <% if (clearanceUpload && clearanceUpload.ocr && clearanceUpload.ocr.state !== 'not_run') { %>
+        <section class="card">
+          <h2>Clearance OCR</h2>
+          <% if (clearanceUpload.ocr.state === 'failed') { %>
+            <p class="alert error">OCR failed on the last run.</p>
+          <% } else { %>
+            <p class="muted">Confidence: <strong><%= clearanceUpload.ocr.confidence ?? 'N/A' %>%</strong></p>
+            <% if (ocrCompare && ocrCompare.warnings && ocrCompare.warnings.length) { %>
+            <div class="alert error">
+              <strong>Profile mismatch warnings</strong>
+              <ul class="tiny" style="margin:0.35rem 0 0 1rem;">
+                <% ocrCompare.warnings.forEach((w) => { %><li><%= w %></li><% }) %>
+              </ul>
+            </div>
+            <% } else if (ocrCompare && (ocrCompare.nameMatch || ocrCompare.idMatch)) { %>
+            <p class="alert success tiny">OCR name and student ID match the profile on record.</p>
+            <% } %>
+            <dl class="detail-list">
+              <div><dt>Student name</dt><dd><%= clearanceUpload.ocr.extracted.studentName || '—' %></dd></div>
+              <div><dt>Student ID</dt><dd><%= clearanceUpload.ocr.extracted.studentId || '—' %></dd></div>
+              <div><dt>Date</dt><dd><%= clearanceUpload.ocr.extracted.clearanceDate || '—' %></dd></div>
+              <div><dt>Offices detected</dt>
+                <dd>
+                  <% if (clearanceUpload.ocr.extracted.detectedOffices && clearanceUpload.ocr.extracted.detectedOffices.length) { %>
+                    <% clearanceUpload.ocr.extracted.detectedOffices.forEach((code) => {
+                      const dept = departments.find((d) => d.code === code);
+                    %><%= dept ? dept.name : code %><% if (code !== clearanceUpload.ocr.extracted.detectedOffices[clearanceUpload.ocr.extracted.detectedOffices.length - 1]) { %>, <% } %><% }) %>
+                  <% } else { %>—<% } %>
+                </dd>
+              </div>
+            </dl>
+            <% if (!readOnly && detectedOffices && detectedOffices.length) { %>
+            <form method="post" action="/admin/clearance/<%= studentId %>/apply-ocr" class="form" style="margin-top:0.75rem;" onsubmit="return confirm('Mark detected offices as Signed from OCR? Department officers should still confirm.');">
+              <button type="submit" class="btn-solid">Apply detected offices to clearance</button>
+            </form>
+            <% } %>
+          <% } %>
+        </section>
+        <% } %>
 
         <section class="card data-card">
           <div class="card-head"><h2>Per-department status</h2></div>
@@ -31,6 +93,7 @@
                   <th>Department / office</th>
                   <th>Status</th>
                   <th>Remarks</th>
+                  <th>Sign-off photo</th>
                   <th>Updated by (email)</th>
                   <th>Updated at</th>
                 </tr>
@@ -41,6 +104,11 @@
                   <td><%= c.departmentName %></td>
                   <td><span class="badge <%= c.badge %>"><%= c.status %></span></td>
                   <td><%= c.remarks || '—' %></td>
+                  <td class="tiny">
+                    <% if (c.photoPath) { %>
+                    <a class="table-link" href="<%= c.photoPath %>" target="_blank"><%= c.photoName || 'View' %></a>
+                    <% } else { %>—<% } %>
+                  </td>
                   <td class="tiny"><%= c.updatedBy || '—' %></td>
                   <td class="tiny"><%= c.updatedAt ? new Date(c.updatedAt).toLocaleString() : '—' %></td>
                 </tr>
@@ -49,6 +117,29 @@
             </table>
           </div>
         </section>
+
+        <% const registrarRow = clearances.find((c) => c.departmentCode === 'registrar'); %>
+        <% if (!readOnly && registrarRow) { %>
+        <section class="card">
+          <div class="card-head"><h2>Registrar clearance (final sign-off)</h2></div>
+          <p class="muted tiny">Only registrar staff can update the last office on the clearance form.</p>
+          <form method="post" action="/admin/clearance/<%= studentId %>/registrar" class="form two-col">
+            <label>
+              Status
+              <select name="status" required>
+                <% ['Pending', 'Signed', 'Not Signed'].forEach((value) => { %>
+                <option value="<%= value %>" <%= registrarRow.status === value ? 'selected' : '' %>><%= value %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              Remarks
+              <input type="text" name="remarks" value="<%= registrarRow.remarks || '' %>" placeholder="Optional note" />
+            </label>
+            <button type="submit" class="full-row">Save registrar clearance</button>
+          </form>
+        </section>
+        <% } %>
       </main>
     </div>
   </body>

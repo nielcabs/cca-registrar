@@ -15,12 +15,20 @@
         <%- include('partials/topbar', {
           title: 'Student Dashboard',
           subtitle: 'Track your requisitions, schedule, and clearance updates.',
-          actionsHtml: '<a class="btn-solid" href="/student/new-request">+ New Request</a>'
+          actionsHtml: user.isVerified ? '<a class="btn-solid" href="/student/new-request">+ New Request</a>' : ''
         }) %>
+
+        <% if (pendingVerification) { %>
+        <div class="alert" style="background:#fff7ed;border-color:#fdba74;color:#9a3412;">
+          <strong>Enrollment pending verification.</strong>
+          The registrar must confirm your enrollment before you can submit document requests or book appointments.
+          You can still update your <a href="/profile">profile</a> and upload your clearance form.
+        </div>
+        <% } %>
 
         <section class="hero-banner">
           <h2>CCA document requests &amp; scheduling</h2>
-          <p>Submit requests with payment proof, track status, view clearance from each office, and see your release appointment when scheduled.</p>
+          <p>Submit requests with payment proof, upload your <a href="/student/tuition">tuition receipt</a> for Finance, track status, view clearance from each office, and see your release appointment when scheduled.</p>
         </section>
 
         <section class="stat-grid">
@@ -48,7 +56,7 @@
             <a class="btn-link" href="/student/clearance">View Details</a>
           </div>
           <p>Your overall clearance status: <span class="badge <%= clearanceBadge %>"><%= clearanceSummary %></span></p>
-          <p class="muted tiny">The registrar can schedule release only after every department shows <strong>Cleared</strong>. If you request another document later, your existing clearance stays on file.</p>
+          <p class="muted tiny">The registrar can schedule release only after every department shows <strong>Signed</strong>. If you request another document later, your existing clearance stays on file.</p>
         </section>
 
         <section class="card data-card">
@@ -80,7 +88,12 @@
                   <td><span class="badge <%= item.statusClass %>"><%= item.status %></span></td>
                   <td><%= item.clearanceStatus %></td>
                   <td><%= item.schedule ? `${item.schedule.date} ${item.schedule.time}` : "Not set" %></td>
-                  <td><a class="table-link" href="/student/track/<%= item.id %>">Track</a></td>
+                  <td class="nowrap">
+                    <a class="table-link" href="/student/track/<%= item.id %>">Track</a>
+                    <% if (item.canBook) { %>
+                      · <a class="table-link" href="/student/track/<%= item.id %>">Book slot</a>
+                    <% } %>
+                  </td>
                 </tr>
                 <% }) %>
               </tbody>

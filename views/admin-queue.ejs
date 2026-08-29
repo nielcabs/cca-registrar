@@ -9,7 +9,7 @@
     <% const scheduledCount = requests.filter((item) => item.status === "Scheduled").length; %>
     <% const releasedCount = requests.filter((item) => item.status === "Released").length; %>
     <% const ocrProcessedCount = requests.filter((item) => item.ocr?.state === "processed" || item.ocr?.state === "corrected").length; %>
-    <% const viewParam = statusGroup === 'completed' ? 'completed' : statusGroup === 'all' ? 'all' : 'active'; %>
+    <% const viewParam = statusGroup === 'completed' ? 'completed' : statusGroup === 'archived' ? 'archived' : statusGroup === 'all' ? 'all' : 'active'; %>
 
     <div class="dashboard-shell">
       <%- include('partials/sidebar', { user, active: 'requests' }) %>
@@ -18,13 +18,14 @@
           title: 'Document request queue',
           subtitle: readOnly
             ? 'View-only access (VPAA). Active and completed transactions are listed separately.'
-            : 'Search, filter by course/section, and process OCR, payment verification, and release slots.'
+            : 'Search, filter by institute/section, and process OCR, payment verification, and release slots.'
         }) %>
 
         <section class="card panel-toolbar">
           <div class="tab-row mb-sm">
             <a class="btn-link <%= viewParam === 'active' ? 'active-tab' : '' %>" href="/admin/requests?view=active">Active requests</a>
-            <a class="btn-link <%= viewParam === 'completed' ? 'active-tab' : '' %>" href="/admin/requests?view=completed">Completed (Released)</a>
+            <a class="btn-link <%= viewParam === 'completed' ? 'active-tab' : '' %>" href="/admin/requests?view=completed">Completed (Released / Rejected)</a>
+            <a class="btn-link <%= viewParam === 'archived' ? 'active-tab' : '' %>" href="/admin/archive">Archived</a>
             <a class="btn-link <%= viewParam === 'all' ? 'active-tab' : '' %>" href="/admin/requests?view=all">All</a>
           </div>
           <form method="get" action="/admin/requests" class="form two-col form-end">
@@ -34,9 +35,9 @@
               <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="Name, ID, document type, request or batch ID" />
             </label>
             <label>
-              Course
+              Institute
               <select name="course">
-                <option value="">All courses</option>
+                <option value="">All institutes</option>
                 <% courses.forEach((c) => { %>
                 <option value="<%= c %>" <%= courseFilter === c ? 'selected' : '' %>><%= c %></option>
                 <% }) %>
@@ -60,7 +61,7 @@
 
         <section class="hero-banner">
           <h2><%= viewParam === 'completed' ? 'Completed transactions' : viewParam === 'active' ? 'Active queue' : 'All requests' %></h2>
-          <p><%= viewParam === 'completed' ? 'Released documents are kept here separately from pending work.' : 'Registrar operations for document processing and scheduling.' %></p>
+          <p><%= viewParam === 'completed' ? 'Released and rejected documents kept here separately from pending work.' : 'Registrar operations for document processing and scheduling.' %></p>
         </section>
 
         <section class="stat-grid">
@@ -110,7 +111,15 @@
                   <td class="tiny"><%= item.uploadedFilePath ? 'Attached' : 'None (scholarship)' %></td>
                   <td><%= item.clearanceStatus %></td>
                   <td class="tiny"><%= new Date(item.createdAt).toLocaleString() %></td>
-                  <td><a class="table-link" href="/admin/request/<%= item.id %>"><%= readOnly ? 'View' : 'Open & process' %></a></td>
+                  <td>
+                    <a class="table-link" href="/admin/request/<%= item.id %>"><%= readOnly ? 'View' : 'Open & process' %></a>
+                    <% if (!readOnly && viewParam === 'completed' && ['Released','Rejected'].includes(item.status)) { %>
+                    <form method="post" action="/admin/request/<%= item.id %>/archive" style="display:inline;margin-left:0.5rem;">
+                      <input type="hidden" name="redirectView" value="completed" />
+                      <button type="submit" class="btn-link" onclick="return confirm('Archive this request?');">Archive</button>
+                    </form>
+                    <% } %>
+                  </td>
                 </tr>
                 <% }) %>
               </tbody>

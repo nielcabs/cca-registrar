@@ -103,15 +103,16 @@ function assert(name, ok, detail = "") {
     newReq.body.includes("documentTypes") && newReq.body.includes("Submit Requests")
   );
   assert(
-    "Receipt required (non-scholarship)",
-    newReq.body.includes("Required for non-scholarship")
+    "Receipt optional (all students)",
+    newReq.body.includes("Payment receipt upload is optional") &&
+      !newReq.body.match(/name="documentFile"[^>]*required/i)
   );
 
   const maria = await login("maria@cca.edu.ph", "cca123");
   const mariaReq = await get("/student/new-request", maria.cookie);
   assert(
     "Receipt optional (scholarship)",
-    mariaReq.body.includes("Optional for scholarship students")
+    mariaReq.body.includes("Payment receipt upload is optional")
   );
 
   const admin = await login("admin@cca.edu.ph", "cca123");
@@ -123,17 +124,31 @@ function assert(name, ok, detail = "") {
   const completed = await get("/admin/requests?view=completed", admin.cookie);
   assert(
     "Completed queue tab",
-    completed.body.includes("Completed transactions") && completed.body.includes("DEMO1003")
+    completed.body.includes("Completed transactions") &&
+      completed.body.includes("Released / Rejected") &&
+      completed.body.includes("DEMO1003")
   );
 
   const filters = await get(
-    "/admin/requests?view=active&course=BS%20Information%20Technology&section=A",
+    "/admin/requests?view=active&course=Bachelor%20of%20Science%20in%20Information%20Systems&section=A",
     admin.cookie
   );
   assert("Course/section filter", filters.body.includes("20230001"));
 
   const clearances = await get("/admin/clearances", admin.cookie);
   assert("Clearance overview", clearances.body.includes("Undergraduate"));
+
+  const sysadmin = await login("sysadmin@cca.edu.ph", "cca123");
+  assert("Sysadmin login", sysadmin.location === "/admin/users");
+
+  const roster = await get("/admin/roster", sysadmin.cookie);
+  assert("Sysadmin roster page", roster.status === 200 && roster.body.includes("Enrollment roster"));
+
+  const archive = await get("/admin/archive", sysadmin.cookie);
+  assert("Sysadmin archive page", archive.status === 200 && archive.body.includes("Archived document requests"));
+
+  const registrarUsers = await get("/admin/users", admin.cookie);
+  assert("Registrar blocked from user management", registrarUsers.status === 403);
 
   const vpaa = await login("vpaa@cca.edu.ph", "cca123");
   assert("VPAA login", vpaa.location === "/admin/dashboard");
