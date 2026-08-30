@@ -581,11 +581,7 @@ async function sendSms(user, title, message) {
   }
 }
 
-async function notifyUser(userId, { title, message, link = null }) {
-  await createNotification({ userId, title, message, link });
-  const user = await getUserById(userId);
-  if (!user) return { email: null, sms: null };
-
+async function deliverNotificationChannels(user, title, message, link) {
   let email = null;
   let sms = null;
   if (user.notifyEmail) email = await sendEmail(user, title, message, link);
@@ -593,12 +589,57 @@ async function notifyUser(userId, { title, message, link = null }) {
   return { email, sms };
 }
 
-async function notifyAllUsers({ title, message, link = null, excludeUserId = null }) {
-  const users = await listUsers();
-  for (const u of users) {
-    if (excludeUserId && u.id === excludeUserId) continue;
-    await notifyUser(u.id, { title, message, link });
+async function notifyUser(userId, { title, message, link = null, waitForDelivery = false }) {
+  await createNotification({ userId, title, message, link });
+
+  const runDelivery = async () => {
+    const user = await getUserById(userId);
+    if (!user) return { email: null, sms: null };
+    return deliverNotificationChannels(user, title, message, link);
+  };
+
+  if (waitForDelivery) {
+    return runDelivery();
   }
+
+  runDelivery().catch((err) => {
+    console.error("[notify] background delivery failed:", err.message);
+  });
+  return { email: null, sms: null, background: true };
+}
+
+async function notifyAllUsers({
+  title,
+  message,
+  link = null,
+  excludeUserId = null,
+  waitForDelivery = false
+}) {
+  const users = await listUsers();
+  const targets = users.filter((u) => !excludeUserId || u.id !== excludeUserId);
+
+  await Promise.all(
+    targets.map((u) => createNotification({ userId: u.id, title, message, link }))
+  );
+
+  const runDelivery = async () => {
+    const results = [];
+    for (const u of targets) {
+      const user = await getUserById(u.id);
+      if (!user) continue;
+      results.push(await deliverNotificationChannels(user, title, message, link));
+    }
+    return results;
+  };
+
+  if (waitForDelivery) {
+    return runDelivery();
+  }
+
+  runDelivery().catch((err) => {
+    console.error("[notify] background broadcast failed:", err.message);
+  });
+  return { background: true };
 }
 
 async function notifyStudentByStudentId(studentId, payload) {

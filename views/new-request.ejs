@@ -44,10 +44,18 @@
               <input type="file" name="documentFile" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" />
             </label>
 
-            <button type="submit">Submit Request<%= documentTypes.length > 1 ? 's' : '' %></button>
+            <button type="submit" id="submitRequestBtn">Submit Request<%= documentTypes.length > 1 ? 's' : '' %></button>
           </form>
         </section>
       </main>
     </div>
+    <script>
+      document.querySelector("form[action='/student/new-request']")?.addEventListener("submit", function () {
+        var btn = document.getElementById("submitRequestBtn");
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = "Submitting…";
+      });
+    </script>
   </body>
 </html>

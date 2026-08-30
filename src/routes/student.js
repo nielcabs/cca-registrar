@@ -359,14 +359,15 @@ router.post(
       };
 
       await insertRequest(newRequest);
-      await writeAudit(
-        req.session.user.email,
-        "submit_request",
-        `id=${newRequest.id} doc=${newRequest.documentType}${batchId ? ` batch=${batchId}` : ""}`
-      );
     }
 
-    await notifyUser(req.session.user.id, {
+    await writeAudit(
+      req.session.user.email,
+      "submit_request",
+      `count=${documentTypes.length}${batchId ? ` batch=${batchId}` : ""} docs=${documentTypes.join(",")}`
+    );
+
+    notifyUser(req.session.user.id, {
       title: "Document request submitted",
       message: `Submitted ${documentTypes.length} document request(s)${batchId ? ` under batch ${batchId}` : ""}. The registrar office will review your payment proof and clearance.`,
       link: "/student/dashboard"
@@ -455,7 +456,7 @@ router.post("/track/:id/book", requireVerifiedStudent, async (req, res) => {
       "book_appointment",
       `id=${found.id} ${scheduleDate} ${scheduleTime}`
     );
-    await notifyUser(req.session.user.id, {
+    notifyUser(req.session.user.id, {
       title: "Release appointment booked",
       message: `Your ${found.documentType} release is scheduled on ${scheduleDate} at ${scheduleTime}.`,
       link: `/student/track/${found.id}`
@@ -516,7 +517,7 @@ router.post("/track/:id/reschedule", requireVerifiedStudent, async (req, res) =>
       "reschedule_appointment",
       `id=${found.id} ${previous?.date} ${previous?.time} -> ${scheduleDate} ${scheduleTime}`
     );
-    await notifyUser(req.session.user.id, {
+    notifyUser(req.session.user.id, {
       title: "Release appointment rescheduled",
       message: `Your ${found.documentType} release is now scheduled on ${scheduleDate} at ${scheduleTime}.`,
       link: `/student/track/${found.id}`
@@ -568,7 +569,7 @@ router.post("/track/:id/cancel-appointment", requireVerifiedStudent, async (req,
       "cancel_appointment",
       `id=${found.id} was ${previous?.date} ${previous?.time}`
     );
-    await notifyUser(req.session.user.id, {
+    notifyUser(req.session.user.id, {
       title: "Release appointment cancelled",
       message: `Your ${found.documentType} release appointment was cancelled. Book a new slot from the request tracker when ready.`,
       link: `/student/track/${found.id}`

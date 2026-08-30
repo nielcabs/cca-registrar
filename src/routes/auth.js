@@ -619,7 +619,8 @@ router.post("/notification-settings/sample", requireAuth, async (req, res) => {
   const results = await notifyUser(fresh.id, {
     title: "CCA Registrar",
     message: "You will receive request and clearance updates on this number.",
-    link: "/notification-settings"
+    link: "/notification-settings",
+    waitForDelivery: true
   });
   await writeAudit(fresh.email, "send_sample_alert", `channels=${channels.join(",")}`);
 
