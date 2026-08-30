@@ -5,7 +5,7 @@
     <title>Student Registration</title>
   </head>
   <body class="auth-bg">
-    <main class="card auth-card" style="width: min(560px, 92vw);">
+    <main class="card auth-card auth-card-wide">
       <div class="brand" style="margin-bottom: 0.5rem;">CCA Registrar</div>
       <h1 style="margin: 0 0 0.35rem;">Create student account</h1>
       <p class="muted">Register with your @cca.edu.ph school email. Accounts require registrar verification before submitting requests.</p>
@@ -32,10 +32,7 @@
             <% }) %>
           </select>
         </label>
-        <label>
-          Institute / Program
-          <%- include('partials/course-select', { name: 'course', selected: form.course || '', required: true, courseGroups }) %>
-        </label>
+        <%- include('partials/course-select', { name: 'course', selected: form.course || '', required: true, courseGroups }) %>
         <label>
           Section
           <%- include('partials/section-input', { name: 'section', value: form.section || '', sections: sectionSuggestions }) %>

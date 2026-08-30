@@ -37,10 +37,7 @@
               Full name
               <input type="text" name="displayName" value="<%= profile.displayName %>" required />
             </label>
-            <label>
-              Institute / program
-              <%- include('partials/course-select', { name: 'course', selected: profile.course || '', required: true, courseGroups }) %>
-            </label>
+            <%- include('partials/course-select', { name: 'course', selected: profile.course || '', required: true, courseGroups }) %>
             <label>
               Section
               <%- include('partials/section-input', { name: 'section', value: profile.section || '', sections: sectionSuggestions }) %>

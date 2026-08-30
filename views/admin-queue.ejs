@@ -28,34 +28,38 @@
             <a class="btn-link <%= viewParam === 'archived' ? 'active-tab' : '' %>" href="/admin/archive">Archived</a>
             <a class="btn-link <%= viewParam === 'all' ? 'active-tab' : '' %>" href="/admin/requests?view=all">All</a>
           </div>
-          <form method="get" action="/admin/requests" class="form two-col form-end">
+          <form method="get" action="/admin/requests" class="filter-form">
             <input type="hidden" name="view" value="<%= viewParam %>" />
-            <label class="full-row">
+            <label class="filter-search">
               Search
               <input type="search" name="q" value="<%= searchQuery || '' %>" placeholder="Name, ID, document type, request or batch ID" />
             </label>
-            <label>
-              Institute
-              <select name="course">
-                <option value="">All institutes</option>
-                <% courses.forEach((c) => { %>
-                <option value="<%= c %>" <%= courseFilter === c ? 'selected' : '' %>><%= c %></option>
-                <% }) %>
-              </select>
-            </label>
-            <label>
-              Section
-              <select name="section">
-                <option value="">All sections</option>
-                <% sections.forEach((s) => { %>
-                <option value="<%= s %>" <%= sectionFilter === s ? 'selected' : '' %>><%= s %></option>
-                <% }) %>
-              </select>
-            </label>
-            <button type="submit">Apply filters</button>
-            <% if (searchQuery || courseFilter || sectionFilter) { %>
-            <a class="btn-link" href="/admin/requests?view=<%= viewParam %>">Clear filters</a>
-            <% } %>
+            <div class="filter-controls">
+              <label class="filter-field">
+                Program
+                <select name="course">
+                  <option value="">All programs</option>
+                  <% courses.forEach((c) => { %>
+                  <option value="<%= c %>" <%= courseFilter === c ? 'selected' : '' %>><%= c %></option>
+                  <% }) %>
+                </select>
+              </label>
+              <label class="filter-field">
+                Section
+                <select name="section">
+                  <option value="">All sections</option>
+                  <% sections.forEach((s) => { %>
+                  <option value="<%= s %>" <%= sectionFilter === s ? 'selected' : '' %>><%= s %></option>
+                  <% }) %>
+                </select>
+              </label>
+              <div class="filter-actions">
+                <button type="submit" class="btn-solid">Apply filters</button>
+                <% if (searchQuery || courseFilter || sectionFilter) { %>
+                <a class="btn-link" href="/admin/requests?view=<%= viewParam %>">Clear</a>
+                <% } %>
+              </div>
+            </div>
           </form>
         </section>
 

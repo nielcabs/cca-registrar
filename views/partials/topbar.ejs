@@ -7,7 +7,12 @@
   const unreadCount = typeof unreadNotificationsCount !== "undefined" ? unreadNotificationsCount : 0;
 %>
 <header class="main-topbar">
-  <div>
+  <button type="button" class="mobile-nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
+    <span class="mobile-nav-toggle-bar"></span>
+    <span class="mobile-nav-toggle-bar"></span>
+    <span class="mobile-nav-toggle-bar"></span>
+  </button>
+  <div class="topbar-title">
     <h1><%= title %></h1>
     <% if (typeof subtitle !== "undefined" && subtitle) { %>
       <p><%= subtitle %></p>

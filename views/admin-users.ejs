@@ -23,34 +23,38 @@
         </div>
 
         <section class="card panel-toolbar">
-          <form method="get" action="/admin/users" class="form two-col form-end">
+          <form method="get" action="/admin/users" class="filter-form">
             <% if (typeof filter !== 'undefined' && filter === 'pending') { %><input type="hidden" name="filter" value="pending" /><% } %>
-            <label class="full-row">
+            <label class="filter-search">
               Search name, email, ID, office
               <input type="search" name="q" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="Juan, 20230001, @cca.edu.ph…" autocomplete="off" />
             </label>
-            <label>
-              Institute
-              <select name="course">
-                <option value="">All institutes</option>
-                <% if (typeof courses !== 'undefined') { courses.forEach((c) => { %>
-                <option value="<%= c %>" <%= typeof courseFilter !== 'undefined' && courseFilter === c ? 'selected' : '' %>><%= c %></option>
-                <% }) } %>
-              </select>
-            </label>
-            <label>
-              Section
-              <select name="section">
-                <option value="">All sections</option>
-                <% if (typeof sections !== 'undefined') { sections.forEach((s) => { %>
-                <option value="<%= s %>" <%= typeof sectionFilter !== 'undefined' && sectionFilter === s ? 'selected' : '' %>><%= s %></option>
-                <% }) } %>
-              </select>
-            </label>
-            <button type="submit">Apply filters</button>
-            <% if ((typeof searchQuery !== 'undefined' && searchQuery) || (typeof courseFilter !== 'undefined' && courseFilter) || (typeof sectionFilter !== 'undefined' && sectionFilter)) { %>
-            <a class="btn-link" href="/admin/users<%= typeof filter !== 'undefined' && filter === 'pending' ? '?filter=pending' : '' %>">Clear filters</a>
-            <% } %>
+            <div class="filter-controls">
+              <label class="filter-field">
+                Program
+                <select name="course">
+                  <option value="">All programs</option>
+                  <% if (typeof courses !== 'undefined') { courses.forEach((c) => { %>
+                  <option value="<%= c %>" <%= typeof courseFilter !== 'undefined' && courseFilter === c ? 'selected' : '' %>><%= c %></option>
+                  <% }) } %>
+                </select>
+              </label>
+              <label class="filter-field">
+                Section
+                <select name="section">
+                  <option value="">All sections</option>
+                  <% if (typeof sections !== 'undefined') { sections.forEach((s) => { %>
+                  <option value="<%= s %>" <%= typeof sectionFilter !== 'undefined' && sectionFilter === s ? 'selected' : '' %>><%= s %></option>
+                  <% }) } %>
+                </select>
+              </label>
+              <div class="filter-actions">
+                <button type="submit" class="btn-solid">Apply filters</button>
+                <% if ((typeof searchQuery !== 'undefined' && searchQuery) || (typeof courseFilter !== 'undefined' && courseFilter) || (typeof sectionFilter !== 'undefined' && sectionFilter)) { %>
+                <a class="btn-link" href="/admin/users<%= typeof filter !== 'undefined' && filter === 'pending' ? '?filter=pending' : '' %>">Clear</a>
+                <% } %>
+              </div>
+            </div>
           </form>
         </section>
 
@@ -188,10 +192,9 @@
                 <% }) %>
               </select>
             </label>
-            <label id="courseField" style="display:none;">
-              Institute / program
+            <div id="courseField" style="display:none;">
               <%- include('partials/course-select', { name: 'course', selected: '', required: true, courseGroups }) %>
-            </label>
+            </div>
             <label id="sectionField" style="display:none;">
               Section
               <input type="text" name="section" placeholder="e.g. A" />
@@ -227,7 +230,7 @@
         var sidInput = sidField.querySelector("input");
         var catSelect = catField.querySelector("select");
         var deptSelect = deptField.querySelector("select");
-        var courseSelect = courseField.querySelector("select");
+        var courseSelect = courseField.querySelector(".course-picker-program");
         function sync() {
           var v = roleSelect.value;
           var isStudent = v === "student";

@@ -3,16 +3,36 @@
 <% const selectedValue = typeof selected !== 'undefined' ? selected : ''; %>
 <% const isRequired = typeof required !== 'undefined' && required; %>
 <% const groups = typeof courseGroups !== 'undefined' ? courseGroups : []; %>
-<select name="<%= fieldName %>" id="<%= fieldId %>"<%= isRequired ? ' required' : '' %>>
-  <option value="">Select institute / program</option>
-  <% groups.forEach((group) => { %>
-  <optgroup label="<%= group.institute %>">
-    <% group.courses.forEach((course) => { %>
-    <option value="<%= course %>" <%= selectedValue === course ? 'selected' : '' %>><%= course %></option>
-    <% }) %>
-  </optgroup>
-  <% }) %>
-  <% if (selectedValue && !groups.some((g) => g.courses.includes(selectedValue))) { %>
-  <option value="<%= selectedValue %>" selected><%= selectedValue %> (legacy)</option>
-  <% } %>
-</select>
+<fieldset class="course-picker-fieldset">
+  <legend><%= typeof legend !== 'undefined' ? legend : 'Institute / Program' %></legend>
+  <div
+    class="course-picker"
+    data-field-id="<%= fieldId %>"
+    data-selected="<%= selectedValue %>"
+    data-required="<%= isRequired ? '1' : '0' %>"
+  >
+    <script type="application/json" class="course-picker-data"><%- JSON.stringify(groups) %></script>
+    <label class="course-picker-step">
+      <span class="course-picker-step-label">Institute</span>
+      <select class="course-picker-institute" aria-label="Institute">
+        <option value="">Select institute</option>
+        <% groups.forEach((group, index) => { %>
+        <option value="<%= index %>"><%= group.institute %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label class="course-picker-step">
+      <span class="course-picker-step-label">Program</span>
+      <select
+        name="<%= fieldName %>"
+        id="<%= fieldId %>"
+        class="course-picker-program"
+        aria-label="Program"
+        <%= isRequired ? 'required' : '' %>
+        disabled
+      >
+        <option value="">Select program</option>
+      </select>
+    </label>
+  </div>
+</fieldset>

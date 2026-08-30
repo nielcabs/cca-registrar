@@ -17,8 +17,8 @@
         <% if (error) { %><div class="alert error"><%= error %></div><% } %>
         <% if (success) { %><div class="alert success"><%= success %></div><% } %>
 
-        <section class="card narrow">
-          <form method="post" action="/admin/users/<%= target.id %>/edit" class="form">
+        <section class="card form-card">
+          <form method="post" action="/admin/users/<%= target.id %>/edit" class="form two-col">
             <label>
               Display name
               <input type="text" name="displayName" value="<%= target.displayName %>" required />
@@ -38,14 +38,6 @@
               </select>
             </label>
             <label>
-              Institute / program
-              <%- include('partials/course-select', { name: 'course', selected: target.course || '', required: true, courseGroups }) %>
-            </label>
-            <label>
-              Section
-              <%- include('partials/section-input', { name: 'section', value: target.section || '', sections: sectionSuggestions, listId: 'admin-section-suggestions' }) %>
-            </label>
-            <label>
               Year level
               <select name="yearLevel">
                 <option value="">Select year level</option>
@@ -53,6 +45,11 @@
                 <option value="<%= y %>" <%= target.yearLevel === y ? 'selected' : '' %>><%= y %> year</option>
                 <% }) %>
               </select>
+            </label>
+            <%- include('partials/course-select', { name: 'course', selected: target.course || '', required: true, courseGroups }) %>
+            <label>
+              Section
+              <%- include('partials/section-input', { name: 'section', value: target.section || '', sections: sectionSuggestions, listId: 'admin-section-suggestions' }) %>
             </label>
             <label>
               Semester
@@ -63,24 +60,29 @@
                 <% }) %>
               </select>
             </label>
-            <label>
+            <label class="full-row">
               Mobile number
               <input type="tel" name="phone" value="<%= target.phone || '' %>" />
             </label>
-            <label class="checkbox-row">
-              <input type="checkbox" name="hasScholarship" value="1" <%= target.hasScholarship ? 'checked' : '' %> />
-              Active scholarship (registrar only — no tuition receipt required)
-            </label>
-            <label class="checkbox-row">
-              <input type="checkbox" name="isVerified" value="1" <%= target.isVerified ? 'checked' : '' %> />
-              Enrollment verified (allows document requests)
-            </label>
+            <div class="form-options">
+              <p class="form-options-title">Enrollment options</p>
+              <label class="checkbox-row">
+                <input type="checkbox" name="hasScholarship" value="1" <%= target.hasScholarship ? 'checked' : '' %> />
+                <span>Active scholarship (registrar only — no tuition receipt required)</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" name="isVerified" value="1" <%= target.isVerified ? 'checked' : '' %> />
+                <span>Enrollment verified (allows document requests)</span>
+              </label>
+            </div>
             <% } else { %>
             <input type="hidden" name="studentCategory" value="<%= target.studentCategory || 'undergraduate' %>" />
             <input type="hidden" name="isVerified" value="<%= target.isVerified ? '1' : '0' %>" />
             <% } %>
 
-            <button type="submit" class="btn-solid">Save changes</button>
+            <div class="form-actions">
+              <button type="submit" class="btn-solid">Save changes</button>
+            </div>
           </form>
         </section>
       </main>

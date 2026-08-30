@@ -184,10 +184,11 @@ body {
 }
 
 .main-topbar {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "title actions";
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem 1rem;
   margin-bottom: 1.1rem;
   padding: 0.95rem 1.15rem;
   background: var(--card);
@@ -196,11 +197,24 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+.mobile-nav-toggle {
+  display: none;
+}
+
+.topbar-title {
+  grid-area: title;
+  min-width: 0;
+}
+
 .main-topbar h1 {
   margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.main-topbar .actions {
+  grid-area: actions;
 }
 
 .main-topbar p {
@@ -453,9 +467,65 @@ details.create-panel[open] > summary {
 
 .auth-card {
   width: min(480px, 92vw);
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(8px);
+}
+
+.auth-card-wide {
+  width: min(560px, 92vw);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+.course-picker-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.course-picker-fieldset legend {
+  padding: 0;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.course-picker {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.course-picker-step {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.course-picker-step-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.course-picker-program:disabled {
+  background: #f1f5f9;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.4.4 6 5l4.6-4.6L12 2.8 6 8.8 0 2.8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px 8px;
+  padding-right: 2rem;
 }
 
 .auth-card h1 {
@@ -525,6 +595,7 @@ details.create-panel[open] > summary {
 
 .table-wrap {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
 }
@@ -592,6 +663,15 @@ label {
   gap: 0.35rem;
   font-size: 0.9rem;
   font-weight: 500;
+  min-width: 0;
+}
+
+label input,
+label select,
+label textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 input,
@@ -750,14 +830,17 @@ a {
 }
 
 .checkbox-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.55rem;
   font-weight: normal;
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .checkbox-row input[type="checkbox"] {
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
   accent-color: var(--primary);
 }
 
@@ -1261,6 +1344,83 @@ body.notif-modal-open {
   color: var(--primary-dark);
 }
 
+.filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.filter-field {
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.filter-actions button {
+  box-shadow: none;
+}
+
+.form-card {
+  max-width: 52rem;
+}
+
+.form.two-col .course-picker-fieldset {
+  grid-column: 1 / -1;
+}
+
+.form.two-col .course-picker {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-options {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fafbfc;
+}
+
+.form-options-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding-top: 0.15rem;
+}
+
+.form-actions .btn-solid {
+  min-width: 9rem;
+  box-shadow: none;
+}
+
 .clearance-upload-card .clearance-preview {
   max-width: 100%;
   max-height: 320px;
@@ -1324,9 +1484,145 @@ body.notif-modal-open {
   }
 
   .sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-    grid-template-rows: auto auto auto auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(292px, 88vw);
+    z-index: 1200;
+    transform: translateX(-105%);
+    transition: transform 220ms ease;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-right: 1px solid var(--line);
+    border-bottom: none;
+    box-shadow: var(--shadow-lg);
+    padding-top: max(1.25rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  body.nav-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1190;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
+
+  .mobile-nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--text);
+    box-shadow: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .mobile-nav-toggle:hover {
+    filter: none;
+    background: var(--primary-soft);
+  }
+
+  .mobile-nav-toggle-bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 160ms ease, opacity 160ms ease;
+  }
+
+  body.nav-open .mobile-nav-toggle-bar:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  body.nav-open .mobile-nav-toggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  body.nav-open .mobile-nav-toggle-bar:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .main-topbar {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "toggle title"
+      "toggle subtitle"
+      "actions actions";
+    align-items: start;
+    padding: 0.85rem;
+    gap: 0.55rem 0.75rem;
+  }
+
+  .mobile-nav-toggle {
+    grid-area: toggle;
+    align-self: start;
+  }
+
+  .topbar-title {
+    align-self: center;
+  }
+
+  .topbar-title h1 {
+    font-size: 1.12rem;
+    line-height: 1.25;
+  }
+
+  .topbar-title p {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .main-topbar .actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.45rem;
+  }
+
+  .actions-primary {
+    width: 100%;
+  }
+
+  .actions-primary .btn-link {
+    width: 100%;
+    text-align: center;
+  }
+
+  .topbar-user-tools {
+    margin-left: auto;
+  }
+
+  .user-chip {
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+
+  .user-chip-meta {
+    display: none;
+  }
+
+  .main-panel {
+    padding: 0.75rem 0.85rem max(1.25rem, env(safe-area-inset-bottom));
   }
 
   .grid,
@@ -1334,12 +1630,177 @@ body.notif-modal-open {
     grid-template-columns: 1fr;
   }
 
-  .main-topbar {
+  .form.two-col .course-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-controls {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+
+  .filter-actions .btn-solid,
+  .filter-actions .btn-link {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .filter-tabs,
+  .tab-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+  }
+
+  .filter-tabs::-webkit-scrollbar,
+  .tab-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-tabs .btn-link,
+  .tab-row .btn-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .card,
+  .data-card {
+    padding: 0.9rem;
+  }
+
+  .hero-banner {
+    padding: 1rem;
+  }
+
+  .hero-banner h2 {
+    font-size: 1rem;
+  }
+
+  .detail-list div {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .table-wrap {
+    margin-left: -0.15rem;
+    margin-right: -0.15rem;
+  }
+
+  .table-wrap::before {
+    content: "Swipe sideways to see more columns";
+    display: block;
+    margin: 0 0 0.45rem 0.15rem;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+
+  .data-table {
+    min-width: 36rem;
+  }
+
+  th,
+  td {
+    padding: 0.55rem 0.6rem;
+    font-size: 0.84rem;
+  }
+
+  .menu a {
+    min-height: 44px;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .notif-panel {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: min(72vh, 520px);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .form-actions .btn-solid,
+  .filter-actions button {
+    width: 100%;
+  }
+
+  .form-card {
+    max-width: none;
+  }
+
+  .card-head-row {
     align-items: flex-start;
   }
 
-  .user-chip {
-    display: none;
+  .inline-search {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card h3 {
+    font-size: 1.45rem;
+  }
+
+  .auth-bg {
+    padding: 1rem;
+    place-items: start center;
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+  }
+
+  .auth-card,
+  .auth-card-wide {
+    width: 100%;
+    max-height: none;
+  }
+
+  .main-topbar .actions form button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .btn-link,
+  .btn-solid,
+  .btn-outline {
+    font-size: 0.84rem;
+  }
+
+  button,
+  .btn-solid {
+    min-height: 44px;
+  }
+
+  button.tiny,
+  .btn-solid.tiny {
+    min-height: auto;
+  }
+
+  .create-panel > summary {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .notif-modal {
+    padding: 0.75rem;
+  }
+
+  .notif-modal-dialog {
+    padding: 1rem;
   }
 }
