@@ -24,7 +24,17 @@ const {
   getUserByStudentId
 } = require("../db");
 const { requireAuth, requireRole, requireVerifiedStudent } = require("../middleware");
-const { computeStatusBadge, computeClearanceBadge, computeTuitionBadge, displayTuitionStatus, DOCUMENT_TYPES, buildSlotAvailability, SLOT_CAPACITY } = require("../helpers");
+const {
+  computeStatusBadge,
+  computeClearanceBadge,
+  computeTuitionBadge,
+  displayTuitionStatus,
+  DOCUMENT_TYPES,
+  buildSlotAvailability,
+  SLOT_CAPACITY,
+  isPaymentReceiptRequired,
+  hasUploadedReceipt
+} = require("../helpers");
 const { notifyUser } = require("../notify");
 const { isClearanceComplete } = require("../terminology");
 const { runClearanceOcrOnFile } = require("../ocr");
@@ -308,11 +318,20 @@ router.post(
       return;
     }
 
+    if (isPaymentReceiptRequired(req.session.user) && !hasUploadedReceipt(req.file)) {
+      res.render("new-request", {
+        user: req.session.user,
+        error: "Payment receipt is required. Attach a JPG, PNG, or PDF of your official receipt.",
+        documentTypes: DOCUMENT_TYPES
+      });
+      return;
+    }
+
     const clearanceSummary = await computeStudentClearanceSummary(req.session.user.studentId);
     const batchId = documentTypes.length > 1 ? uuidv4().split("-")[0].toUpperCase() : null;
     const now = new Date().toISOString();
-    const filePath = req.file ? `/uploads/${req.file.filename}` : "";
-    const fileName = req.file ? req.file.originalname : "";
+    const filePath = hasUploadedReceipt(req.file) ? `/uploads/${req.file.filename}` : "";
+    const fileName = hasUploadedReceipt(req.file) ? req.file.originalname : "";
 
     for (const documentType of documentTypes) {
       const newRequest = {
@@ -330,13 +349,13 @@ router.post(
         updatedAt: now,
         schedule: null,
         registrarRemarks:
-          !req.file
+          !hasUploadedReceipt(req.file)
             ? hasScholarship
               ? "Scholarship — no receipt uploaded."
               : "No payment receipt uploaded — registrar may verify payment separately."
             : "",
         ocr: {
-          state: req.file ? "not_run" : "not_run",
+          state: hasUploadedReceipt(req.file) ? "not_run" : "not_run",
           confidence: null,
           rawText: "",
           extracted: {

@@ -43,7 +43,7 @@ Finance can update tuition status (except Scholarship — that comes from regist
 | Term | Meaning |
 | --- | --- |
 | **Document requisition** | Student request for official documents (TOR, COE, etc.) |
-| **Payment proof / OR receipt** | Optional JPG/PNG upload attached to a requisition batch |
+| **Payment proof / OR receipt** | Required JPG/PNG/PDF upload for non-scholarship students; optional when the registrar has assigned a scholarship |
 | **Batch ID** | Shared identifier when multiple documents are submitted in one transaction |
 | **Release appointment** | Scheduled date/time slot for document pickup |
 

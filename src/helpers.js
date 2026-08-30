@@ -104,6 +104,14 @@ function categoryLabel(value) {
   return labels[value] || value;
 }
 
+function isPaymentReceiptRequired(user) {
+  return !Boolean(user?.hasScholarship);
+}
+
+function hasUploadedReceipt(file) {
+  return Boolean(file && Number(file.size) > 0);
+}
+
 module.exports = {
   computeStatusBadge,
   computeClearanceBadge,
@@ -117,5 +125,7 @@ module.exports = {
   formatDate,
   buildSlotAvailability,
   DOCUMENT_TYPES,
-  categoryLabel
+  categoryLabel,
+  isPaymentReceiptRequired,
+  hasUploadedReceipt
 };
