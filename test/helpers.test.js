@@ -4,13 +4,10 @@ const assert = require("node:assert/strict");
 const { isPaymentReceiptRequired, hasUploadedReceipt } = require("../src/helpers");
 
 describe("isPaymentReceiptRequired", () => {
-  it("requires a receipt for regular students", () => {
-    assert.equal(isPaymentReceiptRequired({ hasScholarship: false }), true);
-    assert.equal(isPaymentReceiptRequired({}), true);
-  });
-
-  it("allows scholarship students to skip a receipt", () => {
+  it("never requires a receipt on document requests", () => {
+    assert.equal(isPaymentReceiptRequired({ hasScholarship: false }), false);
     assert.equal(isPaymentReceiptRequired({ hasScholarship: true }), false);
+    assert.equal(isPaymentReceiptRequired({}), false);
   });
 });
 

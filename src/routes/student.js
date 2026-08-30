@@ -32,7 +32,6 @@ const {
   DOCUMENT_TYPES,
   buildSlotAvailability,
   SLOT_CAPACITY,
-  isPaymentReceiptRequired,
   hasUploadedReceipt
 } = require("../helpers");
 const { notifyUser } = require("../notify");
@@ -313,15 +312,6 @@ router.post(
       res.render("new-request", {
         user: req.session.user,
         error: "Select at least one document type and enter a purpose.",
-        documentTypes: DOCUMENT_TYPES
-      });
-      return;
-    }
-
-    if (isPaymentReceiptRequired(req.session.user) && !hasUploadedReceipt(req.file)) {
-      res.render("new-request", {
-        user: req.session.user,
-        error: "Payment receipt is required. Attach a JPG, PNG, or PDF of your official receipt.",
         documentTypes: DOCUMENT_TYPES
       });
       return;

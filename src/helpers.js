@@ -104,8 +104,8 @@ function categoryLabel(value) {
   return labels[value] || value;
 }
 
-function isPaymentReceiptRequired(user) {
-  return !Boolean(user?.hasScholarship);
+function isPaymentReceiptRequired(_user) {
+  return false;
 }
 
 function hasUploadedReceipt(file) {

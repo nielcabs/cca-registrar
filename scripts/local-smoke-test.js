@@ -103,9 +103,9 @@ function assert(name, ok, detail = "") {
     newReq.body.includes("documentTypes") && newReq.body.includes("Submit Requests")
   );
   assert(
-    "Receipt required (non-scholarship)",
-    newReq.body.includes("A payment receipt (OR) is required") &&
-      /name="documentFile"[^>]*required/i.test(newReq.body)
+    "Receipt optional (all students)",
+    newReq.body.includes("Payment receipt upload is optional") &&
+      !newReq.body.match(/name="documentFile"[^>]*required/i)
   );
 
   const noReceipt = await request("POST", "/student/new-request", {
@@ -116,17 +116,15 @@ function assert(name, ok, detail = "") {
     }
   });
   assert(
-    "Reject request without receipt (non-scholarship)",
-    noReceipt.status === 200 &&
-      noReceipt.body.includes("Payment receipt is required") &&
-      !noReceipt.location
+    "Submit without receipt allowed",
+    noReceipt.status === 302 && String(noReceipt.location || "").includes("/student/dashboard")
   );
 
   const maria = await login("maria@cca.edu.ph", "cca123");
   const mariaReq = await get("/student/new-request", maria.cookie);
   assert(
     "Receipt optional (scholarship)",
-    mariaReq.body.includes("Scholarship students may submit without a payment receipt") &&
+    mariaReq.body.includes("Payment receipt upload is optional") &&
       !mariaReq.body.match(/name="documentFile"[^>]*required/i)
   );
 
