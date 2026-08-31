@@ -9,7 +9,9 @@ const {
   writeAudit,
   listNotificationsForUser,
   markNotificationRead,
-  countUnreadNotifications
+  countUnreadNotifications,
+  DEPARTMENTS,
+  getClearanceDepartmentCodes
 } = require("../db");
 const { requireAuth, requireRole } = require("../middleware");
 const { computeClearanceBadge, computeTuitionBadge, FINANCE_TUITION_STATUSES, displayTuitionStatus } = require("../helpers");
